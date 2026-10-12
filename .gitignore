@@ -39,3 +39,6 @@ luac.out
 *.x86_64
 *.hex
 
+
+# In-game screenshots (probe evidence is transcribed into notes/)
+screenshots/

@@ -10,7 +10,6 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 
 - Show each zone's level range on the map, colored by how it compares to the player's level.
 - Mark dungeon and raid entrances with their level ranges.
-- Show player and cursor coordinates on the map.
 - Stay data-driven: zones added by Forever's expansions are added by editing a table, not code.
 
 **Non-goals (MVP)**
@@ -18,6 +17,7 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 - No quest-giver, vendor or resource-node database.
 - No replacement of Blizzard's map frame; the addon only draws on top of it.
 - No minimap changes.
+- No coordinate display: Forever's map already shows cursor and player coordinates at its bottom left (seen during P3, Oct 12, 2026).
 - Forever only: no support for Classic Era, Cataclysm Classic or Retail. The `.toc` lists only Forever's interface number.
 - No integration or compatibility work with other map addons (Questie, HandyNotes and similar); Lodestar runs as the only addon.
 - No localization: the client is English, so instance names, faction names and all addon text are English only.
@@ -27,10 +27,9 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 1. **Loads cleanly.** With `/console scriptErrors 1`, no Lua errors at login, at `/reload`, when opening the map, or when switching between world, continent and zone maps. Checked on the beta and again on the live client.
 2. **Zone labels.** Every zone row in `Zones.lua` shows a label on its continent map, with both ends colored correctly for the player's current level; `/ls dump` reports no zone row without a label.
 3. **Instance markers.** Every entry in `Instances.lua` shows a marker on its zone map and on its continent map; hovering one shows name, kind and level range.
-4. **Coordinates.** The player position matches what the game reports, `--` shows inside instances, and the cursor coordinates update while moving over the map.
-5. **Zone tooltip.** Hovering a zone on a continent map shows its name, range, faction and instances, and the tooltip hides when the cursor leaves the zone.
-6. **Idle cost.** With the map closed, the addon has no `OnUpdate` handler running; `/ls debug` reports whether the map tick is active, so this can be checked in game.
-7. **Survives.** `/reload`, a level-up (labels recolor), opening the map in combat (no errors, and no taint per P15), and `/ls toggle` of each module (off and back on without `/reload`, with overlays disappearing and reappearing immediately).
+4. **Zone tooltip.** Hovering a zone on a continent map shows its name, range, faction and instances, and the tooltip hides when the cursor leaves the zone.
+5. **Idle cost.** With the map closed, the addon has no `OnUpdate` handler running; `/ls debug` reports whether the map tick is active, so this can be checked in game.
+6. **Survives.** `/reload`, a level-up (labels recolor), opening the map in combat (no errors, and no taint per P15), and `/ls toggle` of each module (off and back on without `/reload`, with overlays disappearing and reappearing immediately).
 
 ## Target client and API assumptions
 
@@ -44,26 +43,26 @@ Lodestar is for personal use: the source is public on GitHub under the MIT licen
 | A2 | `C_Map` exists (`GetMapInfo`, `GetMapChildrenInfo`, `GetBestMapForUnit`, `GetPlayerMapPosition`) | The whole data model is keyed by uiMapID | `/dump C_Map and C_Map.GetBestMapForUnit("player")` |
 | A3 | `WorldMapFrame` is a map canvas that accepts addon data providers and pins (`AddDataProvider`, `AcquirePin`), as in Classic Era | Decides how overlays are drawn: pins scale with zoom and are pooled and refreshed by Blizzard's map. Without it, the fallback is plain frames on the canvas | `/dump WorldMapFrame.AddDataProvider, WorldMapFrame.AcquirePin, WorldMapFrame.ScrollContainer` |
 | A4 | Continent maps list their child zones, and each zone's rectangle on the continent can be queried | Gives label positions without hand-tuned coordinates. `GetMapChildrenInfo` returns only IDs, names and types, not positions; the rectangle comes from `GetMapRectOnMap` | `/dump C_Map.GetMapChildrenInfo(1415, 3)`, then `/dump C_Map.GetMapRectOnMap(1429, 1415)` (Elwynn Forest on Eastern Kingdoms) |
-| A5 | The new zones (Mount Hyjal, Riverglades, Zephras Isle) have uiMapIDs | They need rows in the zone table | P10: `/ls dump` on each continent map |
+| A5 | The new zones (Mount Hyjal, Riverglades, Shen'dralas, Zephras Isle) have uiMapIDs | They need rows in the zone table | P5 lists the continents' children; P10: `/ls dump` on each continent map and on the Zephras Isle map |
 | A6 | Blizzard's map does not already show zone levels | Avoids duplicating a native feature | Open the map and look |
-| A7 | The client may know zone level ranges through `C_Map.GetLodestar(uiMapID)` (returns player min and max level, then pet levels) | If present, level ranges come from the game and `Zones.lua` no longer has to be filled by hand | `/dump C_Map.GetLodestar, C_Map.GetLodestar and C_Map.GetLodestar(1429)` |
+| A7 | The client may know zone level ranges through `C_Map.GetMapLevels(uiMapID)` (returns player min and max level, then pet levels) | If present, level ranges come from the game and `Zones.lua` no longer has to be filled by hand | `/dump C_Map.GetMapLevels ~= nil`, then `/dump C_Map.GetMapLevels(1429)` |
 | A8 | The zone under the cursor can be found from the cursor position (`ScrollContainer:GetNormalizedCursorPosition`, `C_Map.GetMapInfoAtPosition`) | The zone tooltip needs to know which zone is hovered; Classic Era maps show only a one-line name label on hover, not a tooltip the addon could extend | Hover a zone on a continent map and run `/dump C_Map.GetMapInfoAtPosition(WorldMapFrame:GetMapID(), WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition())` (bind it to a macro so the cursor stays on the map) |
 
 A failed probe changes the design, not just a line of code, so run the design probes (P1-P9) in the "Beta verification checklist" section before writing code.
 
 ## Feature set
 
-The MVP is four map overlays that read from one data table; v2 adds user-generated and exploration features.
+The MVP is three map overlays that read from one data table; v2 adds user-generated and exploration features.
 
 | Feature | Tier | Behavior | Needs |
 | --- | --- | --- | --- |
 | Zone level labels | MVP | Text on each zone of the continent maps (not the world map showing both continents): `min-max`, colored by difficulty against the player's level; faction tag for Alliance, Horde or contested | Zone table, child-zone rectangles (`GetMapRectOnMap`) |
 | Instance markers | MVP | Icon on each dungeon or raid entrance with name and level range; tooltip on hover | Instance table |
-| Coordinates | MVP | Player and cursor position shown on the map frame, updated on a throttled timer | Map position API |
 | Zone tooltip | MVP | Hover over a zone: level range, faction control, instances inside it | Zone and instance tables |
 | Waypoints and notes | v2 | Right-click to drop a pin; `/way x y` command; saved per account | SavedVariables |
 | Unexplored areas | v2 | Tint sub-areas the character has not discovered yet | Exploration API (probe first) |
 | Map look and feel | v2 | Opacity, scale and movable window | Frame hooks |
+| Zones off the continents | v2 | Show the level range on the zone's own map for zones no continent shows (Zephras Isle on the beta), if the live client still leaves them off the world map | Zone table |
 | Best zone for your level | v2 | Highlight zones where the player's level falls inside the range | Zone table |
 
 **Difficulty colors** follow the game's own convention: grey for trivial, green for easy, yellow for even, orange for challenging, red for too high.
@@ -103,11 +102,9 @@ flowchart LR
   L --> C
   C --> ZL[ZoneLabels]
   C --> IN[Instances]
-  C --> CO[Coords]
   C --> TT[Tooltip]
   ZL --> M[WorldMapFrame]
   IN --> M
-  CO --> M
   TT --> M
 ```
 
@@ -125,7 +122,6 @@ Lodestar/             # repo root, linked into Interface/AddOns as Lodestar
   Modules/
     ZoneLabels.lua
     Instances.lua
-    Coords.lua
     Tooltip.lua
     Waypoints.lua      # v2
   Pins.xml             # virtual pin templates (MapCanvasPinTemplate) used by the map overlays
@@ -151,7 +147,7 @@ Lodestar/             # repo root, linked into Interface/AddOns as Lodestar
 - **Module contract.** A module is a table with `OnEnable()` and `OnDisable()`, registered with `ns:RegisterModule(name, module)`. The core calls `OnEnable` on `PLAYER_LOGIN` for every module the user has not disabled.
 - **One event frame.** The core owns a single frame and dispatches events to subscribers; modules call `ns:RegisterEvent(name, handler)` instead of creating their own frames.
 - **Overlays are map data providers.** Map overlays register with `WorldMapFrame:AddDataProvider` in `OnEnable` and unregister with `RemoveDataProvider` in `OnDisable`. Blizzard's map calls the provider only while the map is shown (on open and on every map change), so nothing runs while the map is closed. If `WorldMapFrame` does not exist yet at `PLAYER_LOGIN`, the core waits for `ADDON_LOADED` of `Blizzard_WorldMap` before enabling map modules.
-- **Map tick.** The core owns one throttled `OnUpdate` handler that runs every 0.1 s, and only while `WorldMapFrame` is shown: it is set in the map's `OnShow` hook and cleared in `OnHide`. Modules that need to follow the cursor or the player subscribe with `ns:RegisterMapTick(handler)` instead of creating their own `OnUpdate` handlers. Coords and Tooltip use it.
+- **Map tick.** The core owns one throttled `OnUpdate` handler that runs every 0.1 s, and only while `WorldMapFrame` is shown: it is set in the map's `OnShow` hook and cleared in `OnHide`. Modules that need to follow the cursor or the player subscribe with `ns:RegisterMapTick(handler)` instead of creating their own `OnUpdate` handlers. Tooltip uses it.
 - **No libraries in the MVP.** Plain Lua 5.1, no Ace3. Revisit when the options panel is built.
 - **No taint.** "Taint" is what happens when addon code touches Blizzard's UI in a way that later makes protected actions fail ("Interface action failed because of an AddOn"), usually in combat. So:
   - Never replace or reassign a Blizzard function, or a field on a Blizzard frame or mixin.
@@ -198,7 +194,7 @@ ns.Instances = {
 - Positions on other maps (continents) are never stored; they are projected at runtime (see "Map positions" below).
 - There is no in-game override for instances: since the addon is for personal use, a wrong entrance is fixed by editing `Instances.lua` directly.
 
-**Map positions.** The core keeps one cache of zone rectangles, `ns:GetZoneRect(zoneID, mapID)`, which wraps `C_Map.GetMapRectOnMap` and returns `nil` when the zone does not appear on that map. Both ZoneLabels and Instances use it. A point `(x, y)` on a zone's map is projected onto a parent map with:
+**Map positions.** The core keeps one cache of zone rectangles, `ns:GetZoneRect(zoneID, mapID)`, which wraps `C_Map.GetMapRectOnMap` and returns `nil` when the zone does not appear on that map. The game does not return `nil` in that case but a rectangle of four zeros (P5, Zephras Isle on the world map), so any rectangle with `maxX <= minX` or `maxY <= minY` counts as "not on this map"; that check is a pure function in `Logic.lua` with a unit test. Both ZoneLabels and Instances use it. A point `(x, y)` on a zone's map is projected onto a parent map with:
 
 ```lua
 -- Logic.lua: pure function, unit tested
@@ -212,7 +208,7 @@ end
 ```lua
 LodestarDB = {
   version = 1,                       -- bump on schema change, migrate in Core.lua
-  modules = { ZoneLabels = true, Instances = true, Coords = true, Tooltip = true },
+  modules = { ZoneLabels = true, Instances = true, Tooltip = true },
   overrides = { zones = {} },        -- [uiMapID] = { min, max }; set in game with /ls zone, win over client and shipped data
   waypoints = {},                    -- [uiMapID] = { { x, y, note }, ... }  (v2)
   log = {},                          -- { { time, command, lines = { ... } }, ... }; last 50 entries, see "Getting output out of the game"
@@ -223,7 +219,7 @@ LodestarDB = {
 
 | Field | 1st source | 2nd source | 3rd source |
 | --- | --- | --- | --- |
-| `min`, `max` | User override | `C_Map.GetLodestar(mapID)`, if the function exists and returns a minimum above 0 | `Zones.lua` |
+| `min`, `max` | User override | `C_Map.GetMapLevels(mapID)`, if the function exists and returns a minimum above 0 (on the beta it exists but returns four zeros for every zone, P6) | `Zones.lua` |
 | `faction`, `kind`, `labelX`, `labelY` | User override | `Zones.lua` | none |
 
 The result also records where the level range came from (`"override"`, `"client"` or `"table"`), so `/ls dump` and debug output can show it. A zone with no level range from any source shows no label, so missing data never raises an error. The merge itself lives in `Logic.lua` and takes the client's answer as a plain argument, so it can be unit tested without the game.
@@ -257,6 +253,8 @@ Fallback if P3 fails (assumption A3): each module creates its own pool of frames
 3. Place each label at the zone's `labelX, labelY` if set, otherwise at the center of the zone's rectangle from `ns:GetZoneRect(zoneID, currentMapID)` (`(minX + maxX) / 2, (minY + maxY) / 2`). Set text to `min-max` with each end colored separately (see "Difficulty colors"), built as `|cffRRGGBBmin|r-|cffRRGGBBmax|r`.
 4. On `PLAYER_LEVEL_UP`, call the provider's `RefreshAllData` if the map is shown; otherwise do nothing, because the next map open refreshes anyway.
 
+**Zones off the continents.** On the beta, Zephras Isle (2521) is a zone whose parent is the world map (947), and it has no placement there: `GetMapRectOnMap(2521, 947)` returns four zeros and the world map does not draw it. So no continent map shows it, ZoneLabels never labels it, and the zone tooltip can never hover it. It still gets a row in `Zones.lua`, so `/ls dump` and lookups know its range. This is a known MVP gap, to re-check on the live client after Nov 4, 2026, where the island may get a place on the world map; a label on the island's own zone map is a v2 option.
+
 Edge cases: a zone with no data shows no label; a zone with a single level shows `n`; if Blizzard draws permanent zone names on the continent map (note it during P9), offset labels below the name; otherwise center them. Test at both map sizes.
 
 **Instances**
@@ -267,12 +265,6 @@ Edge cases: a zone with no data shows no label; a zone with a single level shows
   - Otherwise, if `ns:GetZoneRect(entry.map, currentMapID)` returns a rectangle, place the pin at `Logic.ProjectToParent(minX, maxX, minY, maxY, entry.x, entry.y)` using that rectangle.
   - Otherwise, skip the entry: its zone is not on this map.
 - Entrances sharing a position are offset slightly so both stay clickable.
-
-**Coords**
-
-- One `FontString` on the map frame showing player and cursor position as `xx.x, yy.y`.
-- Updated on each map tick (see "Map tick" in Architecture), so it runs only while the map is shown.
-- Show `--` when the position is unavailable (instances, some zones).
 
 **Tooltip**
 
@@ -304,11 +296,11 @@ The MVP has no settings window; everything is a slash command, which is fast to 
 | Command | Effect |
 | --- | --- |
 | `/ls` | Print the command list |
-| `/ls toggle <module>` | Enable or disable a module (`ZoneLabels`, `Instances`, `Coords`, `Tooltip`). Takes effect immediately: the core calls the module's `OnDisable` or `OnEnable`, which removes or adds its data provider and map tick subscription. The choice is saved in `LodestarDB.modules`; no `/reload` needed |
+| `/ls toggle <module>` | Enable or disable a module (`ZoneLabels`, `Instances`, `Tooltip`). Takes effect immediately: the core calls the module's `OnDisable` or `OnEnable`, which removes or adds its data provider and map tick subscription. The choice is saved in `LodestarDB.modules`; no `/reload` needed |
 | `/ls zone <mapID\|here> <min> <max>` | Save a level-range override for a zone. `here` means the map currently shown on the world map frame (or the player's zone when the map is closed), so IDs do not have to be looked up |
 | `/ls zone <mapID\|here> reset` | Remove that zone's override, so the client or table value applies again |
 | `/ls overrides` | List every saved override with the client's and the table's value next to it, to spot overrides that are no longer needed |
-| `/ls dump` | Print the current map's ID, name and child zones. For each zone, print the level range from `C_Map.GetLodestar` and from `Zones.lua` side by side, flagging any mismatch or missing row. For each zone missing from `Zones.lua`, also print a ready-made Lua row, for example `[1440] = { min = 20, max = 30, faction = "", kind = "zone" },  -- forever, 2026-10-14`, with the range from the client when it has one and the faction left blank to fill in |
+| `/ls dump` | Print the current map's ID, name and child zones. For each zone, print the level range from `C_Map.GetMapLevels` and from `Zones.lua` side by side, flagging any mismatch or missing row. For each zone missing from `Zones.lua`, also print a ready-made Lua row, for example `[1440] = { min = 20, max = 30, faction = "", kind = "zone" },  -- forever, 2026-10-14`, with the range from the client when it has one and the faction left blank to fill in |
 | `/ls debug` | Toggle verbose logging to the chat frame. When turned on, also prints which modules are enabled and whether the map tick is running |
 | `/ls probe` | Run the design probes that can be run from code (P1-P6 and P8) and print a pass, fail or value line for each |
 | `/ls probe hover` | P7: report the zone under the cursor. Meant to be bound to a key through a macro, so the cursor can stay on the map |
@@ -342,17 +334,17 @@ Probes are numbered `P1`, `P2` and so on; the "Checks" column links each one to 
 | P3 | A3 | Check the map canvas: `/dump WorldMapFrame.AddDataProvider, WorldMapFrame.AcquirePin, MapCanvasPinMixin ~= nil`; all three should be non-nil. Then open the map, run `/fstack`, and note the frame names under `WorldMapFrame` |
 | P4 | A3 | Check whether the map is loaded at login: right after `/reload`, before opening the map, run `/dump WorldMapFrame ~= nil` |
 | P5 | A4 | On each continent map, run `/dump C_Map.GetMapChildrenInfo(<continentID>, 3)` to list its zones, then `/dump C_Map.GetMapRectOnMap(<zoneID>, <continentID>)` for one zone, and check that the four numbers fall between 0 and 1 and match where the zone sits on the map |
-| P6 | A7 | Check for client level data: `/dump C_Map.GetLodestar and C_Map.GetLodestar(1429)`. If it returns ranges, compare a few zones against what the game shows elsewhere (quest levels, mob levels) before trusting it |
+| P6 | A7 | Check for client level data: `/dump C_Map.GetMapLevels ~= nil`, then `/dump C_Map.GetMapLevels(1429)` (not `f and f(...)`, which keeps only the first return value). Four zeros mean no data. If it returns ranges, compare a few zones against what the game shows elsewhere (quest levels, mob levels) before trusting it |
 | P7 | A8 | Check zone hover: make a macro `/dump C_Map.GetMapInfoAtPosition(WorldMapFrame:GetMapID(), WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition())`, bind it to a key, open a continent map, hover a zone and press the key; it should print that zone's info. Also note what Blizzard shows on hover (name label, tooltip, or nothing) |
-| P8 | none (colors) | Check the difficulty-color functions: `/dump GetQuestDifficultyColor, GetQuestGreenRange and GetQuestGreenRange()`, then `/dump GetQuestDifficultyColor(UnitLevel("player") + 3)` (expect orange) |
+| P8 | none (colors) | Check the difficulty-color functions: `/dump GetQuestDifficultyColor ~= nil, GetQuestGreenRange ~= nil`, then `/dump GetQuestGreenRange()` if it exists, then `/dump GetQuestDifficultyColor(UnitLevel("player") + 3)` (expect orange) |
 | P9 | A6 | Check whether Blizzard's map already shows zone levels |
 
 **Data probes.** These need the M2 skeleton (`/ls dump`) loaded; they check and fill the seeded tables.
 
 | # | Checks | Probe |
 | --- | --- | --- |
-| P10 | A5 | Compare zone IDs against the seeded table: run `/ls dump` on each continent map (no travel needed). Note zones missing from the table, including the new ones (Mount Hyjal, Riverglades, Zephras Isle), and IDs that differ from vanilla |
-| P11 | data | Record level ranges only where they differ from the seeded table, or where `GetLodestar` is missing; expanded zones may differ from vanilla |
+| P10 | A5 | Compare zone IDs against the seeded table: run `/ls dump` on each continent map (no travel needed). Note zones missing from the table, including the new ones (Mount Hyjal, Riverglades, Shen'dralas), and IDs that differ from vanilla. Zephras Isle is not on a continent: run `/ls dump` while standing on the island, where the map opens on it |
+| P11 | data | Record level ranges only where they differ from the seeded table, or where `GetMapLevels` is missing; expanded zones may differ from vanilla |
 | P12 | data | Record entrance positions for new dungeons and raids (Hall of Thanes and any others) by standing at the entrance and running `/dump C_Map.GetBestMapForUnit("player"), C_Map.GetPlayerMapPosition(C_Map.GetBestMapForUnit("player"), "player"):GetXY()`. If the map ID is not the zone (check with `/dump C_Map.GetMapInfo(<id>).mapType`, which should be 3), use the zone map's cursor position instead. Spot-check two or three vanilla entrances against the seeded coordinates, and travel to others only if those disagree |
 
 **Other probes.** These check v2 options and behavior in combat. P14 and P15 only mean something once the overlays exist (M4), and are repeated at M5.
@@ -456,8 +448,8 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 2. **M1, dev environment:** git repo, game junction, Lua 5.1, luacheck, `.luacheckrc`, the test runner, `scripts/check.ps1` and the VS Code extensions are set up, as described in "Dev environment setup". Can run in parallel with M0.
 3. **M2, skeleton:** `.toc`, core, module registry, `Debug.lua` (`/ls probe`, `/ls dump`, the log and `/ls copy`) run in game with no errors, and Claude Code can read the log from the SavedVariables file.
 4. **M3, data:** `/ls dump` output is used to check the seeded tables, add the new zones and dungeons, and fix any differences; checked rows are re-marked as verified.
-5. **M4, overlays:** ZoneLabels works on the continent maps, and Coords works on every map.
-6. **M5, MVP complete:** Instances and Tooltip work, and all seven success criteria in the Overview pass.
+5. **M4, overlays:** ZoneLabels works on the continent maps.
+6. **M5, MVP complete:** Instances and Tooltip work, and all six success criteria in the Overview pass.
 7. **M6, v2:** waypoints, unexplored areas and map look and feel, in the order the API allows.
 
 **Risks**
@@ -465,8 +457,8 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Beta ends before all probes and data checks are done | Some rows stay unverified a little longer | Low impact: the tables start from vanilla data, and the remaining checks continue on the live client |
-| API differs from the assumptions | Overlay approach needs rework | Design probes P1-P9 first; if `GetMapRectOnMap` is missing, fill `labelX, labelY` by hand for every zone (read off the Coords module's cursor position while hovering each zone's center) |
-| Beta data changes before launch or in later phases | Wrong level ranges | Prefer `C_Map.GetLodestar` when it exists, so the client stays the source of truth; data-driven tables and user overrides otherwise; re-verify at launch |
+| API differs from the assumptions | Overlay approach needs rework | Design probes P1-P9 first; if `GetMapRectOnMap` is missing, fill `labelX, labelY` by hand for every zone (read off the map's native cursor coordinates while hovering each zone's center) |
+| Beta data changes before launch or in later phases | Wrong level ranges | Prefer `C_Map.GetMapLevels` when it exists, so the client stays the source of truth; data-driven tables and user overrides otherwise; re-verify at launch |
 | Blizzard ships zone levels natively | Duplicated feature | P9; keep the instance and coordinate features, which are separate |
 | Overlay clutter on small maps | Labels overlap zone names or each other | No overlays on the world map; offset below Blizzard's names if it draws them; `labelX, labelY` for problem zones; per-module toggles |
 
