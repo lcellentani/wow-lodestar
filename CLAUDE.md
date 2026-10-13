@@ -7,12 +7,13 @@ The design doc is the source of truth: `docs/Lodestar – WoW Forever Map Addon 
 ## How work happens here
 
 - Claude Code cannot run the game; the user is the test harness. They `/reload` in game and report back.
-- In-game output (`/ls probe`, `/ls dump`, caught errors) is read from `WTF/Account/<ACCOUNT>/SavedVariables/Lodestar.lua` in the game folder (exact path in `notes/environment.md` once recorded). Never edit that file: the game overwrites it at logout.
+- In-game output (`/ls probe`, `/ls dump`, caught errors) is read from `WTF/Account/<ACCOUNT>/SavedVariables/Lodestar.lua` in the game folder (exact path in `notes/environment.md`). Never edit that file: the game overwrites it at logout.
 - Probe results live in `notes/beta-probes.md`, numbered P1-P15 as in the doc's "Beta verification checklist".
+- The user is learning Lua and writes the addon's Lua code; Claude gives a small spec with hints, then reviews, runs the checks and points out issues instead of rewriting their code. Claude writes tooling and config (scripts, `.luacheckrc`, settings) and edits code only when asked.
 
 ## Rules
 
-- Lua 5.1 only. Always declare variables `local`.
+- Lua 5.1 only. Always declare variables `local`. Indent with 2 spaces.
 - One shared namespace: every file starts with `local addonName, ns = ...`.
 - No new globals except those allowed by the doc's "One namespace" rule (`LodestarDB`, slash command globals, `LodestarTooltip`, `LodestarCopyFrame`, `Lodestar...PinMixin`). Every allowed global is listed in `.luacheckrc`.
 - Game-independent logic goes in `Logic.lua` with no WoW API calls, and gets unit tests.
@@ -22,10 +23,11 @@ The design doc is the source of truth: `docs/Lodestar – WoW Forever Map Addon 
 - No taint: never replace or reassign Blizzard functions or fields; use `hooksecurefunc` or `HookScript`; `SetScript` only on our own frames.
 - No libraries (Ace3 etc.) without asking.
 - Never copy Blizzard UI source or Warcraft Wiki text into the repo; facts (IDs, level ranges, coordinates) are fine.
-- After every change run `scripts/check.ps1` (luacheck + tests) and fix failures before reporting done. Until M1 is complete the script does not exist yet; say so instead of claiming checks passed.
+- After every change run `scripts/check.ps1` (luacheck + tests) and fix failures before reporting done.
 
 ## Status
 
 - Design: draft, all review fixes applied.
-- M0 (design probes P1-P9) and M1 (dev environment): not started.
-- No addon code yet.
+- M0: design probes P1-P9 done (`notes/beta-probes.md`); seeding `Data/Zones.lua` and `Data/Instances.lua` still to do.
+- M1 (dev environment): done. `Logic.lua` has five tested pure functions; the game junction and local paths are in `notes/environment.md`.
+- Before M2: probe the APIs it needs that are not confirmed yet (listed in the doc's "Dev environment setup", step 5).

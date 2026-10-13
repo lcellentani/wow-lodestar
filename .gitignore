@@ -42,3 +42,6 @@ luac.out
 
 # In-game screenshots (probe evidence is transcribed into notes/)
 screenshots/
+
+# Downloaded dev tools (lua5.1, luacheck); see the design doc, "Dev environment setup"
+tools/

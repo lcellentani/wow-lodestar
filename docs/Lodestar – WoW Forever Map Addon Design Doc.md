@@ -67,7 +67,7 @@ The MVP is three map overlays that read from one data table; v2 adds user-genera
 
 **Difficulty colors** follow the game's own convention: grey for trivial, green for easy, yellow for even, orange for challenging, red for too high.
 
-- **Each end is colored on its own.** In a `min-max` label, `min` gets the color of its level and `max` gets the color of its level; the dash stays neutral (white). At level 24, Redridge `15-27` shows a green `15` and an orange `27`: the zone is open now, and its top end is still worth coming back for. A single-level zone shows one colored number. Instance markers and tooltips use the same rule.
+- **Each end is colored on its own.** In a `min-max` label, `min` gets the color of its level and `max` gets the color of its level; the dash stays neutral (white). At level 21, Redridge `15-25` shows a green `15` and an orange `25`: the zone is open now, and its top end is still worth coming back for. A single-level zone shows one colored number. Instance markers and tooltips use the same rule.
 - **Client first.** Use the client's `GetQuestDifficultyColor(level)` when it exists, so the addon matches quest colors in the rest of the UI.
 - **Fallback in `Logic.lua`**, used when the client function is missing and unit tested outside the game. It mirrors Blizzard's Classic quest-color logic, with `diff = level - playerLevel`:
 
@@ -381,15 +381,16 @@ Everything here is Windows, needs no installer, and keeps the tools out of git.
      "LodestarTooltip", "LodestarCopyFrame",
      -- one line per pin mixin, e.g. "LodestarZoneLabelPinMixin",
    }
-   -- WoW API the addon reads; grows as probes confirm APIs
+   -- WoW API the addon reads. Only APIs confirmed in notes/beta-probes.md (evidence rule);
+   -- add each one here when a probe confirms it.
    read_globals = {
-     "C_Map", "Enum", "WorldMapFrame", "CreateFrame", "CreateFromMixins", "Mixin",
-     "MapCanvasDataProviderMixin", "MapCanvasPinMixin", "hooksecurefunc",
-     "UnitLevel", "GetQuestDifficultyColor", "GetQuestGreenRange", "GetBuildInfo",
-     "UIParent", "GameTooltip", "UISpecialFrames", "DEFAULT_CHAT_FRAME",
+     "GetBuildInfo", "C_Map", "Enum", "WorldMapFrame", "MapCanvasPinMixin",
+     "GetQuestDifficultyColor", "UnitLevel",
    }
    files["tests/**"] = { globals = { "describe", "it" } }  -- harness helpers
    ```
+
+   APIs the later milestones need but no probe has confirmed yet (`CreateFrame`, `hooksecurefunc`, `MapCanvasDataProviderMixin`, `CreateFromMixins`, `Mixin`, `UIParent`, `GameTooltip`, `UISpecialFrames`, `DEFAULT_CHAT_FRAME`, `GetQuestGreenRange`) are probed with `/dump` before M2 and added then, so luacheck flags any use of an unconfirmed API.
 
 6. **Test runner.** `tests/run.lua` is a small harness (about 30 lines) with `describe(name, fn)`, `it(name, fn)` and `assert`-based checks. It loads `Logic.lua` the way the game does, with `assert(loadfile("Logic.lua"))("Lodestar", ns)`, then runs every `tests/*_spec.lua` file and prints passes, failures and a final count, exiting with code 1 on any failure. The spec files use `describe` and `it`, so they could move to `busted` later with almost no changes.
 7. **One check command.** `scripts/check.ps1` (kept in git) runs `tools/luacheck.exe .`, then `tools/lua/lua5.1.exe tests/run.lua`, and stops on the first failure. This is the single command Claude Code runs after every change. Only the downloaded binaries live in the ignored `tools/` folder.
