@@ -20,6 +20,9 @@ read_globals = {
   "MapCanvasPinMixin",       -- P3
   "GetQuestDifficultyColor", -- P8
   "UnitLevel",               -- P8
+  "CreateFrame", "hooksecurefunc", "UIParent", "DEFAULT_CHAT_FRAME", "UISpecialFrames", -- P16
+  "time", "date", "GetTime", -- P16
+  "CreateFromMixins", "Mixin", "MapCanvasDataProviderMixin", "GameTooltip", -- P17
 }
 
 files["tests/**"] = { globals = { "describe", "it" } }  -- harness helpers

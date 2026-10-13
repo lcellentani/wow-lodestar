@@ -27,6 +27,8 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P13 | v2 | [ ] | | |
 | P14 | taint | [ ] | | |
 | P15 | taint | [ ] | | |
+| P16 | M2 APIs | [x] | 2026-10-13 | beta |
+| P17 | M4-M5 APIs | [x] | 2026-10-13 | beta |
 
 ## Confirmed APIs
 
@@ -53,6 +55,22 @@ APIs whose output is recorded below. Each one also goes into `read_globals` in `
 | `UnitLevel` | P8 | `("player")` |
 | `WorldMapFrame` | P3, P4 | exists at login, before the map is first opened |
 | `Enum.UIMapType` | P2 | Cosmic 0, World 1, Continent 2, Zone 3, Dungeon 4, Micro 5, Orphan 6 |
+| `CreateFrame` | P16 | `"Frame"` with `RegisterEvent` and `SetScript("OnEvent")`; `"EditBox"` with `SetMultiLine`, `HighlightText`, `SetAutoFocus`; templates `UIPanelScrollFrameTemplate`, `BasicFrameTemplateWithInset`, `BackdropTemplate` |
+| `hooksecurefunc` | P16 | `(WorldMapFrame, "OnMapChanged", fn)` works; fires before `OnShow` when the map opens |
+| `WorldMapFrame:HookScript` | P16 | `"OnShow"` and `"OnHide"` |
+| `UIParent` | P16 | table |
+| `DEFAULT_CHAT_FRAME:AddMessage` | P16 | renders `\|cffRRGGBB...\|r`; in `/run` lines typed into chat, write `\|` as `\124` |
+| `UISpecialFrames` | P16 | table |
+| `SlashCmdList`, `SLASH_<NAME>1` | P16 | registration works; `/ls` and `/lodestar` are free |
+| `time`, `date`, `GetTime` | P16 | `date("%Y-%m-%d %H:%M:%S")` returns local time |
+| `CreateFromMixins`, `Mixin` | P17 | functions |
+| `MapCanvasDataProviderMixin` | P17 | table |
+| `WorldMapFrame.RemoveDataProvider`, `WorldMapFrame.RemoveAllPinsByTemplate` | P17 | functions |
+| `MapCanvasPinMixin.SetPosition`, `MapCanvasPinMixin.SetScalingLimits` | P17 | functions |
+| `C_Map.GetPlayerMapPosition` | P17 | function (output checked in P12) |
+| `GameTooltip` | P17 | table |
+| `CreateFrame("GameTooltip", name, UIParent, "GameTooltipTemplate")` | P17 | creates `<name>TextLeft1` and friends |
+| `GetQuestGreenRange` | P8 | **missing** |
 
 ## Design probes (no addon needed)
 
@@ -496,3 +514,190 @@ Result:
 `/console taintLog 1`, `/reload`, then open and close the map in combat and use an action bar ability while still in combat. No "Interface action failed because of an AddOn" message, and no Lodestar lines in `Logs/taint.log`. Afterwards `/console taintLog 0`.
 
 Result:
+
+## API probes (before M2)
+
+Globals and widget features the code will use that P1-P9 did not cover. Each line fits in the chat box (255 characters); copy and paste it as is. `type(x)` keeps the output short: `function`, `table` or `nil`. Frames made by these `/run` lines live until the next `/reload`.
+
+### P16: core APIs for M2 (events, hooks, chat, slash command, copy window)
+
+a. Globals exist; expect `function, function, table, table, table, table`:
+
+```
+/dump type(CreateFrame), type(hooksecurefunc), type(UIParent), type(DEFAULT_CHAT_FRAME), type(UISpecialFrames), type(SlashCmdList)
+```
+
+b. Time functions for the log; expect `function, function`, the current date and time, `function`:
+
+```
+/dump type(time), type(date), date("%Y-%m-%d %H:%M:%S"), type(GetTime)
+```
+
+c. Event frame; then target or untarget something. Expect `event PLAYER_TARGET_CHANGED` in chat:
+
+```
+/run local f = CreateFrame("Frame"); f:RegisterEvent("PLAYER_TARGET_CHANGED"); f:SetScript("OnEvent", function(_, e) print("event", e) end)
+```
+
+d. Map hooks; then open the map, click into another map, and close it. Expect `map OnShow`, `map changed <id>`, `map OnHide`:
+
+```
+/run WorldMapFrame:HookScript("OnShow", function() print("map OnShow") end); WorldMapFrame:HookScript("OnHide", function() print("map OnHide") end)
+/run hooksecurefunc(WorldMapFrame, "OnMapChanged", function(self) print("map changed", self:GetMapID()) end)
+```
+
+e. Colored chat line; expect "Lodestar" in green. Write `|` as `\124` in `/run` lines (see the result):
+
+```
+/run DEFAULT_CHAT_FRAME:AddMessage("\124cff33ff99Lodestar\124r probe: colored text")
+```
+
+f. Slash commands. First type `/ls` and then `/lodestar` on their own: both should be unknown commands, so the names are free. Then register a test command and run `/lsprobe hello`; expect `slash ok: hello`:
+
+```
+/run SLASH_LSPROBE1 = "/lsprobe"; SlashCmdList.LSPROBE = function(msg) print("slash ok:", msg) end
+```
+
+g. Copy window building blocks; each line should print `true` for every value:
+
+```
+/run local e = CreateFrame("EditBox", nil, UIParent); print("EditBox", e.SetMultiLine ~= nil, e.HighlightText ~= nil, e.SetAutoFocus ~= nil)
+/run local s = CreateFrame("ScrollFrame", nil, UIParent, "UIPanelScrollFrameTemplate"); print("ScrollTemplate", s.ScrollBar ~= nil)
+/run local f = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset"); f:Hide(); print("BasicTemplate", f.CloseButton ~= nil)
+/run local b = CreateFrame("Frame", nil, UIParent, "BackdropTemplate"); print("Backdrop", b.SetBackdrop ~= nil)
+```
+
+Result:
+
+a. (2026-10-13, beta; screenshot 231116)
+
+```
+Dump: value=type(CreateFrame), type(hooksecurefunc), type(UIParent), type(DEFAULT_CHAT_FRAME), type(UISpecialFrames), type(SlashCmdList)
+[1]="function",
+[2]="function",
+[3]="table",
+[4]="table",
+[5]="table",
+[6]="table"
+```
+
+- All six exist with the expected types.
+
+b. (2026-10-13, beta; screenshot 231243)
+
+```
+Dump: value=type(time), type(date), date("%Y-%m-%d %H:%M:%S"), type(GetTime)
+[1]="function",
+[2]="function",
+[3]="2026-10-13 23:12:34",
+[4]="function"
+```
+
+- `time`, `date` and `GetTime` exist; `date` takes a format string and returns local time, so log entries can carry a readable timestamp.
+
+c. (2026-10-13, beta; reported by the user, no screenshot): after targeting an NPC, chat printed `event PLAYER_TARGET_CHANGED`.
+
+- A frame made with `CreateFrame("Frame")` receives events through `RegisterEvent` and `SetScript("OnEvent", ...)`: the core's single event frame works as designed.
+
+d. (2026-10-13, beta; screenshot 231834; map opened in Stormwind, then up to Eastern Kingdoms, then closed)
+
+```
+map changed 1453
+map OnShow
+map changed 1415
+map OnHide
+```
+
+- `WorldMapFrame:HookScript("OnShow" / "OnHide", ...)` and `hooksecurefunc(WorldMapFrame, "OnMapChanged", ...)` both work, with no error: the beta's map has an `OnMapChanged` method, so the P3 fallback in the design doc holds.
+- **Order on open: `OnMapChanged` fires before `OnShow`.** The map picks the player's map (1453, Stormwind City) first, then shows. Code that runs on map change must not assume the map tick (started in `OnShow`) is already running.
+- Navigating to the continent fired `OnMapChanged` with 1415 (Eastern Kingdoms); `self:GetMapID()` inside the hook returns the new map.
+
+e. (2026-10-13, beta; screenshots 232039, 232212)
+
+- First run with a literal `|` in the `/run` line: chat printed `|cff33ff99Lodestar|r probe: colored text` as plain text. **The chat box doubles every `|` typed or pasted into it** (to stop fake links), so the color code arrives as `||c...` and shows literally. This affects only text typed into chat, not addon files.
+- Rerun with `\124` (Lua's byte escape for `|`) instead of `|`: "Lodestar" in green, then "probe: colored text" in the default color. `DEFAULT_CHAT_FRAME:AddMessage` works and renders `|cffRRGGBB...|r` color codes.
+- For future probes: any `/run` line with a color code or link must write `|` as `\124`.
+
+f. (2026-10-13, beta; screenshots 232414, 232513)
+
+```
+/ls          -> Type '/help' for a listing of a few commands.
+/lodestar    -> Type '/help' for a listing of a few commands.
+/lsprobe hello  (after registering it)
+slash ok: hello
+```
+
+- `/ls` and `/lodestar` are unknown to the game: both names are free for Lodestar.
+- Registering through `SLASH_<NAME>1` and `SlashCmdList.<NAME>` works; the handler gets the text after the command (`hello`).
+
+g. (2026-10-13, beta; screenshot 232728)
+
+```
+EditBox true true true
+ScrollTemplate true
+BasicTemplate true
+Backdrop true
+```
+
+- `CreateFrame("EditBox")` has `SetMultiLine`, `HighlightText` and `SetAutoFocus`; the templates `UIPanelScrollFrameTemplate` (has `.ScrollBar`), `BasicFrameTemplateWithInset` (has `.CloseButton`) and `BackdropTemplate` (has `SetBackdrop`) all exist. Every piece of the copy window is available.
+
+P16 conclusion: every API M2 needs (core event frame, map hooks, chat output, slash commands, log timestamps, copy window) works on the beta. One gotcha: `|` must be written `\124` in `/run` lines typed into chat.
+
+### P17: overlay APIs for M4-M5
+
+Checked now because there is no client between the beta's end (Oct 21) and launch (Nov 4).
+
+a. Mixins, map and tooltip globals; expect `function, function, table, function, function, table`:
+
+```
+/dump type(CreateFromMixins), type(Mixin), type(MapCanvasDataProviderMixin), type(WorldMapFrame.RemoveDataProvider), type(WorldMapFrame.RemoveAllPinsByTemplate), type(GameTooltip)
+```
+
+b. Pin methods and player position; expect `function, function, function`:
+
+```
+/dump type(MapCanvasPinMixin.SetPosition), type(MapCanvasPinMixin.SetScalingLimits), type(C_Map.GetPlayerMapPosition)
+```
+
+c. Own tooltip from the Blizzard template; expect `GameTooltipTemplate true true`:
+
+```
+/run local t = CreateFrame("GameTooltip", "LodestarProbeTip", UIParent, "GameTooltipTemplate"); print("GameTooltipTemplate", t.AddLine ~= nil, _G.LodestarProbeTipTextLeft1 ~= nil)
+```
+
+Result:
+
+a. (2026-10-13, beta; screenshot 232908)
+
+```
+Dump: value=type(CreateFromMixins), type(Mixin), type(MapCanvasDataProviderMixin), type(WorldMapFrame.RemoveDataProvider), type(WorldMapFrame.RemoveAllPinsByTemplate), type(GameTooltip)
+[1]="function",
+[2]="function",
+[3]="table",
+[4]="function",
+[5]="function",
+[6]="table"
+```
+
+- All six exist with the expected types: overlays can build their data provider with `CreateFromMixins(MapCanvasDataProviderMixin)`, add and remove it, and clear their pins by template; `GameTooltip` is available for instance pins.
+
+b. (2026-10-13, beta; screenshot 232949)
+
+```
+Dump: value=type(MapCanvasPinMixin.SetPosition), type(MapCanvasPinMixin.SetScalingLimits), type(C_Map.GetPlayerMapPosition)
+[1]="function",
+[2]="function",
+[3]="function"
+```
+
+- Pins can place themselves (`SetPosition`) and limit how they scale with zoom (`SetScalingLimits`), as the module specs assume. `C_Map.GetPlayerMapPosition` exists, which P12 (instance entrances) needs.
+
+c. (2026-10-13, beta; screenshot 233038)
+
+```
+GameTooltipTemplate true true
+```
+
+- `CreateFrame("GameTooltip", name, UIParent, "GameTooltipTemplate")` works and creates the template's named lines (`<name>TextLeft1`): Lodestar's own `LodestarTooltip` can be built this way.
+
+P17 conclusion: every overlay API the M4-M5 module specs use exists on the beta.

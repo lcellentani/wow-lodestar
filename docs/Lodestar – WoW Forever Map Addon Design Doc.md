@@ -355,6 +355,13 @@ Probes are numbered `P1`, `P2` and so on; the "Checks" column links each one to 
 | P14 | taint | Open the map in combat and confirm no errors appear |
 | P15 | taint | Run `/console taintLog 1` and `/reload`. With Lodestar enabled, open and close the map in combat, then use an action bar ability while still in combat. Confirm chat shows no "Interface action failed because of an AddOn" message, and that `Logs/taint.log` (in the game folder, written on logout or `/reload`) has no lines blaming Lodestar. Turn logging off afterwards with `/console taintLog 0` |
 
+**API probes.** These need no addon and should run before M2, while the beta is open; they confirm the globals and widget features the code will use (evidence rule). The exact commands are in `notes/beta-probes.md`.
+
+| # | Checks | Probe |
+| --- | --- | --- |
+| P16 | M2 APIs | `CreateFrame`, `hooksecurefunc`, `UIParent`, `DEFAULT_CHAT_FRAME`, `UISpecialFrames`, `SlashCmdList`, `time`, `date`, `GetTime`; an event frame with `RegisterEvent` and `SetScript`; `HookScript` on the map's `OnShow`/`OnHide` and `hooksecurefunc` on `OnMapChanged`; a colored chat line; a test slash command (and that `/ls` and `/lodestar` are free); the copy window pieces (multi-line `EditBox`, `UIPanelScrollFrameTemplate`, `BasicFrameTemplateWithInset`, `BackdropTemplate`) |
+| P17 | M4-M5 APIs | `CreateFromMixins`, `Mixin`, `MapCanvasDataProviderMixin`, `WorldMapFrame.RemoveDataProvider` and `RemoveAllPinsByTemplate`, `GameTooltip`, the pin methods `SetPosition` and `SetScalingLimits`, `C_Map.GetPlayerMapPosition`, and a tooltip made from `GameTooltipTemplate` |
+
 Copy the tables into `notes/beta-probes.md` and tick each probe there as it is done, next to its raw output.
 
 ## Development workflow
@@ -390,7 +397,7 @@ Everything here is Windows, needs no installer, and keeps the tools out of git.
    files["tests/**"] = { globals = { "describe", "it" } }  -- harness helpers
    ```
 
-   APIs the later milestones need but no probe has confirmed yet (`CreateFrame`, `hooksecurefunc`, `MapCanvasDataProviderMixin`, `CreateFromMixins`, `Mixin`, `UIParent`, `GameTooltip`, `UISpecialFrames`, `DEFAULT_CHAT_FRAME`, `GetQuestGreenRange`) are probed with `/dump` before M2 and added then, so luacheck flags any use of an unconfirmed API.
+   This is the starting list from P1-P9. The API probes P16 (M2: frames, events, hooks, chat, slash commands, copy window) and P17 (M4-M5: mixins, data provider, pins, tooltip) confirmed the rest on 2026-10-13, and those names were added to `.luacheckrc` then. Any API not in the file is unconfirmed, and luacheck flags its use. `GetQuestGreenRange` stays out: P8 found it missing.
 
 6. **Test runner.** `tests/run.lua` is a small harness (about 30 lines) with `describe(name, fn)`, `it(name, fn)` and `assert`-based checks. It loads `Logic.lua` the way the game does, with `assert(loadfile("Logic.lua"))("Lodestar", ns)`, then runs every `tests/*_spec.lua` file and prints passes, failures and a final count, exiting with code 1 on any failure. The spec files use `describe` and `it`, so they could move to `busted` later with almost no changes.
 7. **One check command.** `scripts/check.ps1` (kept in git) runs `tools/luacheck.exe .`, then `tools/lua/lua5.1.exe tests/run.lua`, and stops on the first failure. This is the single command Claude Code runs after every change. Only the downloaded binaries live in the ignored `tools/` folder.
