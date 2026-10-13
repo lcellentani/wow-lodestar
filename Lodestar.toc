@@ -1,0 +1,9 @@
+## Interface: 16001
+## Title: Lodestar
+## Notes: Zone level ranges, instance entrances and a zone tooltip on the world map
+## Author: Ludo & Claude
+## Version: 0.1.0
+## SavedVariables: LodestarDB
+
+Logic.lua
+Core.lua

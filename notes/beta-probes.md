@@ -29,6 +29,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P15 | taint | [ ] | | |
 | P16 | M2 APIs | [x] | 2026-10-13 | beta |
 | P17 | M4-M5 APIs | [x] | 2026-10-13 | beta |
+| P18 | A1, load | [x] | 2026-10-13 | beta |
 
 ## Confirmed APIs
 
@@ -701,3 +702,17 @@ GameTooltipTemplate true true
 - `CreateFrame("GameTooltip", name, UIParent, "GameTooltipTemplate")` works and creates the template's named lines (`<name>TextLeft1`): Lodestar's own `LodestarTooltip` can be built this way.
 
 P17 conclusion: every overlay API the M4-M5 module specs use exists on the beta.
+
+### P18: first load and PLAYER_LOGIN (M2 step 2.1)
+
+`Lodestar.toc` (`## Interface: 16001`, files `Logic.lua`, `Core.lua`) through the junction; `Core.lua` registers `PLAYER_LOGIN` on its own frame and prints a line using `GetBuildInfo` and `ns.Logic.FormatCoords`.
+
+Result (2026-10-13, beta; screenshot 234728, after logging in):
+
+```
+Lodestar loaded (interface 16001), test: 50.0, 50.0
+```
+
+- The game loads the addon from the junction with interface 16001 (A1 holds: `.toc`, Lua 5.1 environment).
+- `PLAYER_LOGIN` fires once the character is in the world, before the login chat messages (code of conduct, guild message of the day).
+- Files listed in the `.toc` share the `ns` table: `Core.lua` called `FormatCoords` from `Logic.lua`.
