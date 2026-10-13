@@ -316,7 +316,7 @@ Zephras Isle, character standing on the island (2026-10-12, beta; screenshot 193
 
 - **A map with no placement on its parent returns a rectangle of four zeros, not nil.** Code must treat an all-zero rectangle as "not on this map".
 - The Zephras Isle zone map exists (breadcrumb "World > Zephras Isle", screenshot 193851): an island with Thendal Village, Ruins of Ban'aethal, Shen'dar Village, Shrine of Akir, Falaath Village, Valan…. Native coordinates work there.
-- Navigation: once on the world map, there is no way back to the Zephras Isle map; the map has to be closed and reopened (it opens on the player's current zone).
+- Navigation: the world map has no clickable area for Zephras Isle, but the island's map is reachable from the breadcrumb: the dropdown next to a continent ("Kalimdor") lists the children of World, "Eastern Kingdoms, Kalimdor, Zephras Isle" (2026-10-12, screenshot 235204). This corrects an earlier note that the map had to be closed and reopened. It confirms Zephras Isle is a sibling of the continents under World (947), not a child of Kalimdor.
 
 ```
 /dump C_Map.GetMapRectOnMap(1411, 1414)      (screenshot 185708)
