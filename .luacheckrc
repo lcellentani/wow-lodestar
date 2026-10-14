@@ -25,4 +25,4 @@ read_globals = {
   "CreateFromMixins", "Mixin", "MapCanvasDataProviderMixin", "GameTooltip", -- P17
 }
 
-files["tests/**"] = { globals = { "describe", "it" } }  -- harness helpers
+files["tests/**"] = { globals = { "describe", "it", "DEFAULT_CHAT_FRAME" } }  -- harness helpers; fake chat frame for util_spec
