@@ -1,0 +1,11 @@
+// Project settings for Zed. Indentation is also in .editorconfig, but the Lua
+// language server's formatters (on Enter and on save) take the indent width
+// from the tab_size Zed sends them, so Lua needs it set here too.
+{
+  "languages": {
+    "Lua": {
+      "tab_size": 2,
+      "hard_tabs": false
+    }
+  }
+}

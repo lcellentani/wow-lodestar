@@ -32,6 +32,6 @@ Downloaded into the git-ignored `tools\` folder (2026-10-13):
 
 - `tools\wow-api`: Ketho's WoW API annotations, git clone of `Ketho/vscode-wow-api` at tag `0.22.3` (2026-10-14). To update, delete the folder and clone a newer tag (`notes/zed-setup.md`, step 2).
 
-Editor: Zed with the Lua, World of Warcraft TOC and XML extensions (since 2026-10-14; before that, VS Code). Settings: `.luarc.json` (language server), `.editorconfig` (indentation), `.zed\tasks.json` (the "Lodestar: check" task). Setup steps in `notes/zed-setup.md`.
+Editor: Zed with the Lua, World of Warcraft TOC and XML extensions (since 2026-10-14; before that, VS Code). Settings: `.luarc.json` (language server), `.editorconfig` (indentation), `.zed\settings.json` (Lua tab size, which the language server's formatter needs), `.zed\tasks.json` (the "Lodestar: check" task). Setup steps in `notes/zed-setup.md`.
 
 PowerShell execution policy for the user set to `RemoteSigned` (CurrentUser scope), so `.\scripts\check.ps1` runs.

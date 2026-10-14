@@ -1,6 +1,6 @@
 # Zed setup
 
-**Status (2026-10-14):** done. Steps 1-5 and 8-9 applied; `C_Map` completions and the check task confirmed in Zed. Not yet reported: the `string.format` hover (step 3) and the 2-space Tab (step 4).
+**Status (2026-10-14):** done. Steps 1-5 and 8-9 applied, and verified in Zed: `C_Map` completions, the `string.format` hover, the 2-space Tab, 2-space indentation kept on Enter and save (after the `.zed/settings.json` fix, step 4), and the check task.
 
 Steps to move Lodestar's editor setup from VS Code to Zed (Windows). Only the editor layer changes: the game junction, `tools/` (Lua 5.1, luacheck), `.luacheckrc`, `scripts/check.ps1` and the Claude Code CLI work as they are.
 
@@ -81,7 +81,11 @@ charset = utf-8
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{lua,toc,xml}]
+[*.lua]
+indent_style = space
+indent_size = 2
+
+[*.{toc,xml}]
 indent_style = space
 indent_size = 2
 
@@ -89,9 +93,22 @@ indent_size = 2
 trim_trailing_whitespace = false
 ```
 
+`.editorconfig` alone is not enough for Lua in Zed. LuaLS reformats code in two places: the line you just finished when you press Enter (`textDocument/onTypeFormatting`) and the whole file on save. Both take the indent width from the `tabSize` Zed sends with the request, not from `.editorconfig`, and Zed kept sending 4. Tab inserted 2 spaces while Enter and save reindented to 4 (found 2026-10-14; read in LuaLS 3.19.2's `script/provider/provider.lua`). So Lua's indent is also set in `.zed/settings.json`:
+
+```json
+{
+  "languages": {
+    "Lua": {
+      "tab_size": 2,
+      "hard_tabs": false
+    }
+  }
+}
+```
+
 There is no `end_of_line` setting on purpose. The repo stores LF (`git ls-files --eol`), and `core.autocrlf=true` handles the conversion on checkout, so Zed should keep whatever ending each file already has.
 
-**Verify:** press Tab in a `.lua` file: it inserts 2 spaces.
+**Verify:** press Tab in a `.lua` file: it inserts 2 spaces. Then type a `for` loop inside a function, pressing Enter after each line, and save: every level stays 2 spaces.
 
 ## 5. Add a task for `check.ps1`
 
