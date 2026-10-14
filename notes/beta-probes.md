@@ -30,6 +30,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P16 | M2 APIs | [x] | 2026-10-13 | beta |
 | P17 | M4-M5 APIs | [x] | 2026-10-13 | beta |
 | P18 | A1, load | [x] | 2026-10-13 | beta |
+| P19 | M2 chat, safe calls | [x] | 2026-10-14 | beta |
 
 ## Confirmed APIs
 
@@ -71,6 +72,7 @@ APIs whose output is recorded below. Each one also goes into `read_globals` in `
 | `C_Map.GetPlayerMapPosition` | P17 | function (output checked in P12) |
 | `GameTooltip` | P17 | table |
 | `CreateFrame("GameTooltip", name, UIParent, "GameTooltipTemplate")` | P17 | creates `<name>TextLeft1` and friends |
+| `pcall` | P19 | catches addon errors without a popup; the message starts with `Interface/AddOns/Lodestar/<file>:<line>:` |
 | `GetQuestGreenRange` | P8 | **missing** |
 
 ## Design probes (no addon needed)
@@ -716,3 +718,21 @@ Lodestar loaded (interface 16001), test: 50.0, 50.0
 - The game loads the addon from the junction with interface 16001 (A1 holds: `.toc`, Lua 5.1 environment).
 - `PLAYER_LOGIN` fires once the character is in the world, before the login chat messages (code of conduct, guild message of the day).
 - Files listed in the `.toc` share the `ns` table: `Core.lua` called `FormatCoords` from `Logic.lua`.
+- Character select, AddOn List (screenshot 235033): Lodestar is listed and enabled with "Load out of date AddOns" unticked, so 16001 matches the client. The icon next to the name is a red question mark, the placeholder shown when the `.toc` has no `## IconTexture:` line (cosmetic, optional).
+
+### P19: chat printing and safe calls (M2 step 2.2)
+
+`Util.lua` added to the `.toc` after `Logic.lua`, with `ns.Print(...)` (green `Lodestar:` prefix through `DEFAULT_CHAT_FRAME:AddMessage`) and `ns.SafeCall(fn, ...)` (`pcall`, prints caught errors in red). `Core.lua` printed the hello through `ns.Print`, then ran two temporary test calls: one raising `error("SafeCall test")`, one returning `a + b, "x"` for `2, 3`.
+
+Result (2026-10-14, beta; screenshot 234230, after `/reload`):
+
+```
+Lodestar: loaded (interface 16001), test: 50.0, 50.0
+Lodestar: Error: Interface/AddOns/Lodestar/Core.lua:10: SafeCall test
+Lodestar: true 5 x
+```
+
+- `|cff33ff99` (prefix) and `|cffff4040` (`Error:`) render as colors from an addon file; no `\124` needed outside chat input.
+- `pcall` catches the error: no error popup, and the next line still runs.
+- Error messages name the file as `Interface/AddOns/Lodestar/<file>:<line>:`, with forward slashes. The long line wraps in the chat frame.
+- `SafeCall` passes on all of the function's return values (`true 5 x`).

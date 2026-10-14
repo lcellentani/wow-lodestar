@@ -6,4 +6,5 @@
 ## SavedVariables: LodestarDB
 
 Logic.lua
+Util.lua
 Core.lua
