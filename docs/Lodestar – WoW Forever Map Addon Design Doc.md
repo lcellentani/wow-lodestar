@@ -366,7 +366,7 @@ Copy the tables into `notes/beta-probes.md` and tick each probe there as it is d
 
 ## Development workflow
 
-Claude Code in VS Code is a good fit: an addon is plain text with no build step, so the loop is short. The one limit is that Claude Code cannot run the game, so you are the test harness. The workflow below is designed around that.
+Claude Code with the Zed editor is a good fit: an addon is plain text with no build step, so the loop is short. The one limit is that Claude Code cannot run the game, so you are the test harness. The workflow below is designed around that.
 
 **Dev environment setup (milestone M1)**
 
@@ -401,9 +401,9 @@ Everything here is Windows, needs no installer, and keeps the tools out of git.
 
 6. **Test runner.** `tests/run.lua` is a small harness (about 30 lines) with `describe(name, fn)`, `it(name, fn)` and `assert`-based checks. It loads `Logic.lua` the way the game does, with `assert(loadfile("Logic.lua"))("Lodestar", ns)`, then runs every `tests/*_spec.lua` file and prints passes, failures and a final count, exiting with code 1 on any failure. The spec files use `describe` and `it`, so they could move to `busted` later with almost no changes.
 7. **One check command.** `scripts/check.ps1` (kept in git) runs `tools/luacheck.exe .`, then `tools/lua/lua5.1.exe tests/run.lua`, and stops on the first failure. This is the single command Claude Code runs after every change. Only the downloaded binaries live in the ignored `tools/` folder.
-8. **VS Code (optional editor help).** Install the Lua extension (`sumneko.lua`) and Ketho's WoW API extension (`ketho.wow-api`), and set `"Lua.runtime.version": "Lua 5.1"` in the workspace settings. This gives autocomplete, hover docs and typo warnings for the WoW API. The annotations describe Retail and Classic, not Forever, so a function that autocompletes is still only a candidate: the evidence rule below still decides what can be used, and differences found by probes are noted in `notes/beta-probes.md`.
+8. **Editor help (Zed).** Install Zed's Lua extension (it runs lua-language-server) and clone Ketho's WoW API annotations, pinned to a tag, into `tools/wow-api`. The language server settings live in `.luarc.json` (Lua 5.1, the annotations folder), indentation in `.editorconfig` and the check task in `.zed/tasks.json`, so only `.zed/` is specific to Zed. Step-by-step setup: `notes/zed-setup.md`. This gives autocomplete, hover docs and typo warnings for the WoW API. The annotations describe Retail and Classic, not Forever, so a function that autocompletes is still only a candidate: the evidence rule below still decides what can be used, and differences found by probes are noted in `notes/beta-probes.md`.
 
-M1 is done when `scripts/check.ps1` passes on a starter `Logic.lua` with one sample test, a deliberate global in a scratch file makes luacheck fail, the junction shows the repo's files inside the game's `AddOns` folder, and VS Code shows WoW API completions in a `.lua` file.
+M1 is done when `scripts/check.ps1` passes on a starter `Logic.lua` with one sample test, a deliberate global in a scratch file makes luacheck fail, the junction shows the repo's files inside the game's `AddOns` folder, and the editor shows WoW API completions in a `.lua` file. (M1 was first done with VS Code; the editor setup moved to Zed on 2026-10-14.)
 
 **The loop**
 
@@ -453,7 +453,7 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 **Milestones**
 
 1. **M0, probes:** the design probes P1-P9 are done and their output (screenshots or transcribed values) is saved in `notes/beta-probes.md`. In parallel, outside the game, seed `Zones.lua` and `Instances.lua` from public Classic Era data, every row marked `-- vanilla, unverified`.
-2. **M1, dev environment:** git repo, game junction, Lua 5.1, luacheck, `.luacheckrc`, the test runner, `scripts/check.ps1` and the VS Code extensions are set up, as described in "Dev environment setup". Can run in parallel with M0.
+2. **M1, dev environment:** git repo, game junction, Lua 5.1, luacheck, `.luacheckrc`, the test runner, `scripts/check.ps1` and the editor setup are done, as described in "Dev environment setup". Can run in parallel with M0.
 3. **M2, skeleton:** `.toc`, core, module registry, `Debug.lua` (`/ls probe`, `/ls dump`, the log and `/ls copy`) run in game with no errors, and Claude Code can read the log from the SavedVariables file.
 4. **M3, data:** `/ls dump` output is used to check the seeded tables, add the new zones and dungeons, and fix any differences; checked rows are re-marked as verified.
 5. **M4, overlays:** ZoneLabels works on the continent maps.

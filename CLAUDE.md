@@ -17,7 +17,7 @@ The design doc is the source of truth: `docs/Lodestar – WoW Forever Map Addon 
 - One shared namespace: every file starts with `local addonName, ns = ...`.
 - No new globals except those allowed by the doc's "One namespace" rule (`LodestarDB`, slash command globals, `LodestarTooltip`, `LodestarCopyFrame`, `Lodestar...PinMixin`). Every allowed global is listed in `.luacheckrc`.
 - Game-independent logic goes in `Logic.lua` with no WoW API calls, and gets unit tests.
-- Evidence rule: use only WoW APIs confirmed in `notes/beta-probes.md`. If an API is not confirmed there, ask the user to probe it; do not guess. VS Code WoW API annotations describe Retail/Classic, not Forever, and are not evidence.
+- Evidence rule: use only WoW APIs confirmed in `notes/beta-probes.md`. If an API is not confirmed there, ask the user to probe it; do not guess. The WoW API annotations in `tools/wow-api` (Zed autocomplete) describe Retail/Classic, not Forever, and are not evidence.
 - When an API is confirmed or used, add it to `read_globals` in `.luacheckrc`.
 - Map overlays are data providers with pins from `Pins.xml`; never create frames or FontStrings inside `OnUpdate` or per map refresh.
 - No taint: never replace or reassign Blizzard functions or fields; use `hooksecurefunc` or `HookScript`; `SetScript` only on our own frames.
