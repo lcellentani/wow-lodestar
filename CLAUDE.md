@@ -30,4 +30,5 @@ The design doc is the source of truth: `docs/Lodestar – WoW Forever Map Addon 
 - Design: draft, all review fixes applied.
 - M0: design probes P1-P9 done (`notes/beta-probes.md`); seeding `Data/Zones.lua` and `Data/Instances.lua` still to do.
 - M1 (dev environment): done. `Logic.lua` has five tested pure functions; the game junction and local paths are in `notes/environment.md`.
-- API probes P16 (M2) and P17 (M4-M5) done on 2026-10-13; the confirmed names are in `.luacheckrc`. Ready for M2.
+- API probes P16 (M2) and P17 (M4-M5) done on 2026-10-13; the confirmed names are in `.luacheckrc`.
+- M2 (skeleton): steps 2.1 (`.toc`, `PLAYER_LOGIN`, P18), 2.2 (`Util.lua`: `ns.Print`, `ns.SafeCall`, P19) and 2.3 (`LodestarDB` defaults via `Logic.MergeDefaults`, `ns.db`, P20) done. Next: 2.4, event dispatcher and module registry. Step specs live in `notes/spec-<step>-<topic>.md`.
