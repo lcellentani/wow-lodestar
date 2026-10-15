@@ -47,3 +47,26 @@ function Logic.DifficultyKey(level, playerLevel)
     return "grey"
   end
 end
+
+local function copy(t)
+  if type(t) ~= "table" then
+    return t
+  end
+
+  local result = {}
+  for k, v in pairs(t) do
+    result[k] = copy(v)
+  end
+  return result
+end
+
+function Logic.MergeDefaults(saved, defaults)
+  for k, v in pairs(defaults) do
+    if saved[k] == nil then
+      saved[k] = copy(v)
+    elseif type(v) == "table" and type(saved[k]) == "table" then
+      Logic.MergeDefaults(saved[k], v)
+    end
+  end
+  return saved
+end

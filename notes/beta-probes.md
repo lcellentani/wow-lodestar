@@ -736,3 +736,49 @@ Lodestar: true 5 x
 - `pcall` catches the error: no error popup, and the next line still runs.
 - Error messages name the file as `Interface/AddOns/Lodestar/<file>:<line>:`, with forward slashes. The long line wraps in the chat frame.
 - `SafeCall` passes on all of the function's return values (`true 5 x`).
+
+### P20: SavedVariables defaults (M2 step 2.3)
+
+`Core.lua` holds a local `DEFAULTS` table (the design doc schema, `version = 1`). On `PLAYER_LOGIN` it runs `LodestarDB = ns.Logic.MergeDefaults(LodestarDB or {}, DEFAULTS)`, sets `ns.db = LodestarDB` and prints the DB version. Spec: `notes/spec-2.3-saved-variables.md`.
+
+Result (2026-10-15, beta; screenshots 202121 and 202321):
+
+```
+Lodestar: loaded (interface 16001), db v1
+```
+
+After `/run LodestarDB.modules.Tooltip = false`, `/reload`, `/dump LodestarDB.modules`:
+
+```
+Dump: value=LodestarDB.modules
+[1]={
+  ZoneLabels=true,
+  Tooltip=false,
+  Instances=true
+}
+```
+
+`WTF/Account/<ACCOUNT>/SavedVariables/Lodestar.lua` after logout:
+
+```lua
+LodestarDB = {
+["modules"] = {
+["ZoneLabels"] = true,
+["Tooltip"] = false,
+["Instances"] = true,
+},
+["log"] = {
+},
+["version"] = 1,
+["waypoints"] = {
+},
+["overrides"] = {
+["zones"] = {
+},
+},
+}
+```
+
+- SavedVariables are loaded by `PLAYER_LOGIN`: a value set before `/reload` is there when the handler runs, and the merge keeps it.
+- The game writes the file at logout as plain Lua with `["key"] =` syntax, empty tables included, in no fixed key order. Claude Code can read it from the path in `notes/environment.md`.
+- `/dump` evaluates a Lua expression: `/dump LodestarDB.modules: Tooltip` fails with "function arguments expected" (`:` is method-call syntax).

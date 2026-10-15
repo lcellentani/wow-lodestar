@@ -142,3 +142,100 @@ describe("DifficultyKey", function()
     expectKey({ 1 }, "green", 5)
   end)
 end)
+
+describe("MergeDefaults", function()
+  it("fills an empty saved table with defaults, including nested tables", function()
+    local defaults = {
+      version = 1,
+      modules = {
+        Tooltip = true,
+      },
+    }
+    local saved = {}
+    Logic.MergeDefaults(saved, defaults)
+
+    assert(saved.version == 1, "got " .. tostring(saved.version))
+    assert(saved.modules.Tooltip == true, "got " .. tostring(saved.modules.Tooltip))
+  end)
+  it("preserves saved values that differ from default", function()
+    local defaults = {
+      version = 1,
+      modules = {
+        Tooltip = true,
+      },
+    }
+    local saved = {
+      modules = {
+        Tooltip = false,
+      },
+    }
+    Logic.MergeDefaults(saved, defaults)
+
+    assert(saved.version == 1, "got " .. tostring(saved.version))
+    assert(saved.modules.Tooltip == false, "got " .. tostring(saved.modules.Tooltip))
+  end)
+  it("fills missing siblings when the saved nested table is partially filled", function()
+    local defaults = {
+      version = 1,
+      modules = {
+        ZoneLabels = true,
+        Instances = true,
+        Tooltip = true,
+      },
+    }
+    local saved = {
+      modules = {
+        ZoneLabels = false,
+      },
+    }
+    Logic.MergeDefaults(saved, defaults)
+
+    assert(saved.version == 1, "got " .. tostring(saved.version))
+    assert(saved.modules.ZoneLabels == false, "got " .. tostring(saved.modules.ZoneLabels))
+    assert(saved.modules.Instances == true, "got " .. tostring(saved.modules.Instances))
+    assert(saved.modules.Tooltip == true, "got " .. tostring(saved.modules.Tooltip))
+  end)
+  it("preserves saved keys that are absent from defaults", function()
+    local defaults = {
+      version = 1,
+      modules = {
+        ZoneLabels = true,
+      },
+    }
+    local saved = {
+      modules = {
+        ZoneLabels = false,
+      },
+      overrides = {
+        zones = {
+          [1429] = { min = 10, max = 20 },
+        },
+      },
+    }
+    Logic.MergeDefaults(saved, defaults)
+
+    assert(saved.version == 1, "got " .. tostring(saved.version))
+    assert(saved.modules.ZoneLabels == false, "got " .. tostring(saved.modules.ZoneLabels))
+    assert(type(saved.overrides.zones) == "table", "expected override table")
+    assert(type(saved.overrides.zones[1429]) == "table", "expected zone override table")
+    assert(saved.overrides.zones[1429].min == 10, "got " .. tostring(saved.overrides.zones[1429].min))
+    assert(saved.overrides.zones[1429].max == 20, "got " .. tostring(saved.overrides.zones[1429].max))
+  end)
+  it("copies missing tables so saved data does not share defaults", function()
+    local defaults = {
+      log = {},
+      overrides = {
+        zones = {},
+      },
+    }
+    local saved = {}
+
+    Logic.MergeDefaults(saved, defaults)
+
+    assert(saved.log ~= defaults.log, "expected separate log tables")
+    assert(saved.overrides.zones ~= defaults.overrides.zones, "expected separate zone tables")
+
+    saved.log[1] = "test entry"
+    assert(#defaults.log == 0, "expected defaults.log to remain empty")
+  end)
+end)
