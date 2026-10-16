@@ -18,7 +18,8 @@
     "SlashCmdList",
     "MapCanvasPinMixin",
     "MapCanvasDataProviderMixin",
-    "GetQuestDifficultyColor"
+    "GetQuestDifficultyColor",
+    "WorldMapFrame"
   ],
   "workspace.library": [
     "tools/wow-api/Annotations/Core"
