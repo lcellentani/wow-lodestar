@@ -12,6 +12,14 @@
     "table": "disable",
     "utf8": "disable"
   },
+  "diagnostics.globals": [
+    "DEFAULT_CHAT_FRAME",
+    "UISpecialFrames",
+    "SlashCmdList",
+    "MapCanvasPinMixin",
+    "MapCanvasDataProviderMixin",
+    "GetQuestDifficultyColor"
+  ],
   "workspace.library": [
     "tools/wow-api/Annotations/Core"
   ],
