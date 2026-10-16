@@ -19,7 +19,9 @@
     "MapCanvasPinMixin",
     "MapCanvasDataProviderMixin",
     "GetQuestDifficultyColor",
-    "WorldMapFrame"
+    "WorldMapFrame",
+    "describe",
+    "it"
   ],
   "workspace.library": [
     "tools/wow-api/Annotations/Core"
