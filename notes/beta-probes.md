@@ -824,3 +824,31 @@ Lodestar: Error: Interface/AddOns/Lodestar/Core.lua:91: boom
 - Modules start on `PLAYER_LOGIN`, before the game's login messages (code of conduct, guild message of the day).
 - `false` in `LodestarDB.modules` skips the module; the SavedVariables file kept `["TestA"] = false` as an extra key next to the defaults.
 - Order between modules is not fixed (`pairs`): TestB ran before TestA here.
+
+### P23: map tick (M2 step 2.4c)
+
+On `PLAYER_LOGIN` the core hooks `WorldMapFrame:HookScript("OnShow" / "OnHide", ...)`: `OnShow` resets the accumulator, sets a `tickRunning` flag and `eventFrame:SetScript("OnUpdate", OnUpdate)`; `OnHide` clears both. `OnUpdate(_, elapsed)` runs the tick handlers (`ns.RegisterMapTick`) at most once per 0.1 s, throttled by `Logic.Throttle` (keeps `sum % interval`, so a lag spike fires one tick, not a burst). Temporary test: a tick handler printing every 10th call; the hooks print `ns.IsMapTickRunning()`.
+
+Result (2026-10-16, beta; screenshots 200419, 200556; map opened for a few seconds, closed, opened again, closed):
+
+```
+Lodestar: loaded (interface 16001), db v1
+Lodestar: OnShow - map tick running: true
+Lodestar: map tick 10
+Lodestar: map tick 20
+Lodestar: map tick 30
+Lodestar: map tick 40
+Lodestar: OnHide - map tick running: false
+Lodestar: OnShow - map tick running: true
+Lodestar: map tick 50
+Lodestar: map tick 60
+Lodestar: map tick 70
+Lodestar: map tick 80
+Lodestar: OnHide - map tick running: false
+```
+
+- The hooks fire on every open and close, and the tick restarts on each open. The test counter is never reset, so it carries on from 40; only the throttle's accumulator is reset in `OnShow`.
+
+- `SetScript("OnUpdate", fn)` on our own frame runs `fn` every frame with the elapsed seconds; `SetScript("OnUpdate", nil)` stops it.
+- The tick reaches the registered handler while the map is open and stops when it closes: no `OnUpdate` cost with the map closed (doc success criterion 5).
+- Rate: slightly under 10 per second at high frame rates, since six 1/60 s frames sum to just under 0.1 in floating point (smoke test outside the game); "at most once per 0.1 s" as designed.

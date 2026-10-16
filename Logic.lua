@@ -74,3 +74,11 @@ end
 function Logic.IsModuleEnabled(moduleSettings, name)
   return moduleSettings[name] ~= false
 end
+
+function Logic.Throttle(accumulated, elapsed, interval)
+  local sum = accumulated + elapsed
+  if sum >= interval then
+    return true, sum % interval
+  end
+  return false, sum
+end

@@ -24,6 +24,35 @@ function ns.RegisterModule(name, module)
   modules[name] = module
 end
 
+-- Map tick handlers
+
+local tickHandlers = {}
+local tickAccumulator = 0
+local tickRunning = false
+
+function ns.RegisterMapTick(handler)
+  tickHandlers[handler] = true
+end
+
+function ns.UnregisterMapTick(handler)
+  tickHandlers[handler] = nil
+end
+
+function ns.IsMapTickRunning()
+  return tickRunning
+end
+
+local function OnUpdate(_, elapsed)
+  local fire, newAccumulator = ns.Logic.Throttle(tickAccumulator, elapsed, 0.1)
+  tickAccumulator = newAccumulator
+
+  if fire then
+    for handler in pairs(tickHandlers) do
+      ns.SafeCall(handler)
+    end
+  end
+end
+
 -- Event dispatcher
 
 local handlersByEvent = {}
@@ -47,8 +76,6 @@ function ns.UnregisterEvent(event, handler)
   end
 end
 
--- Event handlers
-
 local function OnLogin()
   local interface = select(4, GetBuildInfo())
 
@@ -56,14 +83,27 @@ local function OnLogin()
   ns.db = LodestarDB
   ns.Print("loaded (interface " .. interface .. "), db v" .. ns.db.version)
 
+  if not WorldMapFrame then
+    ns.Print("|cffff4040Error:|r WorldMapFrame is missing; map tick unavailable")
+  else
+    WorldMapFrame:HookScript("OnShow", function()
+      tickAccumulator = 0
+      tickRunning = true
+      eventFrame:SetScript("OnUpdate", OnUpdate)
+    end)
+
+    WorldMapFrame:HookScript("OnHide", function()
+      tickRunning = false
+      eventFrame:SetScript("OnUpdate", nil)
+    end)
+  end
+
   for name, module in pairs(modules) do
     if ns.Logic.IsModuleEnabled(ns.db.modules, name) then
       ns.SafeCall(module.OnEnable, module)
     end
   end
 end
-
--- WoW events & dispatcher
 
 local function OnEventDispatcher(_, event, ...)
   local handlers = handlersByEvent[event]
@@ -73,6 +113,8 @@ local function OnEventDispatcher(_, event, ...)
     end
   end
 end
+
+-- Startup
 
 ns.RegisterEvent("PLAYER_LOGIN", OnLogin)
 

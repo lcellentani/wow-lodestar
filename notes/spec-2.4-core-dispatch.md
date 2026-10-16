@@ -1,6 +1,6 @@
 # M2 step 2.4: event dispatcher, module registry, map tick
 
-Status: 2.4a and 2.4b done 2026-10-16 (P21, P22 in `notes/beta-probes.md`); 2.4c not started. User writes the code, Claude reviews.
+Status: done 2026-10-16: 2.4a, 2.4b, 2.4c (P21, P22, P23 in `notes/beta-probes.md`). User writes the code, Claude reviews.
 Design doc reference: "Architecture" → "Rules" (module contract, one event frame, map tick, safe calls).
 
 ## What this step is for
@@ -102,20 +102,21 @@ What to build:
 - In `OnLogin`, before enabling modules: if `WorldMapFrame` is missing, print an error and skip the rest of this list. Otherwise hook `WorldMapFrame:HookScript("OnShow", ...)` to start the tick and `WorldMapFrame:HookScript("OnHide", ...)` to stop it (P16d).
 - Start: `eventFrame:SetScript("OnUpdate", OnUpdate)`. Stop: `eventFrame:SetScript("OnUpdate", nil)`. `SetScript` on our own frame is allowed by the no-taint rule; on `WorldMapFrame` we only use `HookScript`.
 - `OnUpdate(_, elapsed)` receives seconds since the last frame. Accumulate them and call every tick handler (through `ns.SafeCall`) at most once per 0.1 s.
-- The throttle is a pure function in `Logic.lua`: `Logic.Throttle(accumulated, elapsed, interval)` returns `fire, newAccumulated`. It adds `elapsed`; when the sum reaches `interval` it returns `true` and the leftover (`sum - interval`), otherwise `false` and the sum.
-- Add `ns.IsMapTickRunning()` (returns a boolean) for `/ls debug` later (doc success criterion 5, "Idle cost").
+- The throttle is a pure function in `Logic.lua`: `Logic.Throttle(accumulated, elapsed, interval)` returns `fire, newAccumulated`. It adds `elapsed`; when the sum reaches `interval` it returns `true` and the leftover within one interval (`sum % interval`), otherwise `false` and the sum. Keeping only the remainder means a lag spike (one long frame) fires one tick, not a burst of catch-up ticks on the following frames.
+- Add `ns.IsMapTickRunning()` for `/ls debug` later (doc success criterion 5, "Idle cost"). It returns a file-level `tickRunning` flag set in the `OnShow` and `OnHide` hooks (no `GetScript`: not probed).
 
 Hints:
 
 - Keep the accumulator in a file-level `local`, and reset it to 0 when the tick starts, so a stale value from the last time the map was open does not fire an early tick.
 - Remember P16d: `OnMapChanged` fires **before** `OnShow`. Nothing in this step depends on it, but code that later runs on map change must not assume the tick is already running.
-- Returning two values is plain Lua: `return true, sum - interval`; the caller writes `local fire, acc = Logic.Throttle(...)`.
+- Returning two values is plain Lua: `return true, sum % interval`; the caller writes `local fire, acc = Logic.Throttle(...)`.
 
 Tests (`describe("Throttle", ...)`):
 
 - Below the interval: `Throttle(0, 0.05, 0.1)` → `false, 0.05`.
 - Reaching it exactly: `Throttle(0.05, 0.05, 0.1)` → `true`, leftover 0.
 - Crossing it: `Throttle(0.08, 0.05, 0.1)` → `true`, leftover 0.03.
+- Lag spike: `Throttle(0, 0.35, 0.1)` → `true`, leftover 0.05 (one tick, not three queued).
 - Use a `near(a, b)` comparison for the leftovers (floating point); `logic_spec.lua` already has one.
 
 Temporary in-game test (remove before commit): register a tick handler that counts calls and prints the count every 10th call (about once a second).
