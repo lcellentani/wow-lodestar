@@ -36,7 +36,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P22 | M2 module registry | [x] | 2026-10-16 | beta |
 | P23 | M2 map tick | [x] | 2026-10-16 | beta |
 | P24 | M2 slash commands | [x] | 2026-10-16 | beta |
-| P25 | M2 toggle, debug | [ ] | | |
+| P25 | M2 toggle, debug | [x] | 2026-10-17 | beta |
 | P26 | login vs /reload chat order | [ ] | | |
 
 ## Confirmed APIs
@@ -877,6 +877,36 @@ Lodestar: Error: unknown command "nope", type /ls for help
 - The command matches case-insensitively, extra spaces collapse, and the args keep their case.
 - A lone `|` followed by a space or at the end of a line renders as a plain `|` in the chat frame: only `|` followed by an escape letter (`|c`, `|r`, ...) is special.
 - After this fresh login the hello line came after the guild message of the day, while P18, P21 and P22 saw it before the login messages. Those were probably fresh logins too (the user usually starts the game from scratch), so the difference is not login vs `/reload`; P26 checks it. Until then, nothing may rely on the order of login chat lines.
+
+### P25: module toggle and debug (M2 step 2.5b)
+
+Core tracks running modules (`runningModules`, marked only when `OnEnable` succeeds) and exposes `ns.GetModuleNames`, `ns.IsModuleRunning` and `ns.SetModuleEnabled` (saves `ns.db.modules[name]`, calls `OnEnable`/`OnDisable` only on a state change). `Options.lua` registers `toggle` (module name through `Logic.FindName`, case-insensitive) and `debug` (session-only `ns.debug`, lists module states and `ns.IsMapTickRunning()`). Temporary test module `TestA` printing `TestA on` / `TestA off`. Spec: `notes/spec-2.5-slash-commands.md`.
+
+Result (2026-10-17, beta; screenshots 003544, 003709, 003857, 004310, 004418):
+
+```
+Lodestar: loaded (interface 16001), db v1
+Lodestar: TestA on
+Lodestar: TestA off                      <- /ls toggle testa
+Lodestar: TestA: off
+Lodestar: TestA on                       <- /ls toggle TestA
+Lodestar: TestA: on
+Lodestar: debug on                       <- /ls debug, map closed
+Lodestar: TestA: on
+Lodestar: map tick running: false
+Lodestar: debug off                      <- /ls debug, map open
+Lodestar: debug on                       <- /ls debug, map open
+Lodestar: TestA: on
+Lodestar: map tick running: true
+Lodestar: /ls toggle <module> - turn a module on or off. Modules: TestA.   <- /ls toggle
+```
+
+- Toggling calls `OnDisable` and `OnEnable` at runtime, and the module name matches case-insensitively.
+- `ns.IsMapTickRunning()` reports the map state correctly (false with the map closed, true with it open).
+- Persistence: after `/ls toggle TestA` (off) and `/reload`, no `TestA on` at login; the SavedVariables file held `["TestA"] = false`.
+- Default: after `/run LodestarDB.modules.TestA = nil` (`/dump LodestarDB.modules` showed only the three default modules) and `/reload`, `TestA on` printed again: a module with no saved setting is enabled.
+- The first cleanup `/run` did not take effect (file still had `TestA = false`); the second, checked with `/dump`, did. Check a `/run` edit with `/dump` before relying on it.
+- Chat order data point for P26: in the first screenshot (after `/reload`) the hello line came after the guild message of the day.
 
 ### P26: login vs /reload chat order (pending)
 

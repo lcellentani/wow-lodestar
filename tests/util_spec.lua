@@ -2,10 +2,13 @@ local ns = {}
 
 local lines = {}
 
+-- Local helpers
+
 DEFAULT_CHAT_FRAME = {
   AddMessage = function(_, msg) table.insert(lines, msg) end,
 }
 
+---@diagnostic disable-next-line: undefined-global
 assert(loadfile("Util.lua"))("Lodestar", ns)
 
 local function reset() lines = {} end
@@ -14,6 +17,8 @@ local function pack(...) return select("#", ...), { ... } end
 
 local PREFIX = "|cff33ff99Lodestar:|r "
 local ERROR_PREFIX = "|cffff4040Error:|r"
+
+-- Test cases
 
 describe("Print", function()
   it("writes one message per call", function()
@@ -26,6 +31,7 @@ describe("Print", function()
       assert(lines[i] == expected, "line " .. i .. ": got " .. tostring(lines[i]))
     end
   end)
+
   it("joins all arguments with spaces, including nil", function()
     reset()
     ns.Print("a", nil, "b", 42, true)
@@ -33,6 +39,7 @@ describe("Print", function()
     local expected = PREFIX .. "a nil b 42 true"
     assert(lines[1] == expected, "got " .. tostring(lines[1]))
   end)
+
   it("prints only the prefix when given no arguments", function()
     reset()
     ns.Print()
@@ -52,6 +59,7 @@ describe("SafeCall", function()
     assert(r[4] == 3, "r[4]: got " .. tostring(r[4]))
     assert(#lines == 0, "expected no output, got " .. #lines .. " lines")
   end)
+
   it("passes its extra arguments to the function", function()
     reset()
     local n, r = pack(ns.SafeCall(function(a, b) return a + b end, 2, 3))
@@ -70,6 +78,7 @@ describe("SafeCall", function()
     assert(#lines == 1, "expected 1 line, got " .. #lines .. " lines")
     assert(string.find(lines[1], ERROR_PREFIX, 1, true), "expected error prefix in message, got " .. lines[1])
   end)
+
   it("catches a non-string error without crashing", function()
     reset()
     local n, r = pack(ns.SafeCall(function() error({}) end))
@@ -78,5 +87,23 @@ describe("SafeCall", function()
     assert(type(r[2]) == "table", "r[2]: expected a table, got " .. type(r[2]))
     assert(#lines == 1, "expected 1 line, got " .. #lines .. " lines")
     assert(string.find(lines[1], ERROR_PREFIX, 1, true), "expected error prefix in message, got " .. lines[1])
+  end)
+end)
+
+describe("DebugPrint", function()
+  it("prints the message when debug mode is enabled", function()
+    ns.debug = true
+    reset()
+    ns.DebugPrint("a", nil, "b", 42, true)
+    assert(#lines == 1, "expected 1 line, got " .. #lines)
+    local expected = PREFIX .. "a nil b 42 true"
+    assert(lines[1] == expected, "got " .. tostring(lines[1]))
+  end)
+
+  it("prints nothing when debug mode is disabled", function()
+    ns.debug = false
+    reset()
+    ns.DebugPrint("a", nil, "b", 42, true)
+    assert(#lines == 0, "expected 0 lines, got " .. #lines)
   end)
 end)

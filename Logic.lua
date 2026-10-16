@@ -32,6 +32,21 @@ function Logic.ParseCommand(msg)
   return command, args
 end
 
+function Logic.FindName(names, input)
+  if input == nil then
+    return nil
+  end
+
+  local lowerInput = string.lower(input)
+  for _, name in ipairs(names) do
+    if string.lower(name) == lowerInput then
+      return name
+    end
+  end
+
+  return nil
+end
+
 function Logic.FormatCoords(x, y)
   if x == nil or y == nil then
     return nil

@@ -19,9 +19,38 @@ local DEFAULTS = {
 -- Module registry
 
 local modules = {}
+local runningModules = {}
 
 function ns.RegisterModule(name, module)
   modules[name] = module
+end
+
+function ns.GetModuleNames()
+  local names = {}
+  for name in pairs(modules) do
+    names[#names + 1] = name
+  end
+  table.sort(names)
+  return names
+end
+
+function ns.IsModuleRunning(name)
+  return runningModules[name] == true
+end
+
+function ns.SetModuleEnabled(name, enabled)
+  ns.db.modules[name] = enabled
+
+  local module = modules[name]
+  if enabled and not ns.IsModuleRunning(name) then
+    local ok = ns.SafeCall(module.OnEnable, module)
+    if ok then
+      runningModules[name] = true
+    end
+  elseif not enabled and ns.IsModuleRunning(name) then
+    ns.SafeCall(module.OnDisable, module)
+    runningModules[name] = nil
+  end
 end
 
 -- Commands
@@ -135,7 +164,10 @@ local function OnLogin()
 
   for name, module in pairs(modules) do
     if ns.Logic.IsModuleEnabled(ns.db.modules, name) then
-      ns.SafeCall(module.OnEnable, module)
+      local ok = ns.SafeCall(module.OnEnable, module)
+      if ok then
+        runningModules[name] = true
+      end
     end
   end
 end

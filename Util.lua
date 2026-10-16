@@ -23,3 +23,9 @@ end
 function ns.SafeCall(fn, ...)
   return SafeCallHelper(pcall(fn, ...))
 end
+
+function ns.DebugPrint(...)
+  if ns.debug then
+    ns.Print(...)
+  end
+end

@@ -1,6 +1,6 @@
 # M2 step 2.5: slash commands (`/ls`, `/lodestar`)
 
-Status: 2.5a done 2026-10-16 (P24 in `notes/beta-probes.md`); 2.5b not started. User writes the code, Claude reviews.
+Status: 2.5a done 2026-10-16 (P24), 2.5b done 2026-10-17 (P25), both in `notes/beta-probes.md`. User writes the code, Claude reviews.
 Design doc reference: "Settings and slash commands".
 
 ## What this step is for

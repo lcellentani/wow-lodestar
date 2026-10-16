@@ -54,6 +54,32 @@ describe("ParseCommand", function()
   end)
 end)
 
+describe("FindName", function()
+  it("returns the canonical name for an exact match", function()
+    local names = { "Instances", "Tooltip", "ZoneLabels" }
+    local found = Logic.FindName(names, "ZoneLabels")
+    assert(found == names[3], "expected " .. names[3] .. ", got " .. tostring(found))
+  end)
+
+  it("matches names without regard to case", function()
+    local names = { "Instances", "Tooltip", "ZoneLabels" }
+    local found = Logic.FindName(names, "zoneLabels")
+    assert(found == names[3], "expected " .. names[3] .. ", got " .. tostring(found))
+  end)
+
+  it("returns nil when no name matches", function()
+    local names = { "Instances", "Tooltip", "ZoneLabels" }
+    local found = Logic.FindName(names, "ZoneLabel")
+    assert(found == nil, "expected nil, got " .. tostring(found))
+  end)
+
+  it("returns nil when the input is nil", function()
+    local names = { "Instances", "Tooltip", "ZoneLabels" }
+    local found = Logic.FindName(names, nil)
+    assert(found == nil, "expected nil, got " .. tostring(found))
+  end)
+end)
+
 describe("FormatCoords", function()
   it("formats as percent with one decimal", function()
     local result = Logic.FormatCoords(0.4123, 0.6543)
