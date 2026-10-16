@@ -8,7 +8,7 @@ The design doc is the source of truth: `docs/Lodestar – WoW Forever Map Addon 
 
 - Claude Code cannot run the game; the user is the test harness. They `/reload` in game and report back.
 - In-game output (`/ls probe`, `/ls dump`, caught errors) is read from `WTF/Account/<ACCOUNT>/SavedVariables/Lodestar.lua` in the game folder (exact path in `notes/environment.md`). Never edit that file: the game overwrites it at logout.
-- Probe results live in `notes/beta-probes.md`, numbered P1-P15 as in the doc's "Beta verification checklist".
+- Probe results live in `notes/beta-probes.md`: P1-P17 as in the doc's "Beta verification checklist", then P18 onwards for the in-game checks of each step (the step spec reserves the numbers).
 - The user is learning Lua and writes the addon's Lua code; Claude gives a small spec with hints, then reviews, runs the checks and points out issues instead of rewriting their code. Claude writes tooling and config (scripts, `.luacheckrc`, settings) and edits code only when asked.
 
 ## Rules

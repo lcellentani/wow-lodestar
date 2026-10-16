@@ -782,3 +782,21 @@ LodestarDB = {
 - SavedVariables are loaded by `PLAYER_LOGIN`: a value set before `/reload` is there when the handler runs, and the merge keeps it.
 - The game writes the file at logout as plain Lua with `["key"] =` syntax, empty tables included, in no fixed key order. Claude Code can read it from the path in `notes/environment.md`.
 - `/dump` evaluates a Lua expression: `/dump LodestarDB.modules: Tooltip` fails with "function arguments expected" (`:` is method-call syntax).
+
+### P21: event dispatcher (M2 step 2.4a)
+
+`Core.lua` dispatches every event from its one frame to sets of handlers (`ns.RegisterEvent`, `ns.UnregisterEvent`; `PLAYER_LOGIN` itself goes through the dispatcher). Temporary test: two handlers on `PLAYER_TARGET_CHANGED`, A unregisters itself on its 2nd call, B on its 1st; when the set is empty, the core calls `eventFrame:UnregisterEvent`. Spec: `notes/spec-2.4-core-dispatch.md`.
+
+Result (2026-10-16, beta after the client patch; screenshots 084859, 085045; `/reload`, then four target changes):
+
+```
+Lodestar: loaded (interface 16001), db v1
+Lodestar: test handler A: PLAYER_TARGET_CHANGED
+Lodestar: test handler B: PLAYER_TARGET_CHANGED
+Lodestar: test handler A: PLAYER_TARGET_CHANGED
+```
+
+- The interface number is still 16001 after the 2026-10-16 client patch.
+- One event reaches every handler in the set; a handler can unregister itself during dispatch.
+- `frame:UnregisterEvent` exists: the 3rd and 4th target changes printed nothing and raised no error.
+- `/reload` resets all Lua state: the test handlers are registered again and the sequence starts over.

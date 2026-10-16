@@ -144,10 +144,10 @@ Lodestar/             # repo root, linked into Interface/AddOns as Lodestar
 **Rules**
 
 - **One namespace.** Every file starts with `local addonName, ns = ...`; nothing is global except the SavedVariables table, slash command handlers, and names that Blizzard's templates require to be global: the `LodestarTooltip` frame, the `LodestarCopyFrame` frame (a global name lets Escape close it through `UISpecialFrames`), and the `Lodestar...PinMixin` tables used by `Pins.xml`. Every such global starts with `Lodestar` and is listed in `.luacheckrc`. Globals in Lua are like unscoped statics in C++: they leak into every other addon.
-- **Module contract.** A module is a table with `OnEnable()` and `OnDisable()`, registered with `ns:RegisterModule(name, module)`. The core calls `OnEnable` on `PLAYER_LOGIN` for every module the user has not disabled.
-- **One event frame.** The core owns a single frame and dispatches events to subscribers; modules call `ns:RegisterEvent(name, handler)` instead of creating their own frames.
+- **Module contract.** A module is a table with `OnEnable()` and `OnDisable()`, registered with `ns.RegisterModule(name, module)`. The core calls `OnEnable` on `PLAYER_LOGIN` for every module the user has not disabled. Core functions on `ns` use the dot form (`ns.RegisterEvent(...)`), since `ns` is a single namespace and needs no `self`; module methods use the colon (`function Module:OnEnable()`), since they work on their own module table.
+- **One event frame.** The core owns a single frame and dispatches events to subscribers; modules call `ns.RegisterEvent(name, handler)` instead of creating their own frames.
 - **Overlays are map data providers.** Map overlays register with `WorldMapFrame:AddDataProvider` in `OnEnable` and unregister with `RemoveDataProvider` in `OnDisable`. Blizzard's map calls the provider only while the map is shown (on open and on every map change), so nothing runs while the map is closed. If `WorldMapFrame` does not exist yet at `PLAYER_LOGIN`, the core waits for `ADDON_LOADED` of `Blizzard_WorldMap` before enabling map modules.
-- **Map tick.** The core owns one throttled `OnUpdate` handler that runs every 0.1 s, and only while `WorldMapFrame` is shown: it is set in the map's `OnShow` hook and cleared in `OnHide`. Modules that need to follow the cursor or the player subscribe with `ns:RegisterMapTick(handler)` instead of creating their own `OnUpdate` handlers. Tooltip uses it.
+- **Map tick.** The core owns one throttled `OnUpdate` handler that runs every 0.1 s, and only while `WorldMapFrame` is shown: it is set in the map's `OnShow` hook and cleared in `OnHide`. Modules that need to follow the cursor or the player subscribe with `ns.RegisterMapTick(handler)` instead of creating their own `OnUpdate` handlers. Tooltip uses it.
 - **No libraries in the MVP.** Plain Lua 5.1, no Ace3. Revisit when the options panel is built.
 - **No taint.** "Taint" is what happens when addon code touches Blizzard's UI in a way that later makes protected actions fail ("Interface action failed because of an AddOn"), usually in combat. So:
   - Never replace or reassign a Blizzard function, or a field on a Blizzard frame or mixin.
@@ -194,7 +194,7 @@ ns.Instances = {
 - Positions on other maps (continents) are never stored; they are projected at runtime (see "Map positions" below).
 - There is no in-game override for instances: since the addon is for personal use, a wrong entrance is fixed by editing `Instances.lua` directly.
 
-**Map positions.** The core keeps one cache of zone rectangles, `ns:GetZoneRect(zoneID, mapID)`, which wraps `C_Map.GetMapRectOnMap` and returns `nil` when the zone does not appear on that map. The game does not return `nil` in that case but a rectangle of four zeros (P5, Zephras Isle on the world map), so any rectangle with `maxX <= minX` or `maxY <= minY` counts as "not on this map"; that check is a pure function in `Logic.lua` with a unit test. Both ZoneLabels and Instances use it. A point `(x, y)` on a zone's map is projected onto a parent map with:
+**Map positions.** The core keeps one cache of zone rectangles, `ns.GetZoneRect(zoneID, mapID)`, which wraps `C_Map.GetMapRectOnMap` and returns `nil` when the zone does not appear on that map. The game does not return `nil` in that case but a rectangle of four zeros (P5, Zephras Isle on the world map), so any rectangle with `maxX <= minX` or `maxY <= minY` counts as "not on this map"; that check is a pure function in `Logic.lua` with a unit test. Both ZoneLabels and Instances use it. A point `(x, y)` on a zone's map is projected onto a parent map with:
 
 ```lua
 -- Logic.lua: pure function, unit tested
@@ -215,7 +215,7 @@ LodestarDB = {
 }
 ```
 
-**Lookup rule.** `ns:GetZoneInfo(mapID)` builds the zone's info field by field, so each field comes from the best source that has it:
+**Lookup rule.** `ns.GetZoneInfo(mapID)` builds the zone's info field by field, so each field comes from the best source that has it:
 
 | Field | 1st source | 2nd source | 3rd source |
 | --- | --- | --- | --- |
@@ -249,8 +249,8 @@ Fallback if P3 fails (assumption A3): each module creates its own pool of frames
 **ZoneLabels**
 
 1. A data provider with one label pin template (a frame holding a `FontString`).
-2. In `RefreshAllData`, if the current map is a continent, get its child zones with `C_Map.GetMapChildrenInfo(currentMapID, Enum.UIMapType.Zone)` and look up each in `ns:GetZoneInfo`.
-3. Place each label at the zone's `labelX, labelY` if set, otherwise at the center of the zone's rectangle from `ns:GetZoneRect(zoneID, currentMapID)` (`(minX + maxX) / 2, (minY + maxY) / 2`). Set text to `min-max` with each end colored separately (see "Difficulty colors"), built as `|cffRRGGBBmin|r-|cffRRGGBBmax|r`.
+2. In `RefreshAllData`, if the current map is a continent, get its child zones with `C_Map.GetMapChildrenInfo(currentMapID, Enum.UIMapType.Zone)` and look up each in `ns.GetZoneInfo`.
+3. Place each label at the zone's `labelX, labelY` if set, otherwise at the center of the zone's rectangle from `ns.GetZoneRect(zoneID, currentMapID)` (`(minX + maxX) / 2, (minY + maxY) / 2`). Set text to `min-max` with each end colored separately (see "Difficulty colors"), built as `|cffRRGGBBmin|r-|cffRRGGBBmax|r`.
 4. On `PLAYER_LEVEL_UP`, call the provider's `RefreshAllData` if the map is shown; otherwise do nothing, because the next map open refreshes anyway.
 
 **Zones off the continents.** On the beta, Zephras Isle (2521) is a zone whose parent is the world map (947), and it has no placement there: `GetMapRectOnMap(2521, 947)` returns four zeros and the world map does not draw it. So no continent map shows it, ZoneLabels never labels it, and the zone tooltip can never hover it. It still gets a row in `Zones.lua`, so `/ls dump` and lookups know its range. This is a known MVP gap, to re-check on the live client after Nov 4, 2026, where the island may get a place on the world map; a label on the island's own zone map is a v2 option.
@@ -262,7 +262,7 @@ Edge cases: a zone with no data shows no label; a zone with a single level shows
 - A data provider with one icon pin template; the pin's `OnMouseEnter` shows a tooltip with name, kind and level range.
 - In `RefreshAllData`, if the current map is a continent or a zone, then for each entry in `ns.Instances`:
   - If `entry.map` is the current map, place the pin at `entry.x, entry.y` as is.
-  - Otherwise, if `ns:GetZoneRect(entry.map, currentMapID)` returns a rectangle, place the pin at `Logic.ProjectToParent(minX, maxX, minY, maxY, entry.x, entry.y)` using that rectangle.
+  - Otherwise, if `ns.GetZoneRect(entry.map, currentMapID)` returns a rectangle, place the pin at `Logic.ProjectToParent(minX, maxX, minY, maxY, entry.x, entry.y)` using that rectangle.
   - Otherwise, skip the entry: its zone is not on this map.
 - Entrances sharing a position are offset slightly so both stay clickable.
 
@@ -279,7 +279,7 @@ Classic Era maps do not show a tooltip when hovering a zone, only a one-line nam
   3. Faction: Alliance (blue), Horde (red) or Contested (yellow).
   4. Instances in the zone (the entries of `ns.Instances` whose `map` equals the hovered zone's uiMapID), one line each with name, colored range and kind; the section is left out when there are none.
 - **Hide** when the cursor leaves the map canvas, moves over a part of the continent with no zone, or the map closes.
-- Uses the same `ns:GetZoneInfo` lookup as ZoneLabels, so there is no second source of truth.
+- Uses the same `ns.GetZoneInfo` lookup as ZoneLabels, so there is no second source of truth.
 
 **Waypoints (v2)**
 
