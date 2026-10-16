@@ -24,6 +24,41 @@ function ns.RegisterModule(name, module)
   modules[name] = module
 end
 
+-- Commands
+
+local commands = {}
+
+function ns.RegisterCommand(name, handler, usage)
+  local lowerName = string.lower(name)
+  commands[lowerName] = {
+    handler = handler,
+    usage = usage,
+  }
+end
+
+function ns.RunCommand(msg)
+  local command, args = ns.Logic.ParseCommand(msg)
+  if command == "" then
+    local names = {}
+    for name in pairs(commands) do
+      names[#names + 1] = name
+    end
+    table.sort(names)
+    for _, name in ipairs(names) do
+      ns.Print("/ls " .. commands[name].usage)
+    end
+    return
+  end
+
+  local entry = commands[command]
+  if entry == nil then
+    ns.Print("|cffff4040Error:|r unknown command \"" .. command .. "\", type /ls for help")
+    return
+  end
+
+  ns.SafeCall(entry.handler, args)
+end
+
 -- Map tick handlers
 
 local tickHandlers = {}

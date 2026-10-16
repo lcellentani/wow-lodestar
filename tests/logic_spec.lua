@@ -1,6 +1,8 @@
 local ns = ...
 local Logic = ns.Logic
 
+-- Local helpers
+
 local function near(a, b) return math.abs(a - b) < 1e-9 end
 
 local function expectKey(levels, key, playerLevel)
@@ -13,19 +15,61 @@ local function expectKey(levels, key, playerLevel)
   end
 end
 
+-- Test cases
+
+describe("ParseCommand", function()
+  it("returns an empty command and args for empty input", function()
+    local command, args = Logic.ParseCommand("")
+    assert(command == "", "got " .. tostring(command))
+    assert(#args == 0, "expected no args, got " .. #args)
+  end)
+
+  it("returns an empty command and args for whitespace input", function()
+    local command, args = Logic.ParseCommand("   ")
+    assert(command == "", "got " .. tostring(command))
+    assert(#args == 0, "expected no args, got " .. #args)
+  end)
+
+  it("separates the command from its argument", function()
+    local command, args = Logic.ParseCommand("toggle ZoneLabels")
+    assert(command == "toggle", "got " .. tostring(command))
+    assert(#args == 1, "expected 1 arg, got " .. #args)
+    assert(args[1] == "ZoneLabels", "got " .. tostring(args[1]))
+  end)
+
+  it("ignores extra spaces and lowercases only the command", function()
+    local command, args = Logic.ParseCommand("  TOGGLE   ZoneLabels  ")
+    assert(command == "toggle", "got " .. tostring(command))
+    assert(#args == 1, "expected 1 arg, got " .. #args)
+    assert(args[1] == "ZoneLabels", "got " .. tostring(args[1]))
+  end)
+
+  it("keeps multiple arguments as strings", function()
+    local command, args = Logic.ParseCommand("zone here 10 20")
+    assert(command == "zone", "got " .. tostring(command))
+    assert(#args == 3, "expected 3 args, got " .. #args)
+    assert(args[1] == "here", "got " .. tostring(args[1]))
+    assert(args[2] == "10", "got " .. tostring(args[2]))
+    assert(args[3] == "20", "got " .. tostring(args[3]))
+  end)
+end)
+
 describe("FormatCoords", function()
   it("formats as percent with one decimal", function()
     local result = Logic.FormatCoords(0.4123, 0.6543)
     assert(result == "41.2, 65.4", "got " .. tostring(result))
   end)
+
   it("pads the map edges to one decimal", function()
     local result = Logic.FormatCoords(0, 1)
     assert(result == "0.0, 100.0", "got " .. tostring(result))
   end)
+
   it("returns nil when x is nil", function()
     local result = Logic.FormatCoords(nil, 0.5)
     assert(result == nil, "got '" .. tostring(result) .. "'")
   end)
+
   it("returns nil when y is nil", function()
     local result = Logic.FormatCoords(0.5, nil)
     assert(result == nil, "got '" .. tostring(result) .. "'")
@@ -41,22 +85,27 @@ describe("IsRectOnMap", function()
     local result = Logic.IsRectOnMap(0, 0, 0, 0)
     assert(result == false, "got " .. tostring(result))
   end)
+
   it("returns false when the rectangle is flipped", function()
     local result = Logic.IsRectOnMap(0.55, 0.40, 0.70, 0.85)
     assert(result == false, "got " .. tostring(result))
   end)
+
   it("returns false when the width is zero", function()
     local result = Logic.IsRectOnMap(0.5, 0.5, 0.1, 0.3)
     assert(result == false, "got " .. tostring(result))
   end)
+
   it("returns false when the height is zero", function()
     local result = Logic.IsRectOnMap(0.4, 0.55, 0.3, 0.3)
     assert(result == false, "got " .. tostring(result))
   end)
+
   it("returns false when all coordinates are nil", function()
     local result = Logic.IsRectOnMap(nil, nil, nil, nil)
     assert(result == false, "got " .. tostring(result))
   end)
+
   it("returns false when one coordinate is nil", function()
     for i = 1, 4 do
       local args = { 0.40, 0.55, 0.70, 0.85 }
@@ -72,14 +121,17 @@ describe("ProjectToParent", function()
     local x, y = Logic.ProjectToParent(0.4, 0.6, 0.2, 0.5, 0, 0)
     assert(near(x, 0.4) and near(y, 0.2), "got " .. x .. ", " .. y)
   end)
+
   it("projects to the bottom-right corner", function()
     local x, y = Logic.ProjectToParent(0.4, 0.6, 0.2, 0.5, 1, 1)
     assert(near(x, 0.6) and near(y, 0.5), "got " .. x .. ", " .. y)
   end)
+
   it("projects to the center", function()
     local x, y = Logic.ProjectToParent(0.4, 0.6, 0.2, 0.5, 0.5, 0.5)
     assert(near(x, 0.5) and near(y, 0.35), "got " .. x .. ", " .. y)
   end)
+
   it("projects an off-center point", function()
     local x, y = Logic.ProjectToParent(0.4, 0.6, 0.2, 0.5, 0.25, 0.75)
     assert(near(x, 0.45) and near(y, 0.425), "got " .. x .. ", " .. y)
@@ -95,26 +147,32 @@ describe("GreyLevel", function()
     local result = Logic.GreyLevel(5)
     assert(result == 0, "got " .. tostring(result))
   end)
+
   it("at level 6, level 1 is grey", function()
     local result = Logic.GreyLevel(6)
     assert(result == 1, "got " .. tostring(result))
   end)
+
   it("at level 25, levels 1-18 are grey", function()
     local result = Logic.GreyLevel(25)
     assert(result == 18, "got " .. tostring(result))
   end)
+
   it("at level 39, levels 1-31 are grey", function()
     local result = Logic.GreyLevel(39)
     assert(result == 31, "got " .. tostring(result))
   end)
+
   it("at level 40, levels 1-31 are grey", function()
     local result = Logic.GreyLevel(40)
     assert(result == 31, "got " .. tostring(result))
   end)
+
   it("at level 45, levels 1-35 are grey", function()
     local result = Logic.GreyLevel(45)
     assert(result == 35, "got " .. tostring(result))
   end)
+
   it("at level 60, levels 1-47 are grey", function()
     local result = Logic.GreyLevel(60)
     assert(result == 47, "got " .. tostring(result))
@@ -126,18 +184,23 @@ describe("DifficultyKey", function()
   it("is red at 5 or more levels above", function()
     expectKey({ 30, 31 }, "red", 25)
   end)
+
   it("is orange at 3 or 4 levels above", function()
     expectKey({ 28, 29 }, "orange", 25)
   end)
+
   it("is yellow from 2 below to 2 levels above", function()
     expectKey({ 23, 25, 27 }, "yellow", 25)
   end)
+
   it("is green from 6 below to 3 levels below", function()
     expectKey({ 19, 22 }, "green", 25)
   end)
+
   it("is grey from 7 or more levels below", function()
     expectKey({ 1, 18 }, "grey", 25)
   end)
+
   it("is green below a low-level player when nothing is grey yet", function()
     expectKey({ 1 }, "green", 5)
   end)
@@ -157,6 +220,7 @@ describe("MergeDefaults", function()
     assert(saved.version == 1, "got " .. tostring(saved.version))
     assert(saved.modules.Tooltip == true, "got " .. tostring(saved.modules.Tooltip))
   end)
+
   it("preserves saved values that differ from default", function()
     local defaults = {
       version = 1,
@@ -174,6 +238,7 @@ describe("MergeDefaults", function()
     assert(saved.version == 1, "got " .. tostring(saved.version))
     assert(saved.modules.Tooltip == false, "got " .. tostring(saved.modules.Tooltip))
   end)
+
   it("fills missing siblings when the saved nested table is partially filled", function()
     local defaults = {
       version = 1,
@@ -195,6 +260,7 @@ describe("MergeDefaults", function()
     assert(saved.modules.Instances == true, "got " .. tostring(saved.modules.Instances))
     assert(saved.modules.Tooltip == true, "got " .. tostring(saved.modules.Tooltip))
   end)
+
   it("preserves saved keys that are absent from defaults", function()
     local defaults = {
       version = 1,
@@ -221,6 +287,7 @@ describe("MergeDefaults", function()
     assert(saved.overrides.zones[1429].min == 10, "got " .. tostring(saved.overrides.zones[1429].min))
     assert(saved.overrides.zones[1429].max == 20, "got " .. tostring(saved.overrides.zones[1429].max))
   end)
+
   it("copies missing tables so saved data does not share defaults", function()
     local defaults = {
       log = {},
@@ -271,16 +338,19 @@ describe("Throttle", function()
     assert(result == false, "expected false, got " .. tostring(result))
     assert(near(leftover, 0.05), "got " .. tostring(leftover))
   end)
+
   it("returns true with no leftover when reaching the interval exactly", function()
     local result, leftover = Logic.Throttle(0.05, 0.05, 0.1)
     assert(result == true, "expected true, got " .. tostring(result))
     assert(near(leftover, 0), "got " .. tostring(leftover))
   end)
+
   it("returns true and preserves time beyond the interval as leftover", function()
     local result, leftover = Logic.Throttle(0.08, 0.05, 0.1)
     assert(result == true, "expected true, got " .. tostring(result))
     assert(near(leftover, 0.03), "got " .. tostring(leftover))
   end)
+
   it("keeps only the remainder after a lag spike", function()
     local result, leftover = Logic.Throttle(0, 0.35, 0.1)
     assert(result == true, "expected true, got " .. tostring(result))

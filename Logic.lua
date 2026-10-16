@@ -3,6 +3,35 @@ local addonName, ns = ...
 local Logic = {}
 ns.Logic = Logic
 
+-- Local helpers
+
+local function copy(t)
+  if type(t) ~= "table" then
+    return t
+  end
+
+  local result = {}
+  for k, v in pairs(t) do
+    result[k] = copy(v)
+  end
+  return result
+end
+
+-- Public APIs
+
+function Logic.ParseCommand(msg)
+  local args = {}
+  local command = ""
+  for word in string.gmatch(msg, "%S+") do
+    if command == "" then
+      command = string.lower(word)
+    else
+      args[#args + 1] = word
+    end
+  end
+  return command, args
+end
+
 function Logic.FormatCoords(x, y)
   if x == nil or y == nil then
     return nil
@@ -46,18 +75,6 @@ function Logic.DifficultyKey(level, playerLevel)
   else
     return "grey"
   end
-end
-
-local function copy(t)
-  if type(t) ~= "table" then
-    return t
-  end
-
-  local result = {}
-  for k, v in pairs(t) do
-    result[k] = copy(v)
-  end
-  return result
 end
 
 function Logic.MergeDefaults(saved, defaults)

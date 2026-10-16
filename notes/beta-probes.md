@@ -31,6 +31,13 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P17 | M4-M5 APIs | [x] | 2026-10-13 | beta |
 | P18 | A1, load | [x] | 2026-10-13 | beta |
 | P19 | M2 chat, safe calls | [x] | 2026-10-14 | beta |
+| P20 | M2 SavedVariables defaults | [x] | 2026-10-15 | beta |
+| P21 | M2 event dispatcher | [x] | 2026-10-16 | beta, after client patch, interface 16001 |
+| P22 | M2 module registry | [x] | 2026-10-16 | beta |
+| P23 | M2 map tick | [x] | 2026-10-16 | beta |
+| P24 | M2 slash commands | [x] | 2026-10-16 | beta |
+| P25 | M2 toggle, debug | [ ] | | |
+| P26 | login vs /reload chat order | [ ] | | |
 
 ## Confirmed APIs
 
@@ -852,3 +859,31 @@ Lodestar: OnHide - map tick running: false
 - `SetScript("OnUpdate", fn)` on our own frame runs `fn` every frame with the elapsed seconds; `SetScript("OnUpdate", nil)` stops it.
 - The tick reaches the registered handler while the map is open and stops when it closes: no `OnUpdate` cost with the map closed (doc success criterion 5).
 - Rate: slightly under 10 per second at high frame rates, since six 1/60 s frames sum to just under 0.1 in floating point (smoke test outside the game); "at most once per 0.1 s" as designed.
+
+### P24: slash commands and help (M2 step 2.5a)
+
+`Options.lua` sets `SLASH_LODESTAR1 = "/ls"`, `SLASH_LODESTAR2 = "/lodestar"` and `SlashCmdList.LODESTAR = ns.RunCommand`. `ns.RunCommand` splits the text with `Logic.ParseCommand` (command lowercased, args keep case), prints the sorted help for an empty command, an error for an unknown one, and otherwise runs the handler through `ns.SafeCall`. Temporary test command: `echo`, printing its args joined with ` | `. Spec: `notes/spec-2.5-slash-commands.md`.
+
+Result (2026-10-16, beta; screenshot 225400; fresh login, then `/ls`, `/lodestar`, `/ls   ECHO  Hello   World`, `/ls nope`):
+
+```
+Lodestar: /ls echo <words...> - print each word separated by |
+Lodestar: /ls echo <words...> - print each word separated by |
+Lodestar: Hello | World
+Lodestar: Error: unknown command "nope", type /ls for help
+```
+
+- `/ls` and `/lodestar` both reach the handler, with the text after the command as the first argument.
+- The command matches case-insensitively, extra spaces collapse, and the args keep their case.
+- A lone `|` followed by a space or at the end of a line renders as a plain `|` in the chat frame: only `|` followed by an escape letter (`|c`, `|r`, ...) is special.
+- After this fresh login the hello line came after the guild message of the day, while P18, P21 and P22 saw it before the login messages. Those were probably fresh logins too (the user usually starts the game from scratch), so the difference is not login vs `/reload`; P26 checks it. Until then, nothing may rely on the order of login chat lines.
+
+### P26: login vs /reload chat order (pending)
+
+P24 saw the Lodestar hello line after the guild message of the day on a fresh login; P18, P21 and P22 saw it before the login messages. Check whether the order depends on how the UI loads.
+
+1. Exit the game completely, start it, log in; screenshot the chat.
+2. Run `/reload`; screenshot the chat.
+3. Repeat both once more.
+
+Record for each run whether the hello line comes before or after the code-of-conduct line and the guild message of the day. Nothing in the design depends on the answer; it only tells whether login output can be expected at a fixed place in chat.
