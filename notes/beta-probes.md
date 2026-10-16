@@ -800,3 +800,27 @@ Lodestar: test handler A: PLAYER_TARGET_CHANGED
 - One event reaches every handler in the set; a handler can unregister itself during dispatch.
 - `frame:UnregisterEvent` exists: the 3rd and 4th target changes printed nothing and raised no error.
 - `/reload` resets all Lua state: the test handlers are registered again and the sequence starts over.
+
+### P22: module registry (M2 step 2.4b)
+
+`ns.RegisterModule(name, module)` at file load; on `PLAYER_LOGIN`, after the DB merge, every module with `Logic.IsModuleEnabled(ns.db.modules, name)` gets `OnEnable` through `ns.SafeCall`. Temporary test modules: TestA prints, TestB raises `error("boom")`.
+
+Result (2026-10-16, beta; screenshots 085045, 085549):
+
+```
+Lodestar: loaded (interface 16001), db v1
+Lodestar: Error: Interface/AddOns/Lodestar/Core.lua:91: boom
+Lodestar: TestA enabled
+```
+
+After `/run LodestarDB.modules.TestA = false` and `/reload`:
+
+```
+Lodestar: loaded (interface 16001), db v1
+Lodestar: Error: Interface/AddOns/Lodestar/Core.lua:91: boom
+```
+
+- A module's error is caught and printed; the other modules still start, with no error popup.
+- Modules start on `PLAYER_LOGIN`, before the game's login messages (code of conduct, guild message of the day).
+- `false` in `LodestarDB.modules` skips the module; the SavedVariables file kept `["TestA"] = false` as an extra key next to the defaults.
+- Order between modules is not fixed (`pairs`): TestB ran before TestA here.

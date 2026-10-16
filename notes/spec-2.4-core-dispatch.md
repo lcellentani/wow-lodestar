@@ -1,6 +1,6 @@
 # M2 step 2.4: event dispatcher, module registry, map tick
 
-Status: 2.4a done 2026-10-16 (P21 in `notes/beta-probes.md`); 2.4b and 2.4c not started. User writes the code, Claude reviews.
+Status: 2.4a and 2.4b done 2026-10-16 (P21, P22 in `notes/beta-probes.md`); 2.4c not started. User writes the code, Claude reviews.
 Design doc reference: "Architecture" → "Rules" (module contract, one event frame, map tick, safe calls).
 
 ## What this step is for

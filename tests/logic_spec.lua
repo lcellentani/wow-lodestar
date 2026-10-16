@@ -239,3 +239,28 @@ describe("MergeDefaults", function()
     assert(#defaults.log == 0, "expected defaults.log to remain empty")
   end)
 end)
+
+describe("IsModuleEnabled", function()
+  it("returns true when the module setting is true", function()
+    local moduleSettings = {
+      ZoneLabels = true,
+    }
+
+    local result = Logic.IsModuleEnabled(moduleSettings, "ZoneLabels")
+    assert(result == true, "expected ZoneLabels enabled, got " .. tostring(result))
+  end)
+  it("returns false when the module setting is false", function()
+    local moduleSettings = {
+      ZoneLabels = false,
+    }
+
+    local result = Logic.IsModuleEnabled(moduleSettings, "ZoneLabels")
+    assert(result == false, "expected ZoneLabels disabled, got " .. tostring(result))
+  end)
+  it("returns true when the module has no setting", function()
+    local moduleSettings = {}
+
+    local result = Logic.IsModuleEnabled(moduleSettings, "ZoneLabels")
+    assert(result == true, "expected ZoneLabels enabled, got " .. tostring(result))
+  end)
+end)

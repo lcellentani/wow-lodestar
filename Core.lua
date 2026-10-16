@@ -16,6 +16,14 @@ local DEFAULTS = {
   log = {},
 }
 
+-- Module registry
+
+local modules = {}
+
+function ns.RegisterModule(name, module)
+  modules[name] = module
+end
+
 -- Event dispatcher
 
 local handlersByEvent = {}
@@ -47,6 +55,12 @@ local function OnLogin()
   LodestarDB = ns.Logic.MergeDefaults(LodestarDB or {}, DEFAULTS)
   ns.db = LodestarDB
   ns.Print("loaded (interface " .. interface .. "), db v" .. ns.db.version)
+
+  for name, module in pairs(modules) do
+    if ns.Logic.IsModuleEnabled(ns.db.modules, name) then
+      ns.SafeCall(module.OnEnable, module)
+    end
+  end
 end
 
 -- WoW events & dispatcher

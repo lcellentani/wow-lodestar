@@ -70,3 +70,7 @@ function Logic.MergeDefaults(saved, defaults)
   end
   return saved
 end
+
+function Logic.IsModuleEnabled(moduleSettings, name)
+  return moduleSettings[name] ~= false
+end
