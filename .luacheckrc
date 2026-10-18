@@ -21,6 +21,7 @@ read_globals = {
   "GetQuestDifficultyColor", -- P8
   "UnitLevel",               -- P8
   "CreateFrame", "hooksecurefunc", "UIParent", "DEFAULT_CHAT_FRAME", "UISpecialFrames", -- P16
+  "ChatFontNormal",          -- P28
   "time", "date", "GetTime", -- P16
   "CreateFromMixins", "Mixin", "MapCanvasDataProviderMixin", "GameTooltip", -- P17
 }

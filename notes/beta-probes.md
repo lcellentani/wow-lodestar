@@ -39,8 +39,8 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P25 | M2 toggle, debug | [x] | 2026-10-17 | beta |
 | P26 | login vs /reload chat order | [ ] | | |
 | P27 | M2 output and log | [x] | 2026-10-18 | beta |
-| P28 | copy window methods (no addon) | [ ] | | |
-| P29 | M2 copy window | [ ] | | |
+| P28 | copy window methods (no addon) | [x] | 2026-10-18 | beta |
+| P29 | M2 copy window | [x] | 2026-10-18 | beta |
 | P30 | M2 /ls dump | [ ] | | |
 | P31 | M2 /ls probe | [ ] | | |
 
@@ -943,3 +943,46 @@ Lodestar: log cleared (2 entries)                                   <- /ls log c
 - `date("%Y-%m-%d %H:%M:%S")` gives local time in that format.
 - The error message carries the file path and line number (`Debug.lua:34:`) added by `error` at level 1.
 - The game writes SavedVariables only on `/reload` or logout: the file did not change between the commands and the next `/reload`, so check the file's time before reading it.
+
+### P28: copy window methods (M2 step 2.6b, no addon)
+
+Checks the frame methods the copy window needs beyond P16g. Lines from `notes/spec-2.6-debug.md`, 2.6b.
+
+Part 1 result (2026-10-18, beta; screenshots 194058, 194720):
+
+```
+Frame1 true true true true      <- SetSize, SetPoint, SetMovable, EnableMouse
+Frame2 true true true true      <- RegisterForDrag, StartMoving, StopMovingOrSizing, .TitleText
+Scroll true true                <- SetScrollChild, SetPoint
+EditBox true true true true true  <- SetText, SetFocus, SetFontObject, SetWidth, ChatFontNormal
+```
+
+- Every method exists; `ChatFontNormal` is a global font object. Added to `.luacheckrc`.
+- **The chat box cuts typed lines at 255 characters.** The first attempt used one 284-character `Frame` line: it printed nothing and showed no error (script errors are not displayed on this client). Split into `Frame1` and `Frame2`, both passed. Keep every `/run` line under 255 characters.
+
+Part 2 result (2026-10-18, beta; screenshot 195553):
+
+```
+Frame3 true true true           <- Show, IsShown, TitleText:SetText
+DragScripts ok                  <- SetScript with OnDragStart and OnDragStop
+EscapeScript ok                 <- SetScript with OnEscapePressed on an EditBox
+```
+
+- `Show`, `IsShown` and `SetText` on the template's `TitleText` exist.
+- `SetScript` accepts `OnDragStart`, `OnDragStop` (Frame) and `OnEscapePressed` (EditBox): an unknown script name would have raised an error and skipped the print.
+
+P28 conclusion: every API the copy window in the 2.6b spec uses is confirmed on the beta.
+
+### P29: copy window (M2 step 2.6b)
+
+`Logic.FormatOutput(entry)` builds the copy text: a header `"<time> /ls <command>"`, then the entry's lines, joined with `"
+"`. `Debug.lua` creates `LodestarCopyFrame` on the first `/ls copy` (`BasicFrameTemplateWithInset`, 520 by 360, centered, draggable, registered in `UISpecialFrames`), with a `UIPanelScrollFrameTemplate` scroll frame whose child is a multi-line `EditBox` (`ChatFontNormal`, width 476, `OnEscapePressed` hides the frame). `/ls copy` prints `nothing to copy yet` without an output, otherwise shows the frame, sets the text, selects it and focuses it; when open, it refreshes. Temporary test command: `emit` with `line 1` to `line 40`. Spec: `notes/spec-2.6-debug.md`.
+
+Result (2026-10-18, beta; screenshot 215205; steps as in the spec, reported by the user as passing):
+
+- The window opens with the title `Lodestar: last output`, the header `2026-10-18 21:51:48 /ls emit` and the lines, all selected; the scroll bar appears since 41 lines are taller than the window.
+- Ctrl+C and a paste into Claude Code gave the header and exactly `line 1` to `line 40`: a plain `CreateFrame("EditBox")` has no character limit at this size (about 360 characters), and the line breaks survive the copy.
+- Dragging moves the window; `/ls copy` reopens it where it was left (the frame is reused).
+- Escape with the cursor in the text closes it through `OnEscapePressed`, and Enter then opens chat normally: the hidden edit box releases the keyboard.
+- Escape after clicking the title bar (text not focused) closes it through `UISpecialFrames`; the close button closes it.
+- `/ls copy` with the window open refreshes it to the newer output.

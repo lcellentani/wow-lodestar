@@ -1,6 +1,6 @@
 # M2 step 2.6: `Debug.lua` (log, copy window, dump, probe)
 
-Status: spec agreed 2026-10-17; 2.6a detailed, 2.6b-2.6d outlined (each detailed before it starts). User writes the code, Claude reviews.
+Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c-2.6d outlined (each detailed before it starts). User writes the code, Claude reviews.
 Design doc reference: "Settings and slash commands", "Getting output out of the game".
 
 ## What this step is for
@@ -113,15 +113,120 @@ Expected: `log cleared (2 entries)` or similar.
 
 Then tell Claude again: the file should show an empty `log`.
 
-## 2.6b: copy window (outline)
+## 2.6b: copy window, `/ls copy`
 
-- `/ls copy` opens `LodestarCopyFrame` (an allowed global, already in `.luacheckrc`) with the lines of `ns.GetLastOutput()` joined by `"\n"`, all selected, so Ctrl+C copies them. Escape closes it (`UISpecialFrames`). Created on first use, then reused. Movable.
-- Built from the pieces confirmed in P16g: a `"Frame"` with `BasicFrameTemplateWithInset`, a `"ScrollFrame"` with `UIPanelScrollFrameTemplate`, a multi-line `"EditBox"` as the scroll child.
-- The frame methods it needs were not part of P16g. **P28** checks them; it needs no addon, so it can run any time before 2.6b (ideally while the beta is open):
+`/ls copy` opens `LodestarCopyFrame` with the last output, all selected, so Ctrl+C copies it. The window is created on first use, then reused; it can be dragged and closed with Escape or its close button.
+
+### Evidence
+
+Every API below is confirmed. P16g: `CreateFrame` for `"Frame"`, `"ScrollFrame"` and `"EditBox"`; the templates `BasicFrameTemplateWithInset` (`.CloseButton`) and `UIPanelScrollFrameTemplate`; `SetMultiLine`, `HighlightText`, `SetAutoFocus`; `UISpecialFrames`. P16c: `SetScript`. P28 part 1 (2026-10-18): `SetSize`, `SetPoint`, `SetMovable`, `EnableMouse`, `RegisterForDrag`, `StartMoving`, `StopMovingOrSizing`, `.TitleText`, `SetScrollChild`, `SetText`, `SetFocus`, `SetFontObject`, `SetWidth`, `ChatFontNormal`. P28 part 2 (below, done 2026-10-18): `Show`, `IsShown`, `TitleText:SetText`, and the script names `OnDragStart`, `OnDragStop`, `OnEscapePressed`.
+
+### `Logic.FormatOutput(entry)` in `Logic.lua`
+
+- Returns one string: a header line `"<time> /ls <command>"`, then each of `entry.lines`, joined with `"\n"`. For example `{ time = "2026-10-18 19:30:07", command = "emit", lines = { "line one", "line two" } }` gives `"2026-10-18 19:30:07 /ls emit\nline one\nline two"`.
+- The header says where pasted text came from; it matters once several dumps are pasted into one note.
+
+Tests (`describe("FormatOutput", ...)`):
+
+- Header plus two lines, as in the example.
+- An entry with no lines gives only the header (no trailing `"\n"`).
+- An `error` entry gives `"<time> /ls error"` then the message (the command name is kept as is).
+
+Hints:
+
+- Build a list: `local parts = { header }`, append each line, then `table.concat(parts, "\n")`. Same pattern as `ns.Print`.
+- Never change `entry.lines`: `Record` keeps that same table as the last output and in the log.
+
+### The window in `Debug.lua`
+
+- A file-level `local copyFrame = nil` and a `local function CreateCopyFrame()` that builds and returns the frame. `/ls copy` calls it only when `copyFrame` is `nil`.
+- The frame: `CreateFrame("Frame", "LodestarCopyFrame", UIParent, "BasicFrameTemplateWithInset")`, size about 520 by 360, centered (`SetPoint("CENTER")`), title `"Lodestar: last output"` through `TitleText:SetText`. The global name is what lets Escape find it: `table.insert(UISpecialFrames, "LodestarCopyFrame")`, once, at creation.
+- Dragging: `SetMovable(true)`, `EnableMouse(true)`, `RegisterForDrag("LeftButton")`, and `OnDragStart` / `OnDragStop` scripts that call `self:StartMoving()` / `self:StopMovingOrSizing()`.
+- Inside: a `"ScrollFrame"` with `UIPanelScrollFrameTemplate`, anchored to the frame's top-left and bottom-right with offsets that leave room for the title bar and, on the right, for the scroll bar (about `12, -30` and `-32, 10`). Its scroll child is an `"EditBox"` with `SetMultiLine(true)`, `SetAutoFocus(false)`, `SetFontObject(ChatFontNormal)` and `SetWidth` equal to the scroll frame's width (520 - 12 - 32 = 476).
+- `OnEscapePressed` on the edit box hides the frame. While the edit box has keyboard focus it receives Escape itself, so `UISpecialFrames` alone would not close the window then.
+- `/ls copy`, usage `"copy - show the last output, selected for Ctrl+C"`:
+  - No last output yet (`ns.GetLastOutput()` is `nil`): print `nothing to copy yet` and stop; no frame is created.
+  - Otherwise create the frame if needed, `Show()` it, `SetText(ns.Logic.FormatOutput(entry))` on the edit box, then `HighlightText()` and `SetFocus()`.
+  - When the window is already open, `/ls copy` refreshes it with the current last output (no toggle): the command always shows the latest.
+- `/ls copy` does not record anything itself, so it never replaces the last output it shows.
+
+Hints:
+
+- Keep the edit box in a file-level local too (or as a field, `copyFrame.editBox = editBox`), since `/ls copy` needs it after creation.
+- `SetScript` on our own frames is fine (CLAUDE.md, no-taint rule); `table.insert` into `UISpecialFrames` is the standard way to register a window for Escape and does not replace anything of Blizzard's.
+- Script handlers get the frame as their first argument: `function(self) self:StartMoving() end`.
+- `HighlightText()` with no arguments selects all the text.
+- Claude adds `ChatFontNormal` to `read_globals` in `.luacheckrc` (done with this spec).
+
+### Temporary in-game test (remove before commit)
+
+A temporary `emit` command that emits 40 numbered lines (`"line 1"` ... `"line 40"`), enough to need the scroll bar.
+
+### P28 part 2 (done 2026-10-18)
+
+Three lines, each under 255 characters. Each should print its label, and `Frame3` three `true`s; a missing line means the call failed:
 
 ```
-/run local f = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset"); f:Hide(); print("Frame", f.SetSize ~= nil, f.SetPoint ~= nil, f.SetMovable ~= nil, f.EnableMouse ~= nil, f.RegisterForDrag ~= nil, f.StartMoving ~= nil, f.StopMovingOrSizing ~= nil, f.TitleText ~= nil)
+/run local f = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset"); f:Hide(); print("Frame3", f.Show ~= nil, f.IsShown ~= nil, f.TitleText.SetText ~= nil)
 ```
+
+```
+/run local f = CreateFrame("Frame", nil, UIParent); f:SetScript("OnDragStart", function() end); f:SetScript("OnDragStop", function() end); print("DragScripts ok")
+```
+
+```
+/run local e = CreateFrame("EditBox", nil, UIParent); e:Hide(); e:SetScript("OnEscapePressed", function() end); print("EscapeScript ok")
+```
+
+### In-game check (P29)
+
+```
+/reload
+```
+
+```
+/ls copy
+```
+
+Expected: `nothing to copy yet`, no window.
+
+```
+/ls emit
+```
+
+```
+/ls copy
+```
+
+Expected: the window opens in the middle of the screen with the header line and `line 1` to `line 40`, all selected; the scroll bar reaches `line 40`. Then:
+
+1. Press Ctrl+C, close the window, paste into the Claude Code prompt: the header and 40 lines arrive.
+2. Drag the window by its title bar; it moves.
+3. Press Escape with the cursor in the text: the window closes.
+4. `/ls copy` again: it opens where it was dragged to. Click the title bar (the text loses focus), press Escape: it closes.
+5. `/ls copy`, then the close button: it closes.
+
+6. Refresh: `/ls copy`, click the title bar (so Enter opens the chat box instead of typing into the window), wait a second, then run the two commands below. The window stays open and shows the new output (a later time in the header).
+
+```
+/ls emit
+```
+
+```
+/ls copy
+```
+
+### P28 part 1 (done 2026-10-18)
+
+```
+/run local f = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset"); f:Hide(); print("Frame1", f.SetSize ~= nil, f.SetPoint ~= nil, f.SetMovable ~= nil, f.EnableMouse ~= nil)
+```
+
+```
+/run local f = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset"); f:Hide(); print("Frame2", f.RegisterForDrag ~= nil, f.StartMoving ~= nil, f.StopMovingOrSizing ~= nil, f.TitleText ~= nil)
+```
+
+(The frame check is split in two: the chat box cuts typed lines at 255 characters, and the single 284-character line failed silently on 2026-10-18.)
 
 ```
 /run local s = CreateFrame("ScrollFrame", nil, UIParent, "UIPanelScrollFrameTemplate"); s:Hide(); print("Scroll", s.SetScrollChild ~= nil, s.SetPoint ~= nil)
@@ -131,7 +236,7 @@ Then tell Claude again: the file should show an empty `log`.
 /run local e = CreateFrame("EditBox", nil, UIParent); e:Hide(); print("EditBox", e.SetText ~= nil, e.SetFocus ~= nil, e.SetFontObject ~= nil, e.SetWidth ~= nil, ChatFontNormal ~= nil)
 ```
 
-Expected: every value `true`. In-game check of the window: P29.
+Result: every value `true` (see `notes/beta-probes.md`, P28).
 
 ## 2.6c: `/ls dump` (outline)
 
