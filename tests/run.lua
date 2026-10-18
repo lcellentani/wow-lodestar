@@ -19,6 +19,7 @@ end
 
 local ns = {}
 assert(loadfile("Logic.lua"))("Lodestar", ns)
+assert(loadfile("Util.lua"))("Lodestar", ns)
 
 for file in io.popen('dir /b tests\\*_spec.lua'):lines() do
   assert(loadfile("tests/" .. file))(ns)
@@ -31,4 +32,3 @@ end
 
 print(string.format("%d passed, %d failed", passed, failed))
 os.exit(failed > 0 and 1 or 0)
-

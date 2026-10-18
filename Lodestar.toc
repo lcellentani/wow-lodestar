@@ -8,4 +8,5 @@
 Logic.lua
 Util.lua
 Core.lua
+Debug.lua
 Options.lua

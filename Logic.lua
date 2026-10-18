@@ -114,3 +114,11 @@ function Logic.Throttle(accumulated, elapsed, interval)
   end
   return false, sum
 end
+
+function Logic.AppendLog(log, entry, max)
+  log[#log + 1] = entry
+  while #log > max do
+    table.remove(log, 1)
+  end
+  return log
+end

@@ -1,17 +1,19 @@
-local ns = {}
-
-local lines = {}
+local ns = ...
 
 -- Local helpers
+
+local lines = {}
 
 DEFAULT_CHAT_FRAME = {
   AddMessage = function(_, msg) table.insert(lines, msg) end,
 }
 
----@diagnostic disable-next-line: undefined-global
-assert(loadfile("Util.lua"))("Lodestar", ns)
+local function reset()
+  lines = {}
+  ns.db = nil
+end
 
-local function reset() lines = {} end
+date = function() return "2026-10-18 12:00:00" end
 
 local function pack(...) return select("#", ...), { ... } end
 
@@ -19,6 +21,56 @@ local PREFIX = "|cff33ff99Lodestar:|r "
 local ERROR_PREFIX = "|cffff4040Error:|r"
 
 -- Test cases
+
+describe("Record", function()
+  it("appends an entry with its time, command and lines to the log", function()
+    reset()
+    ns.db = { log = {} }
+    local entryLines = { "first line", "second line" }
+
+    ns.Record("test", entryLines)
+
+    assert(#ns.db.log == 1, "expected 1 log entry, got " .. #ns.db.log)
+    local entry = ns.db.log[1]
+    assert(entry.time == "2026-10-18 12:00:00", "unexpected time: " .. tostring(entry.time))
+    assert(entry.command == "test", "unexpected command: " .. tostring(entry.command))
+    assert(entry.lines == entryLines, "expected the entry to keep the original lines table")
+    assert(ns.GetLastOutput() == entry, "expected last output to be the recorded entry")
+    assert(#lines == 0, "expected Record not to print, got " .. #lines .. " lines")
+  end)
+
+  it("keeps the last output when the database is not available", function()
+    reset()
+    local entryLines = { "before login" }
+
+    ns.Record("test", entryLines)
+
+    local entry = ns.GetLastOutput()
+    assert(entry ~= nil, "expected a last output entry")
+    assert(entry.time == "2026-10-18 12:00:00", "unexpected time: " .. tostring(entry.time))
+    assert(entry.command == "test", "unexpected command: " .. tostring(entry.command))
+    assert(entry.lines == entryLines, "expected the entry to keep the original lines table")
+    assert(#lines == 0, "expected Record not to print, got " .. #lines .. " lines")
+  end)
+end)
+
+describe("Emit", function()
+  it("prints each line and keeps the command and lines as last output", function()
+    reset()
+    local outputLines = { "first line", "second line" }
+
+    ns.Emit("test", outputLines)
+
+    assert(#lines == 2, "expected 2 printed lines, got " .. #lines)
+    assert(lines[1] == PREFIX .. "first line", "unexpected first line: " .. tostring(lines[1]))
+    assert(lines[2] == PREFIX .. "second line", "unexpected second line: " .. tostring(lines[2]))
+
+    local entry = ns.GetLastOutput()
+    assert(entry ~= nil, "expected a last output entry")
+    assert(entry.command == "test", "unexpected command: " .. tostring(entry.command))
+    assert(entry.lines == outputLines, "expected last output to keep the original lines table")
+  end)
+end)
 
 describe("Print", function()
   it("writes one message per call", function()
@@ -77,6 +129,11 @@ describe("SafeCall", function()
     assert(string.find(message, "boom", 1, true), "expected message containing boom, got " .. message)
     assert(#lines == 1, "expected 1 line, got " .. #lines .. " lines")
     assert(string.find(lines[1], ERROR_PREFIX, 1, true), "expected error prefix in message, got " .. lines[1])
+
+    local entry = ns.GetLastOutput()
+    assert(entry.command == "error", "expected error command, got " .. tostring(entry.command))
+    assert(#entry.lines == 1, "expected 1 recorded error line, got " .. #entry.lines)
+    assert(string.find(entry.lines[1], "boom", 1, true), "expected recorded error to contain boom, got " .. entry.lines[1])
   end)
 
   it("catches a non-string error without crashing", function()

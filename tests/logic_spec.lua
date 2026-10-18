@@ -383,3 +383,80 @@ describe("Throttle", function()
     assert(near(leftover, 0.05), "got " .. tostring(leftover))
   end)
 end)
+
+describe("AppendLog", function()
+  it("appends an entry to an empty log", function()
+    local inLog = {}
+    local entry = "first entry"
+    local max = 3
+    local outLog = Logic.AppendLog(inLog, entry, max)
+    local size = #outLog
+    assert(size == 1, "expected log with 1 entry, got " .. tostring(size))
+    assert(outLog == inLog, "expected AppendLog to return the original log table")
+    assert(outLog[1] == entry, "expected " .. entry .. ", got " .. tostring(outLog[1]))
+  end)
+
+  it("appends entries in order", function()
+    local inLog = {
+      "first entry",
+      "second entry",
+    }
+    local expected = {
+      "first entry",
+      "second entry",
+      "third entry",
+    }
+    local entry = "third entry"
+    local max = 5
+    local outLog = Logic.AppendLog(inLog, entry, max)
+    local size = #outLog
+    assert(size == 3, "expected log with 3 entries, got " .. tostring(size))
+    assert(outLog == inLog, "expected AppendLog to return the original log table")
+    for i in ipairs(outLog) do
+      assert(expected[i] == outLog[i], "expected " .. expected[i] .. ", got " .. tostring(outLog[i]))
+    end
+  end)
+
+  it("discards the oldest entry when the log exceeds its limit", function()
+    local inLog = {
+      "first entry",
+      "second entry",
+      "third entry",
+    }
+    local expected = {
+      "second entry",
+      "third entry",
+      "fourth entry",
+    }
+    local entry = "fourth entry"
+    local max = 3
+    local outLog = Logic.AppendLog(inLog, entry, max)
+    local size = #outLog
+    assert(size == 3, "expected log with 3 entries, got " .. tostring(size))
+    assert(outLog == inLog, "expected AppendLog to return the original log table")
+    for i in ipairs(outLog) do
+      assert(expected[i] == outLog[i], "expected " .. expected[i] .. ", got " .. tostring(outLog[i]))
+    end
+  end)
+
+  it("keeps all entries when appending reaches the limit", function()
+    local inLog = {
+      "first entry",
+      "second entry",
+    }
+    local expected = {
+      "first entry",
+      "second entry",
+      "third entry",
+    }
+    local entry = "third entry"
+    local max = 3
+    local outLog = Logic.AppendLog(inLog, entry, max)
+    local size = #outLog
+    assert(size == 3, "expected log with 3 entries, got " .. tostring(size))
+    assert(outLog == inLog, "expected AppendLog to return the original log table")
+    for i in ipairs(outLog) do
+      assert(expected[i] == outLog[i], "expected " .. expected[i] .. ", got " .. tostring(outLog[i]))
+    end
+  end)
+end)
