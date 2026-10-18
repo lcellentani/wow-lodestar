@@ -122,3 +122,13 @@ function Logic.AppendLog(log, entry, max)
   end
   return log
 end
+
+function Logic.FormatOutput(entry)
+  local parts = {}
+  parts[#parts + 1] = tostring(entry.time) .. " /ls " .. tostring(entry.command)
+  for _, line in ipairs(entry.lines) do
+    parts[#parts + 1] = line
+  end
+
+  return table.concat(parts, "\n")
+end

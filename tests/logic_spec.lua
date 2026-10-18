@@ -460,3 +460,44 @@ describe("AppendLog", function()
     end
   end)
 end)
+
+describe("FormatOutput", function()
+  it("formats the header and output lines", function()
+    local entry = {
+      time = "2026-10-18 19:30:07",
+      command = "emit",
+      lines = { "line one", "line two" },
+    }
+
+    local result = Logic.FormatOutput(entry)
+
+    local expected = "2026-10-18 19:30:07 /ls emit\nline one\nline two"
+    assert(result == expected, "expected " .. expected .. ", got " .. tostring(result))
+  end)
+
+  it("formats an entry with no output lines without a trailing newline", function()
+    local entry = {
+      time = "2026-10-18 19:30:07",
+      command = "empty",
+      lines = {},
+    }
+
+    local result = Logic.FormatOutput(entry)
+
+    local expected = "2026-10-18 19:30:07 /ls empty"
+    assert(result == expected, "expected " .. expected .. ", got " .. tostring(result))
+  end)
+
+  it("keeps the error command and includes its message", function()
+    local entry = {
+      time = "2026-10-18 19:30:07",
+      command = "error",
+      lines = { "boom test" },
+    }
+
+    local result = Logic.FormatOutput(entry)
+
+    local expected = "2026-10-18 19:30:07 /ls error\nboom test"
+    assert(result == expected, "expected " .. expected .. ", got " .. tostring(result))
+  end)
+end)
