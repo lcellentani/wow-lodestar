@@ -132,3 +132,35 @@ function Logic.FormatOutput(entry)
 
   return table.concat(parts, "\n")
 end
+
+function Logic.FormatZoneRow(mapID, name, minLevel, maxLevel, today)
+  if minLevel ~= nil and minLevel > 0 then
+    return string.format(
+      "[%d] = { min = %d, max = %d, faction = \"\", kind = \"zone\" },  -- %s, forever, %s",
+      mapID,
+      minLevel,
+      maxLevel,
+      name,
+      today
+    )
+  else
+    return string.format(
+      "[%d] = { faction = \"\", kind = \"zone\" },  -- %s, forever, %s",
+      mapID,
+      name,
+      today
+    )
+  end
+end
+
+function Logic.FindKey(t, value)
+  if t == nil then
+    return nil
+  end
+
+  for k, v in pairs(t) do
+    if v == value then
+      return k
+    end
+  end
+end

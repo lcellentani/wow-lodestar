@@ -501,3 +501,48 @@ describe("FormatOutput", function()
     assert(result == expected, "expected " .. expected .. ", got " .. tostring(result))
   end)
 end)
+
+describe("FormatZoneRow", function()
+  it("formats a row with a client level range", function()
+    local row = Logic.FormatZoneRow(1440, "Ashenvale", 20, 30, "2026-10-18")
+    assert(
+      row == '[1440] = { min = 20, max = 30, faction = "", kind = "zone" },  -- Ashenvale, forever, 2026-10-18',
+      "got " .. tostring(row)
+    )
+  end)
+
+  it("omits levels when the client range is zero", function()
+    local row = Logic.FormatZoneRow(1440, "Ashenvale", 0, 0, "2026-10-18")
+    assert(
+      row == '[1440] = { faction = "", kind = "zone" },  -- Ashenvale, forever, 2026-10-18',
+      "got " .. tostring(row)
+    )
+  end)
+
+  it("omits levels when the client range is nil", function()
+    local row = Logic.FormatZoneRow(1440, "Ashenvale", nil, nil, "2026-10-18")
+    assert(
+      row == '[1440] = { faction = "", kind = "zone" },  -- Ashenvale, forever, 2026-10-18',
+      "got " .. tostring(row)
+    )
+  end)
+end)
+
+describe("FindKey", function()
+  it("returns the key for a value that is present", function()
+    local enum = { Zone = 3, Continent = 2 }
+    local key = Logic.FindKey(enum, 2)
+    assert(key == "Continent", "expected Continent, got " .. tostring(key))
+  end)
+
+  it("returns nil when the value is missing", function()
+    local enum = { Zone = 3, Continent = 2 }
+    local key = Logic.FindKey(enum, 1)
+    assert(key == nil, "expected nil, got " .. tostring(key))
+  end)
+
+  it("returns nil when the table is nil", function()
+    local key = Logic.FindKey(nil, 2)
+    assert(key == nil, "expected nil, got " .. tostring(key))
+  end)
+end)

@@ -46,6 +46,7 @@ end
 
 local LOG_CLEAR_USAGE = "log clear - empty the saved output log."
 local COPY_USAGE = "copy - show the last output, selected for Ctrl+C."
+local DUMP_USAGE = "dump - list the shown (or current) map's zones with ready-made Zones.lua rows."
 
 ns.RegisterCommand(
   "log",
@@ -82,4 +83,85 @@ ns.RegisterCommand(
     copyFrame.editBox:SetFocus()
   end,
   COPY_USAGE
+)
+
+ns.RegisterCommand(
+  "dump",
+  function()
+    local mapID, source
+    if WorldMapFrame:IsShown() then
+      mapID = WorldMapFrame:GetMapID()
+      source = "shown map"
+    else
+      mapID = C_Map.GetBestMapForUnit("player")
+      source = "player's map"
+    end
+
+    if mapID == nil then
+      ns.Print("no map to dump")
+      return
+    end
+
+    local mapInfo = C_Map.GetMapInfo(mapID)
+    if mapInfo == nil then
+      ns.Print("no map to dump")
+      return
+    end
+
+    local today = date("%Y-%m-%d")
+    local lines = {}
+    local mapTypeName = ns.Logic.FindKey(Enum.UIMapType, mapInfo.mapType)
+    lines[#lines + 1] = string.format(
+      "map %d %s, %s (%s)",
+      mapID,
+      mapInfo.name,
+      tostring(mapTypeName),
+      source
+    )
+
+    local children = C_Map.GetMapChildrenInfo(mapID, Enum.UIMapType.Zone) or {}
+    table.sort(children, function(a, b) return a.mapID < b.mapID end)
+    lines[#lines + 1] = "zones: " .. #children
+    local rows = {}
+    for i = 1, #children do
+      local child = children[i]
+      local minLevel, maxLevel = C_Map.GetMapLevels(child.mapID)
+      local levels = "none"
+      if minLevel ~= nil and minLevel > 0 then
+        levels = minLevel .. "-" .. maxLevel
+      end
+      lines[#lines + 1] = string.format(
+        "%d %s, client levels: %s",
+        child.mapID,
+        child.name,
+        levels
+      )
+      rows[#rows + 1] = ns.Logic.FormatZoneRow(
+        child.mapID,
+        child.name,
+        minLevel,
+        maxLevel,
+        today
+      )
+    end
+
+    lines[#lines + 1] = "rows:"
+    if mapInfo.mapType == Enum.UIMapType.Zone then
+      local minLevel, maxLevel = C_Map.GetMapLevels(mapID)
+      lines[#lines + 1] = ns.Logic.FormatZoneRow(
+        mapID,
+        mapInfo.name,
+        minLevel,
+        maxLevel,
+        today
+      )
+    end
+
+    for i = 1, #rows do
+      lines[#lines + 1] = rows[i]
+    end
+
+    ns.Emit("dump", lines)
+  end,
+  DUMP_USAGE
 )
