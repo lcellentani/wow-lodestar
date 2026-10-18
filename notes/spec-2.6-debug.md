@@ -1,6 +1,6 @@
 # M2 step 2.6: `Debug.lua` (log, copy window, dump, probe)
 
-Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c done (P30, 2026-10-18); 2.6d outlined (detailed before it starts). User writes the code, Claude reviews.
+Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c done (P30, 2026-10-18); 2.6d done (P31, 2026-10-19). Step 2.6 complete. User writes the code, Claude reviews.
 Design doc reference: "Settings and slash commands", "Getting output out of the game".
 
 ## What this step is for
@@ -341,11 +341,64 @@ Expected: the Zephras Isle dump in the copy window.
 
 Then tell Claude: the log holds the four dumps, which Claude copies into `notes/beta-probes.md` (P30 and P10).
 
-## 2.6d: `/ls probe` (outline)
+## 2.6d: `/ls probe`
 
-- Runs the design probes that work from code (P1-P6 and P8) and emits one pass, fail or value line per probe; `/ls probe hover` reports the zone under the cursor (P7), meant for a key-bound macro.
-- Uses only APIs those probes already confirmed.
-- In-game check: P31, on the beta if time allows, otherwise on the live client after Nov 4.
+`/ls probe` re-runs the design probes that work from code and emits one line per probe, so the live client after Nov 4 can be checked in one command instead of retyping P1-P8. `/ls probe hover` reports the zone under the cursor (P7).
+
+(This section was detailed on 2026-10-18, lost when an older copy of the file was saved over it on 2026-10-19 00:00, and restored after P31 from the same text.)
+
+### Decisions
+
+- **Three statuses**: `pass` (the client behaves as the design expects), `FAIL` (it does not; upper case so it stands out in a long output), `info` (a value worth recording where either answer is valid, such as the client's level data).
+- **Each probe is a function in a list**, run in order. A probe that raises an error does not stop the others: it gets a `FAIL` line with the message.
+- **P1 compares with the `.toc` number**: on the live client the interface number may change, and a mismatch means the `.toc` needs updating. The number is a constant in `Debug.lua` (`16001`), next to a comment saying it must match `## Interface` in `Lodestar.toc`.
+- **P9 is left out** (a visual check), and so are P10-P17 (data and API probes that need a person looking at the result).
+
+### Evidence
+
+Only APIs confirmed by the probes being repeated: `GetBuildInfo` (P1), `C_Map.GetBestMapForUnit`, `C_Map.GetMapInfo`, `Enum.UIMapType` (P2), `WorldMapFrame.AddDataProvider`, `WorldMapFrame.AcquirePin`, `MapCanvasPinMixin` (P3), `WorldMapFrame` (P4), `C_Map.GetMapChildrenInfo`, `C_Map.GetMapRectOnMap` (P5), `C_Map.GetMapLevels` (P6), `WorldMapFrame:GetMapID`, `WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition`, `C_Map.GetMapInfoAtPosition` (P7), `GetQuestDifficultyColor`, `UnitLevel` (P8), `IsShown` (P28), `pcall` (P19).
+
+### `Logic.FormatProbe(id, status, detail)` in `Logic.lua`
+
+- Returns `"<id> <status>: <detail>"`, with `"fail"` written as `"FAIL"`: `FormatProbe("P1", "pass", "interface 16001")` gives `"P1 pass: interface 16001"`; `FormatProbe("P3", "fail", "AcquirePin missing")` gives `"P3 FAIL: AcquirePin missing"`.
+
+Tests (`describe("FormatProbe", ...)`): a pass line, a fail line (upper case), an info line.
+
+### The probes in `Debug.lua`
+
+Each returns `status, detail`. The expected beta results come from the probe notes.
+
+| Probe | Checks | `pass` when | Expected on the beta |
+| --- | --- | --- | --- |
+| P1 | `select(4, GetBuildInfo())` | it equals the `.toc` constant | `P1 pass: interface 16001` |
+| P2 | the player's map through `GetBestMapForUnit` and `GetMapInfo` | both return something | `P2 pass: player map 1453 Stormwind City, Zone` |
+| P3 | `WorldMapFrame.AddDataProvider`, `WorldMapFrame.AcquirePin`, `MapCanvasPinMixin` | all three are non-nil | `P3 pass: data providers and pins available` |
+| P4 | `WorldMapFrame` | it exists (it is loaded at login) | `P4 pass: WorldMapFrame loaded` |
+| P5 | `GetMapChildrenInfo` on 1415 and 1414 (`Enum.UIMapType.Zone`), and `GetMapRectOnMap(1429, 1415)` | both lists are non-empty and `Logic.IsRectOnMap` accepts the rectangle | `P5 pass: Eastern Kingdoms 26 zones, Kalimdor 23 zones, Elwynn rect ok` |
+| P6 | `GetMapLevels(1429)` | always `info` | `P6 info: Elwynn Forest client levels: none` |
+| P8 | `GetQuestDifficultyColor(level + 3)` and `Logic.DifficultyKey(level + 3, level)` | the color's `font` is `"QuestDifficulty_VeryDifficult"` and `DifficultyKey` says `"orange"` | `P8 pass: level 21 is orange (QuestDifficulty_VeryDifficult)` for a level 18 character |
+
+The probe IDs keep the design doc's numbering (P7 is the hover subcommand, P9 is visual), so a line can be compared with its section in `notes/beta-probes.md`.
+
+`/ls probe`, usage `"probe [hover] - re-run the design probes, or report the zone under the cursor."`:
+
+- No argument: run every probe, build one line each with `FormatProbe`, end with a summary line (`probes: 7, failed: 0`), then `ns.Emit("probe", lines)`.
+- `hover`: if the world map is not shown, print `open the world map first`. Otherwise take `WorldMapFrame:GetMapID()` and the cursor position, ask `C_Map.GetMapInfoAtPosition`, and emit one `P7 info:` line: `cursor 47.1, 70.2 on 1415: 1429 Elwynn Forest` (coordinates through `Logic.FormatCoords`), or `cursor ... on 1415: no zone` when the call returns `nil`.
+- Anything else: print the usage.
+
+Hints:
+
+- The list: `local PROBES = { { id = "P1", run = function() ... end }, { id = "P2", run = ... }, }`. An array keeps the order; `ipairs` walks it.
+- Running one probe safely: `local ok, status, detail = pcall(probe.run)`. When `ok` is `false`, `status` holds the error message: turn it into `"fail"` and `"error: " .. tostring(status)`.
+- Count the failures while looping, for the summary line.
+- P3 detail on failure: list the missing names, so the line says what to look at.
+- P5 needs only the count of each list (`#children`); `C_Map.GetMapChildrenInfo(...) or {}` as in the dump.
+- `select(4, GetBuildInfo())` picks the fourth return value, as P1 did.
+- Hover without a macro: type `/ls probe hover` in chat with the map open, move the cursor onto a zone, then press Enter. Chat keeps the typed text while the mouse moves (P30 showed chat works with the map open).
+
+### In-game check (P31)
+
+No temporary code. `/reload`, then `/ls probe`: the seven lines from the table and `probes: 7, failed: 0`. Then, with the world map open on Eastern Kingdoms, `/ls probe hover` over Elwynn Forest: `P7 info: cursor ... on 1415: 1429 Elwynn Forest`; with the map closed: `open the world map first`. Then `/reload`, and Claude reads the log and records P31.
 
 ## Done when (each checkpoint)
 

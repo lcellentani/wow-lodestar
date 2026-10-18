@@ -42,7 +42,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P28 | copy window methods (no addon) | [x] | 2026-10-18 | beta |
 | P29 | M2 copy window | [x] | 2026-10-18 | beta |
 | P30 | M2 /ls dump | [x] | 2026-10-18 | beta |
-| P31 | M2 /ls probe | [ ] | | |
+| P31 | M2 /ls probe | [x] | 2026-10-19 | beta |
 
 ## Confirmed APIs
 
@@ -1068,3 +1068,27 @@ All 50 zone rows (26 + 23 + Zephras Isle), de-duplicated and sorted by ID (the s
 [2548] = { faction = "", kind = "zone" },  -- Riverglades, forever, 2026-10-18
 [2652] = { faction = "", kind = "zone" },  -- Shen'dralas, forever, 2026-10-18
 ```
+
+### P31: `/ls probe` (M2 step 2.6d)
+
+`Logic.FormatProbe(id, status, detail)` builds `"<id> <status>: <detail>"` with `fail` written `FAIL`. `Debug.lua` keeps a `PROBES` list (P1-P6 and P8, each a function returning status and detail) and runs each through `pcall`, so a probe that raises an error becomes a `FAIL` line; a summary line counts the failures. `/ls probe hover` reports the zone under the cursor (P7). Spec: `notes/spec-2.6-debug.md`.
+
+Result (2026-10-19, beta, level 18 character in Stormwind; screenshots 002050, 002229, 002311; also read from the SavedVariables log):
+
+```
+P1 pass: interface 16001
+P2 pass: player map 1453 Stormwind City, Zone
+P3 pass: data providers and pins available
+P4 pass: WorldMapFrame loaded
+P5 pass: Eastern Kingdoms 26 zones, Kalimdor 23 zones, Elwynn rect ok
+P6 info: Elwynn Forest client levels: none
+P8 pass: level 21 is orange (QuestDifficulty_VeryDifficult)
+probes: 7, failed: 0
+P7 info: cursor 48.1, 70.2 on 1415: 1429 Elwynn Forest     <- /ls probe hover, map open on Eastern Kingdoms
+open the world map first                                   <- /ls probe hover, map closed
+```
+
+- Every line matches the manual probes (P1-P8) and the counts from P30: the code-run probes agree with the hand-run ones on the beta.
+- Hover works by typing `/ls probe hover`, moving the cursor onto the zone, then pressing Enter; no macro needed. The cursor position (48.1, 70.2) falls inside Elwynn's rectangle from P5 (x 41-51 %, y 66-76 %).
+- A mistyped `/ls prove` printed `Error: unknown command "prove", type /ls for help` (the 2.5 registry's error path).
+- To repeat on the live client after Nov 4: `/ls probe`, the hover check, then `/reload` and compare with this section.
