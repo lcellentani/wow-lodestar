@@ -316,6 +316,8 @@ The MVP has no settings window; everything is a slash command, which is fast to 
 1. **The log in SavedVariables.** Each output is appended to `LodestarDB.log` with a timestamp and the command that produced it, keeping the last 50 entries. The game writes SavedVariables to disk on `/reload` and on logout, to `WTF/Account/<ACCOUNT>/SavedVariables/Lodestar.lua` in the game folder, where Claude Code can read it directly. This is the route for big outputs: probes and dumps.
 2. **The copy window.** `/ls copy` opens a small movable frame with a multi-line edit box holding the last output, already selected, so Ctrl+C copies it. Escape closes it. It is created on first use and is the quick route for one-off checks.
 
+In code, a command collects its output as a list of lines and hands it over once with `ns.Emit(command, lines)`, which prints the lines, appends the log entry (the trim to 50 is the pure `Logic.AppendLog`) and keeps the entry as the last output for `/ls copy`; `ns.SafeCall` records caught errors the same way, without printing them twice.
+
 Two cautions. The game reads SavedVariables at login and overwrites the file at logout, so the file must never be edited while the game runs; Claude Code only reads it. And the probe code lives in its own file (`Debug.lua`) that depends on nothing but the namespace, so `/ls probe` works on the very first build, before any module exists.
 
 ## Beta verification checklist

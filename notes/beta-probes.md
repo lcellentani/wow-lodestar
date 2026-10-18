@@ -38,6 +38,11 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P24 | M2 slash commands | [x] | 2026-10-16 | beta |
 | P25 | M2 toggle, debug | [x] | 2026-10-17 | beta |
 | P26 | login vs /reload chat order | [ ] | | |
+| P27 | M2 output and log | [x] | 2026-10-18 | beta |
+| P28 | copy window methods (no addon) | [ ] | | |
+| P29 | M2 copy window | [ ] | | |
+| P30 | M2 /ls dump | [ ] | | |
+| P31 | M2 /ls probe | [ ] | | |
 
 ## Confirmed APIs
 
@@ -917,3 +922,24 @@ P24 saw the Lodestar hello line after the guild message of the day on a fresh lo
 3. Repeat both once more.
 
 Record for each run whether the hello line comes before or after the code-of-conduct line and the guild message of the day. Nothing in the design depends on the answer; it only tells whether login output can be expected at a fixed place in chat.
+
+Data point (2026-10-18, P27 screenshot 193029, after `/reload`): the hello line came after the guild message of the day.
+
+### P27: output and log (M2 step 2.6a)
+
+`Util.lua` adds `ns.Record(command, lines)` (keeps the entry as last output and, once `ns.db` exists, appends `{ time, command, lines }` to `ns.db.log` through `Logic.AppendLog`, capped at 50), `ns.Emit(command, lines)` (prints each line, then records), `ns.GetLastOutput()`, and makes `ns.SafeCall` record caught errors as command `"error"`. `Debug.lua` registers `/ls log clear`. Temporary test commands: `emit` (two lines) and `boom` (`error("boom test")`). Spec: `notes/spec-2.6-debug.md`.
+
+Result (2026-10-18, beta; screenshots 193029, 193320):
+
+```
+Lodestar: line one                                                  <- /ls emit
+Lodestar: line two
+Lodestar: Error: Interface/AddOns/Lodestar/Debug.lua:34: boom test  <- /ls boom
+Lodestar: log cleared (2 entries)                                   <- /ls log clear, after /reload
+```
+
+- After `/reload`, the SavedVariables file held both entries in order: `emit` (`time = "2026-10-18 19:30:07"`, lines `line one`, `line two`) and `error` (`time = "2026-10-18 19:30:15"`, line `Interface/AddOns/Lodestar/Debug.lua:34: boom test`).
+- After `/ls log clear` and `/reload`, the file held `["log"] = {}`: replacing `ns.db.log` with a new table is saved, since `ns.db` is `LodestarDB`.
+- `date("%Y-%m-%d %H:%M:%S")` gives local time in that format.
+- The error message carries the file path and line number (`Debug.lua:34:`) added by `error` at level 1.
+- The game writes SavedVariables only on `/reload` or logout: the file did not change between the commands and the next `/reload`, so check the file's time before reading it.
