@@ -1,6 +1,6 @@
 # M2 step 2.6: `Debug.lua` (log, copy window, dump, probe)
 
-Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c-2.6d outlined (each detailed before it starts). User writes the code, Claude reviews.
+Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c done (P30, 2026-10-18); 2.6d outlined (detailed before it starts). User writes the code, Claude reviews.
 Design doc reference: "Settings and slash commands", "Getting output out of the game".
 
 ## What this step is for
@@ -238,13 +238,108 @@ Expected: the window opens in the middle of the screen with the header line and 
 
 Result: every value `true` (see `notes/beta-probes.md`, P28).
 
-## 2.6c: `/ls dump` (outline)
+## 2.6c: `/ls dump`
 
-- Prints, through `ns.Emit("dump", lines)`: the map's ID, name and type, then each child zone (`C_Map.GetMapChildrenInfo(mapID, 3)`, P5) with its ID, name and client level range (`C_Map.GetMapLevels`, P6; four zeros mean no data), then a ready-made `Zones.lua` row per child, for example `[1440] = { min = 20, max = 30, faction = "", kind = "zone" },  -- forever, 2026-10-17`.
-- Which map: the shown map (`WorldMapFrame:GetMapID()`, P7) when the map is open, otherwise the player's map (`C_Map.GetBestMapForUnit("player")`, P2). To decide when 2.6c is detailed.
-- The row text is a pure function in `Logic.lua` with tests.
-- The comparison with `Zones.lua` (mismatch and missing-row flags) comes in M3.
-- In-game check: P30, which also starts the data probe P10 (dump on each continent map).
+`/ls dump` reports one map: its ID, name and type, its child zones with the client's level range, and a ready-made `Zones.lua` row per zone. It is how `Data/Zones.lua` gets seeded and checked (doc: "`/ls dump` is the most important command early on"). The comparison with `Zones.lua` (mismatch and missing-row flags) comes in M3, once that table exists.
+
+### Decisions
+
+- **Which map** (decided 2026-10-18): the map shown in the world map when it is open, otherwise the player's map. With the map open, any continent or zone can be dumped from anywhere by browsing to it; no travel. With the map closed it is a quick "where am I" dump.
+- **A zone map gets its own row.** The player's map is always a zone (P2: Stormwind City is mapType 3), and so is Zephras Isle (P5: 2521, a zone under the world map, not under a continent). A zone has no child zones, so the dump adds a row for the map itself when its type is Zone; otherwise those dumps would give no row at all.
+- **Rows without a client range leave `min` and `max` out.** On the beta `GetMapLevels` returns four zeros (P6). A row without `min`/`max` is still valid Lua and, by the doc's lookup rule, just shows no label until the range is filled in; `min = 0` would look like data.
+- **The row comment carries the zone name**: `-- <name>, forever, <date>`. The doc's tag rule (`-- forever, YYYY-MM-DD`: recorded in game) is kept; the name makes a pasted block readable, since `Zones.lua` rows are keyed by number.
+
+### Evidence
+
+All confirmed: `WorldMapFrame:GetMapID` (P7), `IsShown` on a frame (P28), `C_Map.GetBestMapForUnit("player")` and `C_Map.GetMapInfo` (P2, fields `mapID`, `name`, `mapType`, `parentMapID`), `Enum.UIMapType` (P2), `C_Map.GetMapChildrenInfo(mapID, mapType)` (P5, a list of the same info tables), `C_Map.GetMapLevels` (P6, four return values: player min, player max, pet min, pet max), `date` (P16b).
+
+### `Logic.FormatZoneRow(mapID, name, minLevel, maxLevel, today)` in `Logic.lua`
+
+- With a client range (`minLevel` above 0): `[1440] = { min = 20, max = 30, faction = "", kind = "zone" },  -- Ashenvale, forever, 2026-10-18`.
+- Without one (`minLevel` is 0 or `nil`): `[1440] = { faction = "", kind = "zone" },  -- Ashenvale, forever, 2026-10-18`.
+- Two spaces before `--`, as in the doc's examples.
+
+Tests (`describe("FormatZoneRow", ...)`):
+
+- A range gives the row with `min` and `max`.
+- Zero levels give the row without them.
+- `nil` levels give the row without them.
+
+Hints:
+
+- `string.format` builds this in one call: `%d` for numbers, `%s` for strings. `string.format("[%d] = { ... },  -- %s, forever, %s", mapID, name, today)`.
+- `minLevel ~= nil and minLevel > 0` guards against `nil`: comparing `nil > 0` is an error in Lua.
+
+### `Logic.FindKey(t, value)` in `Logic.lua`
+
+- Returns the first key of `t` whose value equals `value`, or `nil`. The dump uses it to print the type name: `Logic.FindKey(Enum.UIMapType, 2)` is `"Continent"`.
+- `Enum.UIMapType` is passed in, so the function stays free of WoW globals and the tests pass their own table, for example `{ Zone = 3, Continent = 2 }`.
+
+Tests: a value present gives its key; a value missing gives `nil`.
+
+Hint: `for key, v in pairs(t) do ... end`. `pairs` visits in no fixed order, which is fine here since the enum's values are unique.
+
+### The command in `Debug.lua`
+
+Usage `"dump - list the shown (or current) map's zones with ready-made Zones.lua rows."`.
+
+1. Pick the map: `WorldMapFrame:IsShown()` gives `WorldMapFrame:GetMapID()`, otherwise `C_Map.GetBestMapForUnit("player")`. Remember which (`"shown map"` or `"player's map"`) for the header.
+2. If there is no map ID, or `C_Map.GetMapInfo(mapID)` returns `nil`: print `no map to dump` and stop (it can happen in some instances or during loading screens).
+3. Build `lines` (a new table on each call):
+   - `map 1415 Eastern Kingdoms, Continent (shown map)`: ID, name, type name through `ns.Logic.FindKey(Enum.UIMapType, info.mapType)`, source.
+   - `zones: 26`, then one line per child zone: `1429 Elwynn Forest, client levels: none`, or `client levels: 20-30` when the first value is above 0.
+   - `rows:`, then one `FormatZoneRow` line per child zone, and also one for the map itself when `info.mapType == Enum.UIMapType.Zone`.
+4. `ns.Emit("dump", lines)`.
+
+Hints:
+
+- `C_Map.GetMapChildrenInfo(mapID, Enum.UIMapType.Zone) or {}`: if the client returns `nil` for a map with no children, the loop still works.
+- Sort the children by ID before printing (`table.sort(children, function(a, b) return a.mapID < b.mapID end)`), so two dumps of the same map compare line by line.
+- `local minLevel, maxLevel = C_Map.GetMapLevels(child.mapID)` keeps only the first two of the four values.
+- `date("%Y-%m-%d")` once per dump, passed to every row as `today`.
+- A continent prints about 55 lines into chat. That is expected: the copy window and the log are the places to read it.
+
+### In-game check (P30, also data probe P10)
+
+No temporary code. In Stormwind, with the world map closed:
+
+```
+/ls dump
+```
+
+Expected: `map 1453 Stormwind City, Zone (player's map)`, `zones: 0`, and one row for Stormwind City.
+
+Open the world map, go up to Eastern Kingdoms, then type in chat with the map still open:
+
+```
+/ls dump
+```
+
+Expected: `map 1415 Eastern Kingdoms, Continent (shown map)`, 26 zones (P5 lists them), 26 rows. If chat cannot be typed into while the map is open, tell Claude; the fallback is a macro with `/ls dump` on a key.
+
+Then the same on Kalimdor, and on Zephras Isle (reached through the breadcrumb dropdown next to the continent name, P5):
+
+```
+/ls dump
+```
+
+```
+/ls dump
+```
+
+Expected: Kalimdor (1414) with its zones; Zephras Isle (2521, Zone) with `zones: 0` and one row for itself.
+
+```
+/ls copy
+```
+
+Expected: the Zephras Isle dump in the copy window.
+
+```
+/reload
+```
+
+Then tell Claude: the log holds the four dumps, which Claude copies into `notes/beta-probes.md` (P30 and P10).
 
 ## 2.6d: `/ls probe` (outline)
 

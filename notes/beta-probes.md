@@ -21,7 +21,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P7 | A8 | [x] | 2026-10-12 | beta, interface 16001 |
 | P8 | colors | [x] | 2026-10-12 | beta, interface 16001 |
 | P9 | A6 | [x] | 2026-10-12 | beta, interface 16001 |
-| P10 | A5 | [ ] | | |
+| P10 | A5 | [ ] | 2026-10-18 | beta, IDs collected (P30); comparison waits for `Data/Zones.lua` |
 | P11 | data | [ ] | | |
 | P12 | data | [ ] | | |
 | P13 | v2 | [ ] | | |
@@ -41,7 +41,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P27 | M2 output and log | [x] | 2026-10-18 | beta |
 | P28 | copy window methods (no addon) | [x] | 2026-10-18 | beta |
 | P29 | M2 copy window | [x] | 2026-10-18 | beta |
-| P30 | M2 /ls dump | [ ] | | |
+| P30 | M2 /ls dump | [x] | 2026-10-18 | beta |
 | P31 | M2 /ls probe | [ ] | | |
 
 ## Confirmed APIs
@@ -85,6 +85,11 @@ APIs whose output is recorded below. Each one also goes into `read_globals` in `
 | `GameTooltip` | P17 | table |
 | `CreateFrame("GameTooltip", name, UIParent, "GameTooltipTemplate")` | P17 | creates `<name>TextLeft1` and friends |
 | `pcall` | P19 | catches addon errors without a popup; the message starts with `Interface/AddOns/Lodestar/<file>:<line>:` |
+| Frame methods (`SetSize`, `SetPoint`, `SetMovable`, `EnableMouse`, `RegisterForDrag`, `StartMoving`, `StopMovingOrSizing`, `Show`, `IsShown`) | P28 | on a `BasicFrameTemplateWithInset` frame; its `.TitleText` has `SetText` |
+| `ScrollFrame:SetScrollChild` | P28 | on a `UIPanelScrollFrameTemplate` scroll frame |
+| EditBox methods (`SetText`, `SetFocus`, `SetFontObject`, `SetWidth`) | P28 | no character limit seen at about 360 characters (P29) |
+| `ChatFontNormal` | P28 | global font object |
+| Script names `OnDragStart`, `OnDragStop`, `OnEscapePressed` | P28 | `SetScript` accepts them |
 | `GetQuestGreenRange` | P8 | **missing** |
 
 ## Design probes (no addon needed)
@@ -485,6 +490,8 @@ Result (2026-10-12, beta): **no native zone levels anywhere** on the map.
 `/ls dump` on each continent map. Note missing zones (Mount Hyjal 2482, Riverglades 2548, Shen'dralas 2652) and IDs that differ from vanilla. Zephras Isle (2521) is not on a continent: run `/ls dump` while standing on the island.
 
 Result:
+
+Part 1 (2026-10-18, beta, through `/ls dump`; full output under P30): the client's zone IDs. Eastern Kingdoms has 26 zones and Kalimdor 23, the same IDs and names as P5; Zephras Isle (2521) is a zone under the world map with no child zones. Every vanilla ID matches Classic Era; the Forever additions are Riverglades (2548), Mount Hyjal (2482), Shen'dralas (2652) and Zephras Isle (2521). Part 2, comparing these with `Data/Zones.lua`, waits until that table is seeded (M0).
 
 ### P11: level ranges
 
@@ -986,3 +993,78 @@ Result (2026-10-18, beta; screenshot 215205; steps as in the spec, reported by t
 - Escape with the cursor in the text closes it through `OnEscapePressed`, and Enter then opens chat normally: the hidden edit box releases the keyboard.
 - Escape after clicking the title bar (text not focused) closes it through `UISpecialFrames`; the close button closes it.
 - `/ls copy` with the window open refreshes it to the newer output.
+
+### P30: `/ls dump` (M2 step 2.6c)
+
+`Logic.FormatZoneRow(mapID, name, minLevel, maxLevel, today)` builds a `Zones.lua` row (`min`/`max` only when the client has a range above 0; comment `-- <name>, forever, <date>`); `Logic.FindKey(t, value)` turns `info.mapType` into its `Enum.UIMapType` name. `/ls dump` takes the shown map when the world map is open (`WorldMapFrame:GetMapID()`), otherwise the player's map (`C_Map.GetBestMapForUnit("player")`), then emits the map line, its child zones (`C_Map.GetMapChildrenInfo(mapID, Enum.UIMapType.Zone)`, sorted by ID) with their client levels (`C_Map.GetMapLevels`), and one row per child, plus one for the map itself when it is a zone. Spec: `notes/spec-2.6-debug.md`.
+
+Result (2026-10-18, beta; read from the SavedVariables log after `/reload`; Stormwind, then the world map open on each map):
+
+```
+23:35:09  map 1453 Stormwind City, Zone (player's map)     zones: 0   1 row (itself)
+23:35:31  map 1415 Eastern Kingdoms, Continent (shown map)  zones: 26  26 rows
+23:35:40  map 1414 Kalimdor, Continent (shown map)          zones: 23  23 rows
+23:35:48  map 2521 Zephras Isle, Zone (shown map)           zones: 0   1 row (itself)
+```
+
+- Both branches work: map closed gives the player's map, map open gives the shown map.
+- **Chat accepts typing while the world map is open**: `/ls dump` runs on whatever map is browsed, from anywhere, no travel and no macro needed.
+- The child lists match P5 exactly (IDs and names, including the capitals).
+- `client levels: none` for every zone: `GetMapLevels` still returns zeros on the beta (P6), so every row leaves out `min` and `max`.
+- `/ls copy` after the four dumps showed the Zephras Isle dump: the copy window holds the last output.
+- The dump of Zephras Isle reached through the breadcrumb dropdown gives the island's own row, so it needs no visit.
+
+All 50 zone rows (26 + 23 + Zephras Isle), de-duplicated and sorted by ID (the starting point for seeding `Data/Zones.lua`; `faction` and the level ranges still to fill in):
+
+```lua
+[1411] = { faction = "", kind = "zone" },  -- Durotar, forever, 2026-10-18
+[1412] = { faction = "", kind = "zone" },  -- Mulgore, forever, 2026-10-18
+[1413] = { faction = "", kind = "zone" },  -- The Barrens, forever, 2026-10-18
+[1416] = { faction = "", kind = "zone" },  -- Alterac Mountains, forever, 2026-10-18
+[1417] = { faction = "", kind = "zone" },  -- Arathi Highlands, forever, 2026-10-18
+[1418] = { faction = "", kind = "zone" },  -- Badlands, forever, 2026-10-18
+[1419] = { faction = "", kind = "zone" },  -- Blasted Lands, forever, 2026-10-18
+[1420] = { faction = "", kind = "zone" },  -- Tirisfal Glades, forever, 2026-10-18
+[1421] = { faction = "", kind = "zone" },  -- Silverpine Forest, forever, 2026-10-18
+[1422] = { faction = "", kind = "zone" },  -- Western Plaguelands, forever, 2026-10-18
+[1423] = { faction = "", kind = "zone" },  -- Eastern Plaguelands, forever, 2026-10-18
+[1424] = { faction = "", kind = "zone" },  -- Hillsbrad Foothills, forever, 2026-10-18
+[1425] = { faction = "", kind = "zone" },  -- The Hinterlands, forever, 2026-10-18
+[1426] = { faction = "", kind = "zone" },  -- Dun Morogh, forever, 2026-10-18
+[1427] = { faction = "", kind = "zone" },  -- Searing Gorge, forever, 2026-10-18
+[1428] = { faction = "", kind = "zone" },  -- Burning Steppes, forever, 2026-10-18
+[1429] = { faction = "", kind = "zone" },  -- Elwynn Forest, forever, 2026-10-18
+[1430] = { faction = "", kind = "zone" },  -- Deadwind Pass, forever, 2026-10-18
+[1431] = { faction = "", kind = "zone" },  -- Duskwood, forever, 2026-10-18
+[1432] = { faction = "", kind = "zone" },  -- Loch Modan, forever, 2026-10-18
+[1433] = { faction = "", kind = "zone" },  -- Redridge Mountains, forever, 2026-10-18
+[1434] = { faction = "", kind = "zone" },  -- Stranglethorn Vale, forever, 2026-10-18
+[1435] = { faction = "", kind = "zone" },  -- Swamp of Sorrows, forever, 2026-10-18
+[1436] = { faction = "", kind = "zone" },  -- Westfall, forever, 2026-10-18
+[1437] = { faction = "", kind = "zone" },  -- Wetlands, forever, 2026-10-18
+[1438] = { faction = "", kind = "zone" },  -- Teldrassil, forever, 2026-10-18
+[1439] = { faction = "", kind = "zone" },  -- Darkshore, forever, 2026-10-18
+[1440] = { faction = "", kind = "zone" },  -- Ashenvale, forever, 2026-10-18
+[1441] = { faction = "", kind = "zone" },  -- Thousand Needles, forever, 2026-10-18
+[1442] = { faction = "", kind = "zone" },  -- Stonetalon Mountains, forever, 2026-10-18
+[1443] = { faction = "", kind = "zone" },  -- Desolace, forever, 2026-10-18
+[1444] = { faction = "", kind = "zone" },  -- Feralas, forever, 2026-10-18
+[1445] = { faction = "", kind = "zone" },  -- Dustwallow Marsh, forever, 2026-10-18
+[1446] = { faction = "", kind = "zone" },  -- Tanaris, forever, 2026-10-18
+[1447] = { faction = "", kind = "zone" },  -- Azshara, forever, 2026-10-18
+[1448] = { faction = "", kind = "zone" },  -- Felwood, forever, 2026-10-18
+[1449] = { faction = "", kind = "zone" },  -- Un'Goro Crater, forever, 2026-10-18
+[1450] = { faction = "", kind = "zone" },  -- Moonglade, forever, 2026-10-18
+[1451] = { faction = "", kind = "zone" },  -- Silithus, forever, 2026-10-18
+[1452] = { faction = "", kind = "zone" },  -- Winterspring, forever, 2026-10-18
+[1453] = { faction = "", kind = "zone" },  -- Stormwind City, forever, 2026-10-18
+[1454] = { faction = "", kind = "zone" },  -- Orgrimmar, forever, 2026-10-18
+[1455] = { faction = "", kind = "zone" },  -- Ironforge, forever, 2026-10-18
+[1456] = { faction = "", kind = "zone" },  -- Thunder Bluff, forever, 2026-10-18
+[1457] = { faction = "", kind = "zone" },  -- Darnassus, forever, 2026-10-18
+[1458] = { faction = "", kind = "zone" },  -- Undercity, forever, 2026-10-18
+[2482] = { faction = "", kind = "zone" },  -- Mount Hyjal, forever, 2026-10-18
+[2521] = { faction = "", kind = "zone" },  -- Zephras Isle, forever, 2026-10-18
+[2548] = { faction = "", kind = "zone" },  -- Riverglades, forever, 2026-10-18
+[2652] = { faction = "", kind = "zone" },  -- Shen'dralas, forever, 2026-10-18
+```
