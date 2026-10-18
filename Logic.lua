@@ -164,3 +164,8 @@ function Logic.FindKey(t, value)
     end
   end
 end
+
+function Logic.FormatProbe(id, status, detail)
+  local displayStatus = status == "fail" and "FAIL" or status
+  return id .. " " .. displayStatus .. ": " .. detail
+end

@@ -47,6 +47,102 @@ end
 local LOG_CLEAR_USAGE = "log clear - empty the saved output log."
 local COPY_USAGE = "copy - show the last output, selected for Ctrl+C."
 local DUMP_USAGE = "dump - list the shown (or current) map's zones with ready-made Zones.lua rows."
+local PROBE_USAGE = "probe [hover] - re-run the design probes, or report the zone under the cursor."
+local EXPECTED_INTERFACE = 16001 -- Must match ## Interface in Lodestar.toc.
+
+local PROBES = {
+  {
+    id = "P1",
+    run = function()
+      local interface = select(4, GetBuildInfo())
+      if interface == EXPECTED_INTERFACE then
+        return "pass", "interface " .. interface
+      end
+      return "fail", "interface " .. tostring(interface) .. " (expected " .. EXPECTED_INTERFACE .. ")"
+    end,
+  },
+  {
+    id = "P2",
+    run = function()
+      local mapID = C_Map.GetBestMapForUnit("player")
+      local mapInfo = mapID and C_Map.GetMapInfo(mapID)
+      if mapInfo ~= nil then
+        return "pass", "player map " .. mapID .. " " .. mapInfo.name .. ", " .. tostring(ns.Logic.FindKey(Enum.UIMapType, mapInfo.mapType))
+      end
+      return "fail", "player map unavailable"
+    end,
+  },
+  {
+    id = "P3",
+    run = function()
+      if WorldMapFrame == nil then
+        return "fail", "WorldMapFrame missing"
+      end
+
+      local missing = {}
+      if WorldMapFrame.AddDataProvider == nil then
+        missing[#missing + 1] = "AddDataProvider"
+      end
+      if WorldMapFrame.AcquirePin == nil then
+        missing[#missing + 1] = "AcquirePin"
+      end
+      if MapCanvasPinMixin == nil then
+        missing[#missing + 1] = "MapCanvasPinMixin"
+      end
+      if #missing == 0 then
+        return "pass", "data providers and pins available"
+      end
+      return "fail", table.concat(missing, ", ") .. " missing"
+    end,
+  },
+  {
+    id = "P4",
+    run = function()
+      if WorldMapFrame ~= nil then
+        return "pass", "WorldMapFrame loaded"
+      end
+      return "fail", "WorldMapFrame missing"
+    end,
+  },
+  {
+    id = "P5",
+    run = function()
+      local easternKingdoms = C_Map.GetMapChildrenInfo(1415, Enum.UIMapType.Zone) or {}
+      local kalimdor = C_Map.GetMapChildrenInfo(1414, Enum.UIMapType.Zone) or {}
+      local minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(1429, 1415)
+      local rectOk = ns.Logic.IsRectOnMap(minX, maxX, minY, maxY)
+      local detail = "Eastern Kingdoms " .. #easternKingdoms .. " zones, Kalimdor " .. #kalimdor .. " zones, Elwynn rect " .. (rectOk and "ok" or "invalid")
+      if #easternKingdoms > 0 and #kalimdor > 0 and rectOk then
+        return "pass", detail
+      end
+      return "fail", detail
+    end,
+  },
+  {
+    id = "P6",
+    run = function()
+      local minLevel, maxLevel = C_Map.GetMapLevels(1429)
+      local levels = "none"
+      if minLevel ~= nil and minLevel > 0 then
+        levels = minLevel .. "-" .. tostring(maxLevel)
+      end
+      return "info", "Elwynn Forest client levels: " .. levels
+    end,
+  },
+  {
+    id = "P8",
+    run = function()
+      local level = UnitLevel("player")
+      local targetLevel = level + 3
+      local color = GetQuestDifficultyColor(targetLevel)
+      local key = ns.Logic.DifficultyKey(targetLevel, level)
+      if color ~= nil and color.font == "QuestDifficulty_VeryDifficult" and key == "orange" then
+        return "pass", "level " .. targetLevel .. " is orange (" .. color.font .. ")"
+      end
+      return "fail", "level " .. targetLevel .. " expected orange (" .. tostring(color and color.font) .. ", " .. key .. ")"
+    end,
+  },
+}
 
 ns.RegisterCommand(
   "log",
@@ -83,6 +179,57 @@ ns.RegisterCommand(
     copyFrame.editBox:SetFocus()
   end,
   COPY_USAGE
+)
+
+ns.RegisterCommand(
+  "probe",
+  function(args)
+    local op = string.lower(args[1] or "")
+    if op == "hover" and args[2] == nil then
+      if not WorldMapFrame:IsShown() then
+        ns.Print("open the world map first")
+        return
+      end
+
+      local mapID = WorldMapFrame:GetMapID()
+      local x, y = WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition()
+      local coords = ns.Logic.FormatCoords(x, y)
+      if coords == nil then
+        coords = "unknown"
+      end
+      local mapInfo = C_Map.GetMapInfoAtPosition(mapID, x, y)
+      local detail = "cursor " .. coords .. " on " .. tostring(mapID) .. ": "
+      if mapInfo == nil then
+        detail = detail .. "no zone"
+      else
+        detail = detail .. mapInfo.mapID .. " " .. mapInfo.name
+      end
+      ns.Emit("probe", { ns.Logic.FormatProbe("P7", "info", detail) })
+      return
+    end
+
+    if #args > 0 then
+      ns.Print("/ls " .. PROBE_USAGE)
+      return
+    end
+
+    local lines = {}
+    local failed = 0
+    for _, probe in ipairs(PROBES) do
+      local ok, status, detail = pcall(probe.run)
+      if not ok then
+        detail = "error: " .. tostring(status)
+        status = "fail"
+      end
+      if status == "fail" then
+        failed = failed + 1
+      end
+      lines[#lines + 1] = ns.Logic.FormatProbe(probe.id, status, detail)
+    end
+    lines[#lines + 1] = "probes: " .. #PROBES .. ", failed: " .. failed
+    ns.Emit("probe", lines)
+  end,
+  PROBE_USAGE
 )
 
 ns.RegisterCommand(
