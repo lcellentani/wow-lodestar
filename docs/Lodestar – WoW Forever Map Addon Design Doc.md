@@ -187,9 +187,18 @@ Field values (decided 2026-10-18, when the table was seeded): `faction` is `"All
 ```lua
 ns.Instances = {
   -- { name, map = zone uiMapID, x, y (0-1 on that zone's map), min, max, kind = "dungeon" | "raid" }
-  { name = "Hall of Thanes", map = 0, x = 0.0, y = 0.0, min = 13, max = 18, kind = "dungeon" },  -- forever, fill in game
+  { name = "The Deadmines", map = 1436, x = 0.424, y = 0.726, min = 17, max = 26, kind = "dungeon" },
+  { name = "Hall of Thanes", map = 1455, min = 13, max = 20, kind = "dungeon" },  -- entrance not found yet
 }
 ```
+
+Decided when the table was seeded (2026-10-19):
+
+- **One row per instance**, including each wing (Scarlet Monastery, Dire Maul, Stratholme) and each instance inside Blackrock Mountain; rows behind one entrance share its position, and the Instances module groups markers at the same spot.
+- **`x`/`y` and `min`/`max` are optional, each pair together.** A row without `x`/`y` (an entrance not yet found in game) gets no marker but still appears in its zone's tooltip; a row without levels shows no range.
+- **Level source**: the beta's group finder lists dungeons with suggested ranges (`C_LFGList`, P33), including the Forever dungeons; those values are used where present. Raids (not in the beta's list) use the vanilla level 60.
+- **Entrance source**: the game draws no dungeon entrances on Forever's maps and `GetDungeonEntrancesForMap` returns nothing (P32), and Warcraft Wiki gives entrance coordinates for almost no instance, so vanilla entrances were seeded from Claude's recall of Classic Era data, marked approximate; Forever entrances come from the game (P12). The map's own `Cursor:` readout shows the position under the mouse, so an entrance whose spot is known can be read without travel.
+- `tests/instances_spec.lua` checks every row: unique name, known kind, a `map` that exists in `Zones.lua`, the pairs, positions between 0 and 1, levels 1-60.
 
 - `map` is always the uiMapID of the **zone** that contains the entrance (map type 3), never a continent.
 - `x` and `y` are normalized 0-1 positions on that zone's map: exactly what `C_Map.GetPlayerMapPosition` reports while standing at the entrance.

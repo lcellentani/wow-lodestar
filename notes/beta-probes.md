@@ -21,7 +21,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P7 | A8 | [x] | 2026-10-12 | beta, interface 16001 |
 | P8 | colors | [x] | 2026-10-12 | beta, interface 16001 |
 | P9 | A6 | [x] | 2026-10-12 | beta, interface 16001 |
-| P10 | A5 | [ ] | 2026-10-18 | beta, IDs collected (P30); comparison waits for `Data/Zones.lua` |
+| P10 | A5 | [x] | 2026-10-18 | beta; `Data/Zones.lua` built from the dump, checked by `tests/zones_spec.lua` |
 | P11 | data | [ ] | | |
 | P12 | data | [ ] | | |
 | P13 | v2 | [ ] | | |
@@ -43,6 +43,8 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P29 | M2 copy window | [x] | 2026-10-18 | beta |
 | P30 | M2 /ls dump | [x] | 2026-10-18 | beta |
 | P31 | M2 /ls probe | [x] | 2026-10-19 | beta |
+| P32 | dungeon entrance API | [x] | 2026-10-19 | beta |
+| P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
 
 ## Confirmed APIs
 
@@ -492,6 +494,8 @@ Result (2026-10-12, beta): **no native zone levels anywhere** on the map.
 Result:
 
 Part 1 (2026-10-18, beta, through `/ls dump`; full output under P30): the client's zone IDs. Eastern Kingdoms has 26 zones and Kalimdor 23, the same IDs and names as P5; Zephras Isle (2521) is a zone under the world map with no child zones. Every vanilla ID matches Classic Era; the Forever additions are Riverglades (2548), Mount Hyjal (2482), Shen'dralas (2652) and Zephras Isle (2521). Part 2, comparing these with `Data/Zones.lua`, waits until that table is seeded (M0).
+
+Part 2 (2026-10-18): `Data/Zones.lua` was seeded from these rows, so its IDs match the client by construction; `tests/zones_spec.lua` fails if a dumped zone is missing or an extra one appears.
 
 ### P11: level ranges
 
@@ -1092,3 +1096,127 @@ open the world map first                                   <- /ls probe hover, m
 - Hover works by typing `/ls probe hover`, moving the cursor onto the zone, then pressing Enter; no macro needed. The cursor position (48.1, 70.2) falls inside Elwynn's rectangle from P5 (x 41-51 %, y 66-76 %).
 - A mistyped `/ls prove` printed `Error: unknown command "prove", type /ls for help` (the 2.5 registry's error path).
 - To repeat on the live client after Nov 4: `/ls probe`, the hover check, then `/reload` and compare with this section.
+
+### P32: dungeon entrance API (seeding `Data/Instances.lua`)
+
+Classic Era draws dungeon entrances on zone maps through `C_EncounterJournal.GetDungeonEntrancesForMap(uiMapID)`; if Forever returned data, entrance names and positions could be read from the game instead of seeded by hand.
+
+```
+/dump C_EncounterJournal ~= nil, C_EncounterJournal and C_EncounterJournal.GetDungeonEntrancesForMap ~= nil
+/dump C_EncounterJournal.GetDungeonEntrancesForMap(1436)
+/dump C_EncounterJournal.GetDungeonEntrancesForMap(1415)
+```
+
+Result (2026-10-19, beta, character in Stormwind; screenshots 003041, 003331, 003525):
+
+```
+[1]=true, [2]=true     <- the table and the function exist
+[1]={}                 <- Westfall (1436)
+[1]={}                 <- Eastern Kingdoms (1415)
+```
+
+- **`GetDungeonEntrancesForMap` exists but returns an empty table**, even for Westfall, which has The Deadmines: the same pattern as `GetMapLevels` (P6). Not usable for entrances; not added to `.luacheckrc`.
+- A first `/run` loop over the Westfall result printed nothing, consistent with the empty table.
+- **The Westfall map shows no dungeon entrance icon** near Moonbrook (screenshot 003525, user has been in The Deadmines). Only quest markers are drawn.
+- The map's native readout at the bottom left shows `Cursor: x, y` (percent on the shown map) and `Player: x, y (map)`, so an entrance's position can be read by hovering its spot on the zone map, without travel; `/ls probe hover` gives the same numbers into the log.
+- Consequence: vanilla entrances are seeded from public data; the Forever dungeons' entrances need P12 (stand at the entrance, or hover a known spot on the zone map).
+
+### P33: group finder activities (level ranges from the client)
+
+Classic Era's Looking for Group tool lists activities with suggested level ranges (`C_LFGList`). If Forever has it, the client gives level ranges for dungeons, and for the Forever dungeons no public source covers.
+
+```
+/dump C_LFGList ~= nil, C_LFGList and C_LFGList.GetAvailableActivities ~= nil
+/run local a = C_LFGList.GetAvailableActivities(); print(#a)
+/dump C_LFGList.GetActivityInfoTable(C_LFGList.GetAvailableActivities()[1])
+/run local a=C_LFGList.GetAvailableActivities() for i=1,24 do local t=C_LFGList.GetActivityInfoTable(a[i]) print(i,t.fullName,t.minLevelSuggestion,t.maxLevelSuggestion,t.maxNumPlayers) end
+```
+
+(the last line repeated for 25-48 and 49-71)
+
+Result (2026-10-19, beta, level 18 Alliance character in Stormwind; screenshots 004239, 004356, 004446, 004506):
+
+- `C_LFGList` and `GetAvailableActivities` exist; **71 activities**.
+- `GetActivityInfoTable(id)` returns a table with `fullName`, `shortName`, `minLevelSuggestion`, `maxLevelSuggestion`, `minLevel`, `maxNumPlayers`, `mapID`, `categoryID`, `groupFinderActivityGroupID`, `difficultyID`, `displayType`, `filters`, `orderIndex`, `ilvlSuggestion`, `allowCrossFaction`, `useDungeonRoleExpectations`, `redirectedDifficultyID`, `useHonorLevel`, `showQuickJoinToast` and the flags `isHeroicActivity`, `isMythicActivity`, `isMythicPlusActivity`, `isNormalActivity`, `isPvpActivity`, `isRatedPvpActivity`, `isCurrentRaidActivity`. Activity 1 is `Custom` with all zeros.
+
+All 71 (index, fullName, minLevelSuggestion, maxLevelSuggestion, maxNumPlayers):
+
+```
+ 1 Custom 0 0 0
+ 2 Alterac Mountains 28 44 0
+ 3 Silverpine Forest 8 24 0
+ 4 Tirisfal Glades 1 14 0
+ 5 Eastern Plaguelands 53 63 0
+ 6 Western Plaguelands 48 60 0
+ 7 Hinterlands 38 54 0
+ 8 Hillsbrad Foothills 18 34 0
+ 9 Arathi Highlands 28 44 0
+10 Badlands 33 50 0
+11 Searing Gorge 43 60 0
+12 Burning Steppes 48 60 0
+13 Redridge Mountains 13 30 0
+14 Swamp of Sorrows 33 50 0
+15 Blasted Lands 43 60 0
+16 Stranglethorn Vale 28 50 0
+17 Wetlands 18 34 0
+18 Loch Modan 8 24 0
+19 Dun Morogh 1 14 0
+20 Duskwood 18 34 0
+21 Westfall 8 24 0
+22 Elwynn Forest 1 14 0
+23 Zephras Isle 1 14 0
+24 Mount Hyjal 55 60 0
+25 Winterspring 53 63 0
+26 Azshara 43 60 0
+27 Felwood 46 60 0
+28 Ashenvale 18 34 0
+29 Darkshore 8 24 0
+30 Teldrassil 1 14 0
+31 Silithus 53 60 0
+32 Un'Goro Crater 45 60 0
+33 Tanaris 38 54 0
+34 Dustwallow Marsh 33 50 0
+35 Riverglades 33 54 0
+36 Feralas 38 54 0
+37 Durotar 1 14 0
+38 Mulgore 1 14 0
+39 The Barrens 8 30 0
+40 Stonetalon Mountains 13 32 0
+41 Thousand Needles 23 40 0
+42 Desolace 28 44 0
+43 Hall of Thanes 13 20 5
+44 City of Dalaran 28 35 5
+45 Ruins of Lordaeron 15 22 5
+46 Excavation Site: Wetlands 26 33 5
+47 Stratholme (Service Gate) 58 60 5
+48 Upper Blackrock Spire 59 60 10
+49 Scarlet Monastery - Library 33 41 5
+50 Scarlet Monastery - Cathedral 38 46 5
+51 Scarlet Monastery - Armory 36 44 5
+52 Stratholme (Main Gate) 58 60 5
+53 Dire Maul (North) 56 60 5
+54 Dire Maul (West) 56 60 5
+55 Dire Maul (East) 54 60 5
+56 Lower Blackrock Spire 55 60 5
+57 Blackrock Depths 52 60 5
+58 Sunken Temple 50 60 5
+59 Maraudon 46 55 5
+60 Zul'Farrak 44 54 5
+61 Uldaman 41 51 5
+62 Razorfen Downs 37 46 5
+63 Scarlet Monastery - Graveyard 30 38 5
+64 Razorfen Kraul 29 38 5
+65 Gnomeregan 29 38 5
+66 Wailing Caverns 15 24 5
+67 Scholomance 58 60 5
+68 Deadmines 17 26 5
+69 Shadowfang Keep 20 30 5
+70 Blackfathom Deeps 24 32 5
+71 Stormwind Stockades 24 32 5
+```
+
+- **41 zone activities** (players 0), each with Forever's suggested range. They are wider than the Classic wiki ranges seeded in `Data/Zones.lua` (Elwynn 1-14 vs 1-10, Westfall 8-24 vs 10-20) and include the Forever zones: Zephras Isle 1-14, Mount Hyjal 55-60, Riverglades 33-54. Missing: Moonglade, Deadwind Pass, Shen'dralas and the six capitals. Whether zone labels use these ranges is an M3 decision.
+- **29 dungeons** (players 5, Upper Blackrock Spire 10), one activity per wing (Scarlet Monastery x4, Dire Maul x3, Stratholme x2). Four Forever dungeons are in the beta: Hall of Thanes 13-20, City of Dalaran 28-35, Ruins of Lordaeron 15-22, Excavation Site: Wetlands 26-33.
+- **Missing**: Ragefire Chasm (probably hidden from an Alliance character; to check with a Horde one), all raids (the guides say raids unlock on 2026-12-09), and the Forever dungeons the guides list but the beta lacks (The Drowned City, Krol'dok Stronghold, Alcaz Island Prison, Blackmaw Hold, Shaper's Terrace).
+- Only `minLevelSuggestion`, `maxLevelSuggestion`, `maxNumPlayers` and `fullName` were read per activity; `mapID` was 0 for `Custom` and is not yet checked for a dungeon.
+- Not used in addon code yet, so not added to `.luacheckrc`; Claude seeds `Data/Instances.lua` levels from this table.

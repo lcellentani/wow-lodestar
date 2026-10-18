@@ -28,7 +28,7 @@ The design doc is the source of truth: `docs/Lodestar – WoW Forever Map Addon 
 ## Status
 
 - Design: draft, all review fixes applied.
-- M0: design probes P1-P9 done (`notes/beta-probes.md`); `Data/Zones.lua` seeded 2026-10-18 (50 zones from P30, vanilla data from Warcraft Wiki, Forever zones from guides, all unverified; checked by `tests/zones_spec.lua`); `Data/Instances.lua` still to do.
+- M0: design probes P1-P9 done (`notes/beta-probes.md`); `Data/Zones.lua` seeded 2026-10-18 (50 zones from P30, vanilla data from Warcraft Wiki, Forever zones from guides, all unverified; checked by `tests/zones_spec.lua`); `Data/Instances.lua` seeded 2026-10-19 (42 instances; levels from the beta's group finder, P33; vanilla entrances approximate, Forever entrances to find in game, P12; checked by `tests/instances_spec.lua`). M0 done.
 - M1 (dev environment): done. `Logic.lua` has five tested pure functions; the game junction and local paths are in `notes/environment.md`.
 - API probes P16 (M2) and P17 (M4-M5) done on 2026-10-13; the confirmed names are in `.luacheckrc`.
 - M2 (skeleton): done 2026-10-19. Steps 2.1 (`.toc`, `PLAYER_LOGIN`, P18), 2.2 (`Util.lua`: `ns.Print`, `ns.SafeCall`, P19), 2.3 (`LodestarDB` defaults via `Logic.MergeDefaults`, `ns.db`, P20), 2.4 (event dispatcher, module registry, map tick, P21-P23), 2.5 (`Options.lua`: `/ls`, `/lodestar`, `toggle`, `debug`, P24-P25) and 2.6 (`Debug.lua`: log and `/ls log clear`, `/ls copy`, `/ls dump`, `/ls probe`, P27-P31). Step specs live in `notes/spec-<step>-<topic>.md`. Next: seed `Data/Instances.lua` (rest of M0), then M3.
