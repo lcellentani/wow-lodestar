@@ -524,6 +524,11 @@ Line used from 2026-10-19 (prints map ID, name, type and position in one go):
 | --- | --- | --- | --- | --- |
 | Hall of Thanes | 1455 Ironforge (type 3) | 0.28077 | 0.47070 | 2026-10-19, beta, standing at the portal (screenshot 010643); the zone is Ironforge, not Dun Morogh |
 | Excavation Site: Wetlands | 1437 Wetlands (type 3) | 0.53649 | 0.65965 | 2026-10-19, beta, standing at the dungeon's **meeting stone**, not the portal (screenshot 012839); "Discovered Thelgen Rock" on arrival, so the portal is likely in or by the Thelgen Rock cave; the level 18 character could not go further |
+| The Stockade (vanilla) | 1453 Stormwind City (type 3) | 0.53353 | 0.70861 | 2026-10-19, beta, at the dungeon's meeting stone, which stands just outside the door of the building that holds the prison (screenshot 013104; user), so it marks the entrance well. The seeded approximate value (Claude's recall, 0.405, 0.559) was about 0.13 and 0.15 off, so recalled entrances can be badly wrong: check each one in game before trusting its marker |
+| Ragefire Chasm (vanilla) | 1454 Orgrimmar (type 3) | 0.51230 | 0.48991 | 2026-10-19, beta, Horde character at the dungeon's meeting stone (screenshot 014823). The seeded approximate value (0.513, 0.500) was close, within 0.001 and 0.010 |
+| Ruins of Lordaeron | 1458 Undercity (type 3) | 0.70740 | 0.17820 | 2026-10-19, beta, Horde character standing at the portal (screenshot 015445). The entrance is in Undercity, not in Tirisfal Glades as the guides said |
+
+- City of Dalaran: not measured; the user's portal to Dalaran was no longer available on 2026-10-19 (probably disabled). Its row keeps no position and the assumed zone (Alterac Mountains); to measure on the live client.
 
 ## Other probes
 
@@ -1226,6 +1231,6 @@ All 71 (index, fullName, minLevelSuggestion, maxLevelSuggestion, maxNumPlayers):
 
 - **41 zone activities** (players 0), each with Forever's suggested range. They are wider than the Classic wiki ranges seeded in `Data/Zones.lua` (Elwynn 1-14 vs 1-10, Westfall 8-24 vs 10-20) and include the Forever zones: Zephras Isle 1-14, Mount Hyjal 55-60, Riverglades 33-54. Missing: Moonglade, Deadwind Pass, Shen'dralas and the six capitals. Whether zone labels use these ranges is an M3 decision.
 - **29 dungeons** (players 5, Upper Blackrock Spire 10), one activity per wing (Scarlet Monastery x4, Dire Maul x3, Stratholme x2). Four Forever dungeons are in the beta: Hall of Thanes 13-20, City of Dalaran 28-35, Ruins of Lordaeron 15-22, Excavation Site: Wetlands 26-33.
-- **Missing**: Ragefire Chasm (probably hidden from an Alliance character; to check with a Horde one), all raids (the guides say raids unlock on 2026-12-09), and the Forever dungeons the guides list but the beta lacks (The Drowned City, Krol'dok Stronghold, Alcaz Island Prison, Blackmaw Hold, Shaper's Terrace).
+- **Missing**: Ragefire Chasm for the Alliance character; a Horde character's list has it as `Ragefire Chasm 13 18` (2026-10-19, screenshot 014906), so the group finder lists faction dungeons only to their faction. Also missing: all raids (the guides say raids unlock on 2026-12-09), and the Forever dungeons the guides list but the beta lacks (The Drowned City, Krol'dok Stronghold, Alcaz Island Prison, Blackmaw Hold, Shaper's Terrace).
 - Only `minLevelSuggestion`, `maxLevelSuggestion`, `maxNumPlayers` and `fullName` were read per activity; `mapID` was 0 for `Custom` and is not yet checked for a dungeon.
 - Not used in addon code yet, so not added to `.luacheckrc`; Claude seeds `Data/Instances.lua` levels from this table.

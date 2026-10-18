@@ -11,7 +11,7 @@ ns.Instances = {
   -- Eastern Kingdoms, vanilla
   { name = "The Deadmines", map = 1436, x = 0.424, y = 0.726, min = 17, max = 26, kind = "dungeon" },  -- Westfall; levels P33, entrance Warcraft Wiki
   { name = "Shadowfang Keep", map = 1421, x = 0.448, y = 0.678, min = 20, max = 30, kind = "dungeon" },  -- Silverpine Forest; levels P33, entrance approximate
-  { name = "The Stockade", map = 1453, x = 0.405, y = 0.559, min = 24, max = 32, kind = "dungeon" },  -- Stormwind City; levels P33, entrance approximate
+  { name = "The Stockade", map = 1453, x = 0.534, y = 0.709, min = 24, max = 32, kind = "dungeon" },  -- Stormwind City; levels P33, its meeting stone, just outside the prison building's door, 2026-10-19 (P12; the recalled 0.405, 0.559 was far off)
   { name = "Gnomeregan", map = 1426, x = 0.243, y = 0.398, min = 29, max = 38, kind = "dungeon" },  -- Dun Morogh; levels P33, entrance approximate
   { name = "Scarlet Monastery - Graveyard", map = 1420, x = 0.848, y = 0.306, min = 30, max = 38, kind = "dungeon" },  -- Tirisfal Glades; levels P33, entrance approximate
   { name = "Scarlet Monastery - Library", map = 1420, x = 0.848, y = 0.306, min = 33, max = 41, kind = "dungeon" },  -- Tirisfal Glades; levels P33, entrance approximate
@@ -31,7 +31,7 @@ ns.Instances = {
   { name = "Naxxramas", map = 1423, x = 0.399, y = 0.259, min = 60, max = 60, kind = "raid" },  -- Eastern Plaguelands; levels vanilla, entrance approximate (least sure)
 
   -- Kalimdor, vanilla
-  { name = "Ragefire Chasm", map = 1454, x = 0.513, y = 0.500, min = 13, max = 16, kind = "dungeon" },  -- Orgrimmar; levels Warcraft Wiki pre-Cataclysm (not in P33 for an Alliance character), entrance approximate
+  { name = "Ragefire Chasm", map = 1454, x = 0.512, y = 0.490, min = 13, max = 18, kind = "dungeon" },  -- Orgrimmar; levels P33 (Horde character), its meeting stone 2026-10-19 (P12)
   { name = "Wailing Caverns", map = 1413, x = 0.460, y = 0.365, min = 15, max = 24, kind = "dungeon" },  -- The Barrens; levels P33, entrance approximate
   { name = "Blackfathom Deeps", map = 1440, x = 0.145, y = 0.142, min = 24, max = 32, kind = "dungeon" },  -- Ashenvale; levels P33, entrance approximate
   { name = "Razorfen Kraul", map = 1413, x = 0.425, y = 0.895, min = 29, max = 38, kind = "dungeon" },  -- The Barrens; levels P33, entrance approximate
@@ -47,7 +47,7 @@ ns.Instances = {
 
   -- Forever: entrances to find in game (P12)
   { name = "Hall of Thanes", map = 1455, x = 0.281, y = 0.471, min = 13, max = 20, kind = "dungeon" },  -- Ironforge; levels P33, entrance verified 2026-10-19 (P12)
-  { name = "Ruins of Lordaeron", map = 1420, min = 15, max = 22, kind = "dungeon" },  -- Tirisfal Glades (guides); levels P33
+  { name = "Ruins of Lordaeron", map = 1458, x = 0.707, y = 0.178, min = 15, max = 22, kind = "dungeon" },  -- Undercity (guides said Tirisfal Glades); levels P33, entrance verified at the portal 2026-10-19 (P12)
   { name = "Excavation Site: Wetlands", map = 1437, x = 0.536, y = 0.660, min = 26, max = 33, kind = "dungeon" },  -- Wetlands; levels P33, position of its meeting stone by Thelgen Rock 2026-10-19 (P12), portal nearby
   { name = "City of Dalaran", map = 1416, min = 28, max = 35, kind = "dungeon" },  -- Alterac Mountains (assumed: where Dalaran stands in vanilla); levels P33
   { name = "The Drowned City", map = 1434, kind = "dungeon" },  -- Stranglethorn Vale (guides); not in the beta, guides disagree on levels
