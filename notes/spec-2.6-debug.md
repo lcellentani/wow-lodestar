@@ -1,6 +1,6 @@
 # M2 step 2.6: `Debug.lua` (log, copy window, dump, probe)
 
-Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c done (P30, 2026-10-18); 2.6d done (P31, 2026-10-19). Step 2.6 complete. User writes the code, Claude reviews.
+Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c done (P30, 2026-10-18); 2.6d done (P31, 2026-10-19); 2.6e (`/ls probe here`) added and detailed 2026-10-19. User writes the code, Claude reviews.
 Design doc reference: "Settings and slash commands", "Getting output out of the game".
 
 ## What this step is for
@@ -399,6 +399,63 @@ Hints:
 ### In-game check (P31)
 
 No temporary code. `/reload`, then `/ls probe`: the seven lines from the table and `probes: 7, failed: 0`. Then, with the world map open on Eastern Kingdoms, `/ls probe hover` over Elwynn Forest: `P7 info: cursor ... on 1415: 1429 Elwynn Forest`; with the map closed: `open the world map first`. Then `/reload`, and Claude reads the log and records P31.
+
+## 2.6e: `/ls probe here`
+
+Added 2026-10-19, while recording Forever dungeon entrances (P12). `/ls probe here` reports the character's own map and position, with a ready-made `x = ..., y = ...` fragment for `Data/Instances.lua`. It replaces the long `/run` line of P12, and its output goes through `ns.Emit`, so every reading also lands in the log and the copy window.
+
+### Evidence
+
+`C_Map.GetBestMapForUnit("player")` and `C_Map.GetMapInfo` (P2), `Enum.UIMapType` (P2), `C_Map.GetPlayerMapPosition(mapID, "player")` (P17: exists; P12, 2026-10-19: returns a position whose `GetXY()` gives x and y between 0 and 1, e.g. 0.28077, 0.47070 at the Hall of Thanes portal in Ironforge).
+
+### `Logic.FormatEntrance(x, y)` in `Logic.lua`
+
+- Returns `"x = 0.281, y = 0.471"`: both values rounded to three decimals, the precision used in `Data/Instances.lua` (0.001 of a zone is a few yards).
+- Tests (`describe("FormatEntrance", ...)`): the Hall of Thanes reading (`0.28077352046967, 0.47070151567459` gives `"x = 0.281, y = 0.471"`); a value that rounds up across a digit (`0.0996, 0.5` gives `"x = 0.100, y = 0.500"`, three decimals kept).
+- Hint: `string.format("%.3f", x)` rounds and keeps trailing zeros.
+
+### The subcommand in `Debug.lua`
+
+Usage becomes `"probe [hover|here] - re-run the design probes, or report the zone under the cursor or your position."`.
+
+1. `mapID = C_Map.GetBestMapForUnit("player")`. If `nil` (loading screens, some instances): print `no player map` and stop.
+2. `info = C_Map.GetMapInfo(mapID)`, `position = C_Map.GetPlayerMapPosition(mapID, "player")`. If `position` is `nil` (inside an instance, a map without coordinates): emit `P12 info: no position on <id> <name>`.
+3. Otherwise `local x, y = position:GetXY()` and emit one line through `FormatProbe("P12", "info", detail)`, with detail `player 28.1, 47.1 on 1455 Ironforge, Zone: x = 0.281, y = 0.471` (`Logic.FormatCoords` for the readable part, `FindKey` for the type, `FormatEntrance` for the fragment).
+4. When the map is not a zone (`info.mapType ~= Enum.UIMapType.Zone`, for example a cave or Blackrock Mountain), add `, not a zone map: read the zone map's cursor instead` to the detail, as the design doc's entrance rule says.
+
+Hints:
+
+- `GetPlayerMapPosition` returns an object, not two numbers: check it for `nil` before calling `:GetXY()` on it.
+- `hover` and `here` both live in the same `probe` handler; one `if op == "hover" ... elseif op == "here" ... end` before the "anything else prints the usage" check keeps them side by side.
+- The detail keeps the order of the old `/run` line (map ID, name, type, position), so readings taken both ways compare easily.
+
+### In-game check (P34)
+
+No temporary code.
+
+```
+/reload
+```
+
+```
+/ls probe here
+```
+
+In Stormwind, expected: `P12 info: player <x>, <y> on 1453 Stormwind City, Zone: x = ..., y = ...`, matching the map's `Player:` readout at the bottom left.
+
+At an instance portal (for example the Hall of Thanes, already measured at 0.281, 0.471):
+
+```
+/ls probe here
+```
+
+Expected: the same values as the `/run` reading, within 0.001.
+
+```
+/ls copy
+```
+
+Expected: the last reading in the copy window. Then `/reload`, and Claude reads the readings from the log, updates `Data/Instances.lua` and records P34 (and the entrances in P12).
 
 ## Done when (each checkpoint)
 

@@ -23,7 +23,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P9 | A6 | [x] | 2026-10-12 | beta, interface 16001 |
 | P10 | A5 | [x] | 2026-10-18 | beta; `Data/Zones.lua` built from the dump, checked by `tests/zones_spec.lua` |
 | P11 | data | [ ] | | |
-| P12 | data | [ ] | | |
+| P12 | data | [ ] | 2026-10-19 | beta, in progress |
 | P13 | v2 | [ ] | | |
 | P14 | taint | [ ] | | |
 | P15 | taint | [ ] | | |
@@ -45,6 +45,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P31 | M2 /ls probe | [x] | 2026-10-19 | beta |
 | P32 | dungeon entrance API | [x] | 2026-10-19 | beta |
 | P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
+| P34 | M2 /ls probe here | [ ] | | |
 
 ## Confirmed APIs
 
@@ -513,8 +514,16 @@ At each entrance:
 
 If the map is not a zone map, check with `/dump C_Map.GetMapInfo(<id>).mapType` (should be 3) and use the zone map's cursor position instead.
 
+Line used from 2026-10-19 (prints map ID, name, type and position in one go):
+
+```
+/run local m=C_Map.GetBestMapForUnit("player") local i=C_Map.GetMapInfo(m) local x,y=C_Map.GetPlayerMapPosition(m,"player"):GetXY() print(m,i.name,i.mapType,x,y)
+```
+
 | Instance | Map ID | x | y | Notes |
 | --- | --- | --- | --- | --- |
+| Hall of Thanes | 1455 Ironforge (type 3) | 0.28077 | 0.47070 | 2026-10-19, beta, standing at the portal (screenshot 010643); the zone is Ironforge, not Dun Morogh |
+| Excavation Site: Wetlands | 1437 Wetlands (type 3) | 0.53649 | 0.65965 | 2026-10-19, beta, standing at the dungeon's **meeting stone**, not the portal (screenshot 012839); "Discovered Thelgen Rock" on arrival, so the portal is likely in or by the Thelgen Rock cave; the level 18 character could not go further |
 
 ## Other probes
 
