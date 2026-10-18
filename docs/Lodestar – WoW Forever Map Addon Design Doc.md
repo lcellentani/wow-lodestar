@@ -178,6 +178,8 @@ ns.Zones = {
 }
 ```
 
+Field values (decided 2026-10-18, when the table was seeded): `faction` is `"Alliance"`, `"Horde"` or `"Contested"` (Moonglade counts as Contested), or `""` while still unknown (the Forever zones, to fill in from the game); `kind` is `"zone"` or `"city"`. The six capitals are `kind = "city"` with no `min`/`max`, so they get no label but the tooltip can still name them as cities. `tests/zones_spec.lua` checks every row against these rules and against the zone IDs `/ls dump` listed (P30).
+
 `labelX` and `labelY` are optional, in the parent continent's normalized coordinates. Set them only where the rectangle center lands badly (for example an L-shaped zone, or a zone whose center sits in water); otherwise the label goes at the center of the zone's rectangle.
 
 **Instances** (`Data/Instances.lua`).

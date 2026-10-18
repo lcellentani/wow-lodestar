@@ -8,5 +8,6 @@
 Logic.lua
 Util.lua
 Core.lua
+Data\Zones.lua
 Debug.lua
 Options.lua
