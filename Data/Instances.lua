@@ -47,7 +47,7 @@ ns.Instances = {
 
   -- Forever: entrances to find in game (P12)
   { name = "Hall of Thanes", map = 1455, x = 0.281, y = 0.471, min = 13, max = 20, kind = "dungeon" },  -- Ironforge; levels P33, entrance verified 2026-10-19 (P12)
-  { name = "Ruins of Lordaeron", map = 1458, x = 0.707, y = 0.178, min = 15, max = 22, kind = "dungeon" },  -- Undercity (guides said Tirisfal Glades); levels P33, entrance verified at the portal 2026-10-19 (P12)
+  { name = "Ruins of Lordaeron", map = 1458, x = 0.707, y = 0.178, min = 15, max = 22, kind = "dungeon" },  -- Undercity (guides said Tirisfal Glades); levels P33, its meeting stone 2026-10-19 (P12)
   { name = "Excavation Site: Wetlands", map = 1437, x = 0.536, y = 0.660, min = 26, max = 33, kind = "dungeon" },  -- Wetlands; levels P33, position of its meeting stone by Thelgen Rock 2026-10-19 (P12), portal nearby
   { name = "City of Dalaran", map = 1416, min = 28, max = 35, kind = "dungeon" },  -- Alterac Mountains (assumed: where Dalaran stands in vanilla); levels P33
   { name = "The Drowned City", map = 1434, kind = "dungeon" },  -- Stranglethorn Vale (guides); not in the beta, guides disagree on levels
