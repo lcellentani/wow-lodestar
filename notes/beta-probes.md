@@ -522,7 +522,7 @@ Line used from 2026-10-19 (prints map ID, name, type and position in one go):
 
 | Instance | Map ID | x | y | Notes |
 | --- | --- | --- | --- | --- |
-| Hall of Thanes | 1455 Ironforge (type 3) | 0.28077 | 0.47070 | 2026-10-19, beta, standing at the portal (screenshot 010643); the zone is Ironforge, not Dun Morogh |
+| Hall of Thanes | 1455 Ironforge (type 3) | 0.28077 | 0.47070 | 2026-10-19, beta, standing in front of the dungeon's meeting stone (screenshot 010643; first reported as the portal, corrected by the user); the zone is Ironforge, not Dun Morogh |
 | Excavation Site: Wetlands | 1437 Wetlands (type 3) | 0.53649 | 0.65965 | 2026-10-19, beta, standing at the dungeon's **meeting stone**, not the portal (screenshot 012839); "Discovered Thelgen Rock" on arrival, so the portal is likely in or by the Thelgen Rock cave; the level 18 character could not go further |
 | The Stockade (vanilla) | 1453 Stormwind City (type 3) | 0.53353 | 0.70861 | 2026-10-19, beta, at the dungeon's meeting stone, which stands just outside the door of the building that holds the prison (screenshot 013104; user), so it marks the entrance well. The seeded approximate value (Claude's recall, 0.405, 0.559) was about 0.13 and 0.15 off, so recalled entrances can be badly wrong: check each one in game before trusting its marker |
 | Ragefire Chasm (vanilla) | 1454 Orgrimmar (type 3) | 0.51230 | 0.48991 | 2026-10-19, beta, Horde character at the dungeon's meeting stone (screenshot 014823). The seeded approximate value (0.513, 0.500) was close, within 0.001 and 0.010 |

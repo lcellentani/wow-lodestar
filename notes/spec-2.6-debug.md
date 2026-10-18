@@ -406,7 +406,7 @@ Added 2026-10-19, while recording Forever dungeon entrances (P12). `/ls probe he
 
 ### Evidence
 
-`C_Map.GetBestMapForUnit("player")` and `C_Map.GetMapInfo` (P2), `Enum.UIMapType` (P2), `C_Map.GetPlayerMapPosition(mapID, "player")` (P17: exists; P12, 2026-10-19: returns a position whose `GetXY()` gives x and y between 0 and 1, e.g. 0.28077, 0.47070 at the Hall of Thanes portal in Ironforge).
+`C_Map.GetBestMapForUnit("player")` and `C_Map.GetMapInfo` (P2), `Enum.UIMapType` (P2), `C_Map.GetPlayerMapPosition(mapID, "player")` (P17: exists; P12, 2026-10-19: returns a position whose `GetXY()` gives x and y between 0 and 1, e.g. 0.28077, 0.47070 at the Hall of Thanes meeting stone in Ironforge).
 
 ### `Logic.FormatEntrance(x, y)` in `Logic.lua`
 
@@ -443,7 +443,7 @@ No temporary code.
 
 In Stormwind, expected: `P12 info: player <x>, <y> on 1453 Stormwind City, Zone: x = ..., y = ...`, matching the map's `Player:` readout at the bottom left.
 
-At an instance portal (for example the Hall of Thanes, already measured at 0.281, 0.471):
+At an instance's meeting stone (for example the Hall of Thanes, already measured there at 0.281, 0.471):
 
 ```
 /ls probe here
