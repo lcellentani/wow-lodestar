@@ -1303,5 +1303,5 @@ P7 info: cursor 46.6, 30.2 on 1415: 1416 Alterac Mountains, 28-44 (table)   <- b
 - Every color matches the client's bands at level 18: 12 and below grey, 13 green, 14-18 yellow (the loop above), and red from 23 (level + 5). Redridge's 13 is the single green level, so the wider yellow band (`DifficultyKey` change in 4.1a) and the client agree in game.
 - Source `table` everywhere, as expected: `GetMapLevels` still returns zeros (P6) and no override is saved.
 - Not hovered in game: a city (Stormwind, `no level data`) and Burning Steppes. Both were checked outside the game the same evening with the real `Logic.lua`, `Util.lua`, `Core.lua` and `Data/Zones.lua` and stubbed WoW functions, which also showed the fallback colors (`GetQuestDifficultyColor` removed) giving the same result as the client at level 18.
-- The readings reach the SavedVariables log at the next `/reload` (the file was saved at 22:25, just before them).
+- The SavedVariables log (after the next `/reload`, 22:27) has the same four lines with the raw codes: grey `|cff808080`, yellow `|cffffd100`, green `|cff40bf40`, red `|cffff1a1a`, the client's P35 colors through `Logic.ColorCode`.
 
