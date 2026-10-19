@@ -22,7 +22,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P8 | colors | [x] | 2026-10-12 | beta, interface 16001 |
 | P9 | A6 | [x] | 2026-10-12 | beta, interface 16001 |
 | P10 | A5 | [x] | 2026-10-18 | beta; `Data/Zones.lua` built from the dump, checked by `tests/zones_spec.lua` |
-| P11 | data | [ ] | | |
+| P11 | data | [x] | 2026-10-19 | closed: zone ranges come from the group finder (P33), not from checks zone by zone |
 | P12 | data | [ ] | 2026-10-19 | beta, in progress |
 | P13 | v2 | [ ] | | |
 | P14 | taint | [ ] | | |
@@ -51,6 +51,8 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P37 | M4 ZoneLabels test pin | [x] | 2026-10-19 | beta |
 | P38 | M4 ZoneLabels labels | [x] | 2026-10-19 | beta |
 | P39 | M4 label names on the maximized map | [x] | 2026-10-19 | beta |
+| P40 | level-up event | [ ] | | |
+| P41 | dungeon and raid icons (atlases) | [ ] | | |
 
 ## Confirmed APIs
 
