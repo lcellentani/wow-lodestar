@@ -46,6 +46,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P32 | dungeon entrance API | [x] | 2026-10-19 | beta |
 | P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
 | P34 | M2 /ls probe here | [x] | 2026-10-19 | beta |
+| P35 | M4 zone info, colors in /ls probe hover | [ ] | | |
 
 ## Confirmed APIs
 
