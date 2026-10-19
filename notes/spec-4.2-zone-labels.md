@@ -1,6 +1,6 @@
 # M4 step 4.2: ZoneLabels, the first map overlay
 
-Status: spec written 2026-10-19; P36 done the same day: no `MapCanvasPinTemplate` on Forever, so `Pins.xml` uses a plain frame. User writes the code, Claude reviews and does `.luacheckrc`.
+Status: spec written 2026-10-19; P36 done the same day: no `MapCanvasPinTemplate` on Forever, so `Pins.xml` uses a plain frame. 4.2a test pin checked in game (P37, 2026-10-19). User writes the code, Claude reviews and does `.luacheckrc`.
 Design doc reference: "Architecture" (load order, `Pins.xml`, one namespace, no taint), "Data model" (map positions, `ns.GetZoneRect`), "Module specs" (how map overlays draw, ZoneLabels).
 
 ## What this step is for

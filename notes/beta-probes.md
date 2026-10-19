@@ -48,7 +48,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P34 | M2 /ls probe here | [x] | 2026-10-19 | beta |
 | P35 | M4 zone info, colors in /ls probe hover | [x] | 2026-10-19 | beta |
 | P36 | pin hooks, pin template, label fonts | [x] | 2026-10-19 | beta |
-| P37 | M4 ZoneLabels test pin | [ ] | | |
+| P37 | M4 ZoneLabels test pin | [x] | 2026-10-19 | beta |
 | P38 | M4 ZoneLabels labels | [ ] | | |
 
 ## Confirmed APIs
@@ -1340,4 +1340,19 @@ DungeonEntrancePinTemplate Frame LegendHighlightableMapPoiPinTemplate, BaseSuper
 - **`MapCanvasPinTemplate` does not exist.** `C_XMLUtil.GetTemplateInfo` works (it finds `GameTooltipTemplate`), so its `nil` for that name is real. Blizzard's own map pins are `Frame` templates that inherit only POI-specific templates (legend highlight, super-tracking), not a common pin base. Lodestar's pin template is therefore a plain virtual `Frame` with its mixin; the design doc and spec 4.2 are changed.
 - **Forever's Blizzard UI is the Mainline (retail) code**: `GameTooltip.xml` loads from `Blizzard_GameTooltip/Mainline/`. The APIs probed so far match Classic Era, but templates and frame details can follow retail, so each one is checked before use (design doc, "Target client and API assumptions").
 - `C_XMLUtil.GetTemplateInfo(name)` is a handy probe for any template: it returns `type`, `inherits` and `sourceLocation`. Not used in addon code, so not in `.luacheckrc`.
+
+### P37: ZoneLabels test pin (M4 step 4.2a)
+
+`Modules/ZoneLabels.lua` adds a data provider that, on a continent map, acquires one pin from `LodestarZoneLabelPinTemplate` (`Pins.xml`: a plain virtual `Frame` with the mixin, no base template, P36) with the text `TEST` at 0.5, 0.5. Spec: `notes/spec-4.2-zone-labels.md`.
+
+Result (2026-10-19, beta, level 18 character in Stormwind; screenshots 225843, 225851, 225859, 225923, 225954; script errors on):
+
+- Eastern Kingdoms and Kalimdor: `TEST` at the center of each, white with an outline. Switching between them moves it, so the map calls `RefreshAllData` on a map change.
+- Zone maps (Elwynn Forest, Zephras Isle) and the world map: no `TEST`. Zephras Isle is reached from the same breadcrumb dropdown as the continents but is a zone map (P5), so the provider is right to skip it.
+- Clicking the zone under `TEST` zooms into it: the pin does not take the mouse (`enableMouse="false"`).
+- Zooming in keeps the text about the same size while the map grows (`SetScalingLimits(1, 1.0, 1.2)`).
+- `/ls toggle ZoneLabels` off removes the pin on the next map open; on brings it back, no `/reload`: `RemoveDataProvider` and `AddDataProvider` work at runtime.
+- No errors.
+- So a pin template with no base template works with the map's pin pool on Forever: the overlay design holds (assumption A3 in practice, not only by function names).
+- For 4.3: the text is small next to Blizzard's lettering; Blizzard draws small building icons on the continent maps (one sits just under the center), so real labels may meet some of them.
 
