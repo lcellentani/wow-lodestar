@@ -46,7 +46,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P32 | dungeon entrance API | [x] | 2026-10-19 | beta |
 | P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
 | P34 | M2 /ls probe here | [x] | 2026-10-19 | beta |
-| P35 | M4 zone info, colors in /ls probe hover | [ ] | | |
+| P35 | M4 zone info, colors in /ls probe hover | [ ] | | difficulty colors done 2026-10-19 (beta); hover check to do |
 
 ## Confirmed APIs
 
@@ -1254,3 +1254,39 @@ P12 info: player 8.9, 57.7 on 1416 Alterac Mountains, Zone: x = 0.089, y = 0.577
 - The spec's comparison at an already measured meeting stone (Hall of Thanes) was not repeated; the match with the map readout covers the same thing, since the `/run` line read the same `GetPlayerMapPosition`.
 - The copy header says `/ls probe`, not `/ls probe here`: `Emit` is given the command name only, as for `hover`.
 - No "not a zone map" case seen yet (both readings on zone maps).
+
+### P35: zone info and colored ranges (M4 step 4.1)
+
+Spec: `notes/spec-4.1-zone-info.md`. Two parts: the client's difficulty colors (for the fallback table and the `DifficultyKey` rule), then the hover check of 4.1b (to do).
+
+**Difficulty colors** (2026-10-19, beta, level 18 character in Stormwind; screenshots 191328, 191438, 191456, 191512, 191700):
+
+```
+/dump GetQuestDifficultyColor(UnitLevel("player") + 5)
+/dump GetQuestDifficultyColor(UnitLevel("player"))
+/dump GetQuestDifficultyColor(UnitLevel("player") - 4)
+/dump GetQuestDifficultyColor(1)
+/run local p=UnitLevel("player") for d=-12,0 do local c=GetQuestDifficultyColor(p+d) print(d,p+d,c.font,c.r,c.g,c.b) end
+```
+
+| Key | Font | First color `r, g, b` | Second (lighter) `r, g, b` | Source |
+| --- | --- | --- | --- | --- |
+| red | `QuestDifficulty_Impossible` | 1, 0.1, 0.1 | 1, 0.4, 0.4 | level + 5 |
+| orange | `QuestDifficulty_VeryDifficult` | 1, 0.5, 0.25 | 1, 0.75, 0.44 | level + 3 (P8) |
+| yellow | `QuestDifficulty_Difficult` | 1, 0.82, 0 | 1, 1, 0.1 | own level, level - 4 |
+| green | `QuestDifficulty_Standard` | 0.25, 0.75, 0.25 | not read | the loop, level - 5 |
+| grey | `QuestDifficulty_Trivial` | 0.5, 0.5, 0.5 | 0.7, 0.7, 0.7 | level 1 |
+
+The loop (player level 18), diff and level:
+
+```
+-12 to -6 (levels 6-12)  Trivial    0.5 0.5 0.5
+-5        (level 13)     Standard   0.25 0.75 0.25
+-4 to 0   (levels 14-18) Difficult  1 0.82 0
+```
+
+- **Yellow reaches 4 levels below, not 2**: Forever's rule is `diff >= -4` for yellow, where the design doc's fallback (Classic's rule) said `diff >= -2`. `Logic.DifficultyKey` and its tests change to match (spec 4.1a).
+- **Grey at or below 12 at level 18**, as `Logic.GreyLevel(18) = 18 - 1 - 5 = 12` says: the grey formula holds at this level; checked at one level only.
+- So at level 18 green is a single level (13). Not checked: above the player (+1, +2 yellow, +4 orange are assumed from P8's +3 orange and +5 red).
+- The five first colors become `FALLBACK_COLORS` in `Util.lua` (4.1b). Labels use the client's own colors anyway, since `GetQuestDifficultyColor` exists.
+

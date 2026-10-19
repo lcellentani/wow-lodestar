@@ -1,6 +1,6 @@
 # M4 step 4.1: zone info and colored level ranges
 
-Status: spec written 2026-10-19. User writes the code, Claude reviews.
+Status: spec written 2026-10-19; fallback colors probed and `DifficultyKey` change added the same day (P35). User writes the code, Claude reviews.
 Design doc reference: "Data model" (lookup rule, Zones "Level source"), "Feature set" (Difficulty colors), "Module specs" (ZoneLabels step 3).
 
 ## What this step is for
@@ -17,6 +17,14 @@ ZoneLabels (4.2) and the Tooltip (M5) both need two answers for a zone: "what is
 - **Commits**: your code as `[T2] feat(...)`, Claude's notes as a separate `[T4] docs(notes): ...`.
 
 ## 4.1a: pure logic in `Logic.lua`
+
+### Change: `Logic.DifficultyKey` uses Forever's yellow band
+
+P35 showed that Forever's client keeps yellow down to 4 levels below the player, not 2 as in Classic: at level 18, levels 14-18 are yellow, 13 green, 12 and below grey. The design doc's fallback table now says `diff >= -4` for yellow.
+
+- In `DifficultyKey`, the yellow check becomes `diff >= -4`.
+- Tests: "is yellow from 2 below to 2 levels above" becomes "from 4 below" (add level 21 at player 25); "is green from 6 below to 3 levels below" becomes "6 below to 5 below" (levels 19 and 20 at player 25; 22 is now yellow).
+- Add a test with P35's own numbers at player level 18: 14 yellow, 13 green, 12 grey. It pins the rule to what the client showed.
 
 ### `Logic.MergeZoneInfo(row, override, clientMin, clientMax)`
 
@@ -73,32 +81,22 @@ Hints:
 
 ## 4.1b: WoW side and in-game check
 
-### Before writing: probe the fallback colors (part of P35)
+### Fallback colors (probed, P35)
 
-P8 recorded only orange. Run these at any level, each line on its own, and send the screenshots:
+The client's first color for each key, from P35 and P8:
 
-```
-/dump GetQuestDifficultyColor(UnitLevel("player") + 5)
-```
-
-```
-/dump GetQuestDifficultyColor(UnitLevel("player"))
-```
-
-```
-/dump GetQuestDifficultyColor(UnitLevel("player") - 4)
-```
-
-```
-/dump GetQuestDifficultyColor(1)
-```
-
-Expected: red, yellow, green, and grey (from level 6 on, level 1 is grey). Claude records the four `r, g, b` values in P35; those, plus P8's orange, become the fallback table.
+| Key | `r, g, b` |
+| --- | --- |
+| red | 1, 0.1, 0.1 |
+| orange | 1, 0.5, 0.25 |
+| yellow | 1, 0.82, 0 |
+| green | 0.25, 0.75, 0.25 |
+| grey | 0.5, 0.5, 0.5 |
 
 ### `ns.LevelColorCode(level)` in `Util.lua`
 
 - If `GetQuestDifficultyColor` exists: `local color = GetQuestDifficultyColor(level)` (the first return value is the color, P8) and return `ns.Logic.ColorCode(color.r, color.g, color.b)`.
-- Otherwise: `local key = ns.Logic.DifficultyKey(level, UnitLevel("player"))` and return the code for `FALLBACK_COLORS[key]`, a file-level table with the five probed colors.
+- Otherwise: `local key = ns.Logic.DifficultyKey(level, UnitLevel("player"))` and return the code for `FALLBACK_COLORS[key]`, a file-level table with the five colors above.
 - Hint: write `FALLBACK_COLORS` as `{ red = { r = ..., g = ..., b = ... }, ... }` so both branches end in the same `ColorCode(c.r, c.g, c.b)` call.
 
 ### `ns.GetZoneInfo(mapID)` in `Core.lua`

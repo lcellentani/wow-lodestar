@@ -75,7 +75,7 @@ The MVP is three map overlays that read from one data table; v2 adds user-genera
 | --- | --- |
 | `diff >= 5` | red |
 | `diff >= 3` | orange |
-| `diff >= -2` | yellow |
+| `diff >= -4` | yellow |
 | `-diff <= greenRange` | green |
 | otherwise | grey |
 
