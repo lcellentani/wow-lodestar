@@ -215,20 +215,26 @@ describe("DifficultyKey", function()
     expectKey({ 28, 29 }, "orange", 25)
   end)
 
-  it("is yellow from 2 below to 2 levels above", function()
-    expectKey({ 23, 25, 27 }, "yellow", 25)
+  it("is yellow from 4 below to 2 levels above", function()
+    expectKey({ 21, 23, 25, 27 }, "yellow", 25)
   end)
 
-  it("is green from 6 below to 3 levels below", function()
-    expectKey({ 19, 22 }, "green", 25)
+  it("is green from 6 below to 5 levels below", function()
+    expectKey({ 19, 20 }, "green", 25)
+  end)
+
+  it("matches the Forever bands observed at player level 18", function()
+    expectKey({ 14 }, "yellow", 18)
+    expectKey({ 13 }, "green", 18)
+    expectKey({ 12 }, "grey", 18)
   end)
 
   it("is grey from 7 or more levels below", function()
     expectKey({ 1, 18 }, "grey", 25)
   end)
 
-  it("is green below a low-level player when nothing is grey yet", function()
-    expectKey({ 1 }, "green", 5)
+  it("is yellow down to 4 levels below a low-level player", function()
+    expectKey({ 1 }, "yellow", 5)
   end)
 end)
 
@@ -573,5 +579,129 @@ describe("FormatProbe", function()
   it("formats an info line", function()
     local result = Logic.FormatProbe("P6", "info", "client levels: none")
     assert(result == "P6 info: client levels: none", "got " .. tostring(result))
+  end)
+end)
+
+describe("MergeZoneInfo", function()
+  local elwynn = { min = 1, max = 14, faction = "Alliance", kind = "zone" }
+
+  local function expectRange(info, min, max, source)
+    assert(info.min == min and info.max == max and info.source == source,
+      "got " .. tostring(info.min) .. "-" .. tostring(info.max) .. " (" .. tostring(info.source) .. ")")
+  end
+
+  it("uses the table range when the client range is zero", function()
+    local info = Logic.MergeZoneInfo(elwynn, nil, 0, 0)
+    expectRange(info, 1, 14, "table")
+    assert(info.faction == "Alliance", "got " .. tostring(info.faction))
+    assert(info.kind == "zone", "got " .. tostring(info.kind))
+  end)
+
+  it("uses the table range when the client range is nil", function()
+    local info = Logic.MergeZoneInfo(elwynn, nil, nil, nil)
+    expectRange(info, 1, 14, "table")
+  end)
+
+  it("prefers the client range over the table", function()
+    local info = Logic.MergeZoneInfo(elwynn, nil, 2, 12)
+    expectRange(info, 2, 12, "client")
+  end)
+
+  it("prefers a complete override range over client and table", function()
+    local info = Logic.MergeZoneInfo(elwynn, { min = 5, max = 10 }, 2, 12)
+    expectRange(info, 5, 10, "override")
+  end)
+
+  it("ignores an incomplete override range and falls back to the client", function()
+    local info = Logic.MergeZoneInfo(elwynn, { min = 5 }, 2, 12)
+    expectRange(info, 2, 12, "client")
+  end)
+
+  it("falls back to the table when an override range is incomplete", function()
+    local info = Logic.MergeZoneInfo(elwynn, { min = 5 }, 0, 0)
+    expectRange(info, 1, 14, "table")
+  end)
+
+  it("merges label coordinates independently and keeps zero coordinates", function()
+    local row = { labelX = 0.4, labelY = 0.6 }
+    local override = { labelY = 0.7 }
+    local info = Logic.MergeZoneInfo(row, override, 0, 0)
+    assert(info.labelX == 0.4, "got labelX " .. tostring(info.labelX))
+    assert(info.labelY == 0.7, "got labelY " .. tostring(info.labelY))
+
+    local zeroInfo = Logic.MergeZoneInfo({ labelX = 0 }, nil, 0, 0)
+    assert(zeroInfo.labelX == 0, "got labelX " .. tostring(zeroInfo.labelX))
+  end)
+
+  it("prefers override faction and keeps the row kind", function()
+    local info = Logic.MergeZoneInfo(elwynn, { faction = "Horde" }, 0, 0)
+    assert(info.faction == "Horde", "got " .. tostring(info.faction))
+    assert(info.kind == "zone", "got " .. tostring(info.kind))
+  end)
+
+  it("keeps city metadata without a level range", function()
+    local city = { faction = "Horde", kind = "city" }
+    local info = Logic.MergeZoneInfo(city, nil, 0, 0)
+    assert(info.min == nil and info.max == nil and info.source == nil, "unexpected range or source")
+    assert(info.faction == "Horde", "got " .. tostring(info.faction))
+    assert(info.kind == "city", "got " .. tostring(info.kind))
+  end)
+
+  it("returns a table of nil fields when there is no data", function()
+    local info = Logic.MergeZoneInfo(nil, nil, nil, nil)
+    assert(type(info) == "table", "got " .. type(info))
+    assert(info.min == nil and info.max == nil and info.source == nil, "unexpected range or source")
+    assert(info.faction == nil and info.kind == nil, "unexpected faction or kind")
+    assert(info.labelX == nil and info.labelY == nil, "unexpected label coordinates")
+  end)
+
+  it("returns a new table without modifying the row", function()
+    local info = Logic.MergeZoneInfo(elwynn, nil, 0, 0)
+    assert(info ~= elwynn, "returned the original row")
+    info.min = 99
+    assert(elwynn.min == 1, "changed the original row min to " .. tostring(elwynn.min))
+  end)
+end)
+
+describe("ColorCode", function()
+  it("formats white", function()
+    local result = Logic.ColorCode(1, 1, 1)
+    assert(result == "|cffffffff", "got " .. tostring(result))
+  end)
+
+  it("formats black", function()
+    local result = Logic.ColorCode(0, 0, 0)
+    assert(result == "|cff000000", "got " .. tostring(result))
+  end)
+
+  it("rounds the orange color channels to the nearest hex values", function()
+    local result = Logic.ColorCode(1, 0.5, 0.25)
+    assert(result == "|cffff8040", "got " .. tostring(result))
+  end)
+
+  it("formats the probed green color", function()
+    local result = Logic.ColorCode(0.25, 0.75, 0.25)
+    assert(result == "|cff40bf40", "got " .. tostring(result))
+  end)
+end)
+
+describe("FormatLevelRange", function()
+  local function fakeCode(level)
+    return "<" .. level .. ">"
+  end
+
+  it("colors each end of a level range and leaves the dash neutral", function()
+    local result = Logic.FormatLevelRange(15, 25, fakeCode)
+    assert(result == "<15>15|r-<25>25|r", "got " .. tostring(result))
+  end)
+
+  it("formats a single-level range with one color", function()
+    local result = Logic.FormatLevelRange(60, 60, fakeCode)
+    assert(result == "<60>60|r", "got " .. tostring(result))
+  end)
+
+  it("returns nil when the minimum is nil", function()
+    local result = Logic.FormatLevelRange(nil, nil, fakeCode)
+    assert(result == nil, "got " .. tostring(result))
   end)
 end)

@@ -83,7 +83,7 @@ function Logic.DifficultyKey(level, playerLevel)
     return "red"
   elseif diff >= 3 then
     return "orange"
-  elseif diff >= -2 then
+  elseif diff >= -4 then
     return "yellow"
   elseif level > Logic.GreyLevel(playerLevel) then
     return "green"
@@ -172,4 +172,51 @@ end
 
 function Logic.FormatEntrance(x, y)
   return string.format("x = %.3f, y = %.3f", x, y)
+end
+
+function Logic.MergeZoneInfo(row, override, clientMin, clientMax)
+  local info = {}
+
+  if override and override.min and override.max then
+    info.min = override.min
+    info.max = override.max
+    info.source = "override"
+  elseif clientMin and clientMin > 0 and clientMax then
+    info.min = clientMin
+    info.max = clientMax
+    info.source = "client"
+  elseif row and row.min then
+    info.min = row.min
+    info.max = row.max
+    info.source = "table"
+  end
+
+  info.faction = (override and override.faction) or (row and row.faction)
+  info.kind = (override and override.kind) or (row and row.kind)
+  info.labelX = (override and override.labelX) or (row and row.labelX)
+  info.labelY = (override and override.labelY) or (row and row.labelY)
+
+  return info
+end
+
+function Logic.ColorCode(r, g, b)
+  return string.format(
+    "|cff%02x%02x%02x",
+    math.floor(r * 255 + 0.5),
+    math.floor(g * 255 + 0.5),
+    math.floor(b * 255 + 0.5)
+  )
+end
+
+-- min and max come together (MergeZoneInfo); no nil check for max.
+function Logic.FormatLevelRange(min, max, codeFor)
+  if min == nil then
+    return nil
+  end
+
+  if min == max then
+    return codeFor(min) .. min .. "|r"
+  end
+
+  return codeFor(min) .. min .. "|r-" .. codeFor(max) .. max .. "|r"
 end
