@@ -50,6 +50,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P36 | pin hooks, pin template, label fonts | [x] | 2026-10-19 | beta |
 | P37 | M4 ZoneLabels test pin | [x] | 2026-10-19 | beta |
 | P38 | M4 ZoneLabels labels | [x] | 2026-10-19 | beta |
+| P39 | M4 label names on the maximized map | [x] | 2026-10-19 | beta |
 
 ## Confirmed APIs
 
@@ -1374,4 +1375,26 @@ Problems for step 4.3:
 - **Labels on Blizzard's capital icons** in the zones that hold a capital: Tirisfal Glades (Undercity), Dun Morogh (Ironforge), Durotar (Orgrimmar), Mulgore (Thunder Bluff), Teldrassil (Darnassus). Readable, but crowded.
 - The player arrow is drawn above the labels (Elwynn's `1` hidden under it): expected wherever the player stands; no change planned.
 - Fix in the design: `labelX, labelY` in `Data/Zones.lua` for the zones above, read off the map's `Cursor:` readout.
+
+### P39: zone names on the maximized map (M4 step 4.3, first iteration)
+
+Names plus ranges were tried on every label after P38. In the small Map & Quest Log window they overlapped badly (screenshots 233840, 233848); on the maximized map they read well (233953), since the labels keep their screen size while the map doubles. Shrinking every label with `SetScalingLimits(1, 0.75, 1.0)` made them hard to read on the maximized map (234149) and was reverted. Decided with the user: **names only on the maximized map**, ranges only in the small window; zone details on hover come from the M5 Tooltip. Hand-placed `labelX, labelY` were rejected for now: they need upkeep if maps change.
+
+Code written by Claude at the user's request for fast iteration (2026-10-19): `Pins.xml` gets a `Name` FontString anchored above `Label` (`relativeKey="$parent.Label"`), with `Label` centered on the pin; `RefreshAllData` passes the zone name only when `WorldMapFrame:IsMaximized()`.
+
+Result (2026-10-19, beta, level 18 character; screenshots 234400, 234638, 234649, 235131, 235651, 235658):
+
+```
+/dump type(WorldMapFrame.IsMaximized), WorldMapFrame:IsMaximized()
+[1]="function", [2]=false        <- small window; true when maximized (user)
+
+/dump type(WorldMapFrame.Maximize), type(WorldMapFrame.Minimize)
+[1]="function", [2]="function"
+```
+
+- `WorldMapFrame:IsMaximized()` exists and tells the two window sizes apart.
+- **The map does not refresh data providers on maximize or minimize**: names appeared only after a continent switch. Fixed with `hooksecurefunc(WorldMapFrame, "Maximize" / "Minimize", ...)`, installed once, which calls `RefreshAllData` while the module is enabled and the map shown; names now follow the window size at once.
+- **`AddDataProvider` does not draw on a map that is already open**: after `/ls toggle ZoneLabels` off and on with the map open, labels came back only after a continent switch. `OnEnable` now calls `RefreshAllData` when the map is shown, and `OnDisable` calls `RemoveAllData` before `RemoveDataProvider`; toggling now works at once in both sizes.
+- The ranges sit at the zone centers in both sizes; names hang above them on the maximized map.
+- Still overlapping: Duskwood, Deadwind Pass and Swamp of Sorrows (both sizes); Searing Gorge and Badlands (small window). Candidate fix: automatic collision handling (nudge or hide), not hand-placed positions.
 
