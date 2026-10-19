@@ -47,7 +47,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
 | P34 | M2 /ls probe here | [x] | 2026-10-19 | beta |
 | P35 | M4 zone info, colors in /ls probe hover | [x] | 2026-10-19 | beta |
-| P36 | pin hooks, pin template, label fonts | [ ] | | |
+| P36 | pin hooks, pin template, label fonts | [x] | 2026-10-19 | beta |
 | P37 | M4 ZoneLabels test pin | [ ] | | |
 | P38 | M4 ZoneLabels labels | [ ] | | |
 
@@ -1307,4 +1307,37 @@ P7 info: cursor 46.6, 30.2 on 1415: 1416 Alterac Mountains, 28-44 (table)   <- b
 - Source `table` everywhere, as expected: `GetMapLevels` still returns zeros (P6) and no override is saved.
 - Not hovered in game: a city (Stormwind, `no level data`) and Burning Steppes. Both were checked outside the game the same evening with the real `Logic.lua`, `Util.lua`, `Core.lua` and `Data/Zones.lua` and stubbed WoW functions, which also showed the fallback colors (`GetQuestDifficultyColor` removed) giving the same result as the client at level 18.
 - The SavedVariables log (after the next `/reload`, 22:27) has the same four lines with the raw codes: grey `|cff808080`, yellow `|cffffd100`, green `|cff40bf40`, red `|cffff1a1a`, the client's P35 colors through `Logic.ColorCode`.
+
+### P36: pin hooks, pin template, label fonts (M4 step 4.2a)
+
+The pieces the ZoneLabels pin needs that P3 and P17 did not cover. Spec: `notes/spec-4.2-zone-labels.md`.
+
+Result (2026-10-19, beta; screenshots 223511, 223636, 223914):
+
+```
+/dump type(MapCanvasPinMixin.OnAcquired), type(MapCanvasPinMixin.SetScalingLimits), type(MapCanvasDataProviderMixin.RefreshAllData), type(MapCanvasDataProviderMixin.RemoveAllData)
+[1]="function", [2]="function", [3]="function", [4]="function"
+
+/dump C_XMLUtil and C_XMLUtil.GetTemplateInfo("MapCanvasPinTemplate")
+empty result
+
+/dump type(GameFontHighlightOutline), type(GameFontNormalOutline)
+[1]="table", [2]="table"
+
+/dump C_XMLUtil ~= nil, C_XMLUtil and C_XMLUtil.GetTemplateInfo("GameTooltipTemplate")
+[1]=true,
+[2]={ inherits="SharedTooltipTemplate", type="GameTooltip", keyValues={ { key="supportsDataRefresh", type="boolean", value="true", keyType="string" } },
+      height=0, width=0, sourceLocation="Interface/AddOns/Blizzard_GameTooltip/Mainline/GameTooltip.xml:4" }
+
+/run for _,n in ipairs({"MapCanvasPinTemplate","AreaPOIPinTemplate","DungeonEntrancePinTemplate"}) do local t=C_XMLUtil.GetTemplateInfo(n) print(n, t and t.type, t and t.inherits, t and t.sourceLocation) end
+MapCanvasPinTemplate nil nil nil
+AreaPOIPinTemplate Frame LegendHighlightableMapPoiPinTemplate, BaseSuperTrackableMapPoiPinTemplate Interface/AddOns/Blizzard_SharedMapDataProviders/AreaPOIDataProvider.xml:5
+DungeonEntrancePinTemplate Frame LegendHighlightableMapPoiPinTemplate, BaseSuperTrackableMapPoiPinTemplate Interface/AddOns/Blizzard_SharedMapDataProviders/DungeonEntranceDataProvider.xml:5
+```
+
+- The pin hook `OnAcquired`, `SetScalingLimits`, and the provider's `RefreshAllData` and `RemoveAllData` exist.
+- `GameFontHighlightOutline` and `GameFontNormalOutline` exist: font objects for the label text.
+- **`MapCanvasPinTemplate` does not exist.** `C_XMLUtil.GetTemplateInfo` works (it finds `GameTooltipTemplate`), so its `nil` for that name is real. Blizzard's own map pins are `Frame` templates that inherit only POI-specific templates (legend highlight, super-tracking), not a common pin base. Lodestar's pin template is therefore a plain virtual `Frame` with its mixin; the design doc and spec 4.2 are changed.
+- **Forever's Blizzard UI is the Mainline (retail) code**: `GameTooltip.xml` loads from `Blizzard_GameTooltip/Mainline/`. The APIs probed so far match Classic Era, but templates and frame details can follow retail, so each one is checked before use (design doc, "Target client and API assumptions").
+- `C_XMLUtil.GetTemplateInfo(name)` is a handy probe for any template: it returns `type`, `inherits` and `sourceLocation`. Not used in addon code, so not in `.luacheckrc`.
 

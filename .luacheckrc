@@ -25,6 +25,7 @@ read_globals = {
   "ChatFontNormal",          -- P28
   "time", "date", "GetTime", -- P16
   "CreateFromMixins", "Mixin", "MapCanvasDataProviderMixin", "GameTooltip", -- P17
+  "GameFontHighlightOutline", "GameFontNormalOutline", -- P36
 }
 
 files["tests/**"] = { globals = { "describe", "it", "DEFAULT_CHAT_FRAME", "date" } }  -- harness helpers; fakes for util_spec

@@ -1,6 +1,6 @@
 # M4 step 4.2: ZoneLabels, the first map overlay
 
-Status: spec written 2026-10-19. User writes the code, Claude reviews and does `.luacheckrc`.
+Status: spec written 2026-10-19; P36 done the same day: no `MapCanvasPinTemplate` on Forever, so `Pins.xml` uses a plain frame. User writes the code, Claude reviews and does `.luacheckrc`.
 Design doc reference: "Architecture" (load order, `Pins.xml`, one namespace, no taint), "Data model" (map positions, `ns.GetZoneRect`), "Module specs" (how map overlays draw, ZoneLabels).
 
 ## What this step is for
@@ -11,7 +11,7 @@ Step 4.1 knows each zone's range and how to color it; this step draws it on the 
 
 - **Two checkpoints.** 4.2a: a probe (P36), then one test pin at the center of each continent (P37). 4.2b: one label per zone with its colored range (P38).
 - **The provider talks to `WorldMapFrame` directly** (`GetMapID`, `AcquirePin`, `RemoveAllPinsByTemplate`, all confirmed in P3, P7, P17), not to the provider's own `GetMap()`, which is unprobed. There is only one map canvas anyway.
-- **The pin is set up in `OnAcquired`**: text, position and scaling, each time the map hands out the pin. No `OnLoad` script, so we do not depend on how `MapCanvasPinTemplate` calls it.
+- **The pin is set up in `OnAcquired`**: text, position and scaling, each time the map hands out the pin. No `OnLoad` script: the template has no base template that would call it (P36).
 - **Labels never take the mouse.** Clicking a zone on a continent map zooms into it; a label sitting on top must not block that.
 - **Left for 4.3**: refresh on `PLAYER_LEVEL_UP` (the event name is unprobed), tuning the zoom scaling, overlap with Blizzard's zone names, both map sizes, labels that need `labelX, labelY`.
 - **Who writes what**: you write `Pins.xml`, `Modules/ZoneLabels.lua`, the `.toc` lines and the Lua changes; Claude adds `LodestarZoneLabelPinMixin` to `.luacheckrc` (done with this spec) and records the probes. Commits as before: your code `[T2]`, Claude's notes `[T4]`.
@@ -40,14 +40,16 @@ Expected: a table describing the template (its type `Frame`). If `C_XMLUtil` is 
 
 Expected: two `"table"`: font objects for the label text. Claude records P36 and adds the confirmed names to `.luacheckrc` before you write the code.
 
+Result (P36): the four functions and both fonts exist, but **`MapCanvasPinTemplate` does not**: `C_XMLUtil.GetTemplateInfo` finds `GameTooltipTemplate` and returns `nil` for it. Forever's Blizzard UI is the Mainline (retail) code, and its own map pins (`AreaPOIPinTemplate`, `DungeonEntrancePinTemplate`) inherit only POI-specific templates (`LegendHighlightableMapPoiPinTemplate`, `BaseSuperTrackableMapPoiPinTemplate`). So the Lodestar template is a plain `Frame` with the mixin and no `inherits`; the skeleton below is already changed.
+
 ### `Pins.xml` (new file, repo root)
 
 Templates only; all behavior is in Lua. The skeleton (XML is boilerplate, not part of learning Lua, so it is given almost whole):
 
 ```xml
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Frame name="LodestarZoneLabelPinTemplate" inherits="MapCanvasPinTemplate"
-         mixin="LodestarZoneLabelPinMixin" enableMouse="false" virtual="true">
+  <Frame name="LodestarZoneLabelPinTemplate" mixin="LodestarZoneLabelPinMixin"
+         enableMouse="false" virtual="true">
     <Size x="1" y="1"/>
     <Layers>
       <Layer level="OVERLAY">
@@ -63,6 +65,7 @@ Templates only; all behavior is in Lua. The skeleton (XML is boilerplate, not pa
 ```
 
 - `virtual="true"`: a template, not a frame; the map creates frames from it.
+- No `inherits`: Forever has no `MapCanvasPinTemplate` (P36). The map's pin behavior comes from the mixin, which is built on `MapCanvasPinMixin`.
 - `parentKey="Label"`: the FontString becomes `self.Label` in the mixin, like a member pointer set up by the template.
 - `mixin=` names a global table, so the mixin must exist before `Pins.xml` loads: `.toc` order matters (below).
 - The 1x1 frame is only an anchor point; the text is centered on it and drawn outside it.

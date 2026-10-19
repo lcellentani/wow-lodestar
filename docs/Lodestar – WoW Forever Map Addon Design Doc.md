@@ -48,6 +48,8 @@ Lodestar is for personal use: the source is public on GitHub under the MIT licen
 | A7 | The client may know zone level ranges through `C_Map.GetMapLevels(uiMapID)` (returns player min and max level, then pet levels) | If present, level ranges come from the game and `Zones.lua` no longer has to be filled by hand | `/dump C_Map.GetMapLevels ~= nil`, then `/dump C_Map.GetMapLevels(1429)` |
 | A8 | The zone under the cursor can be found from the cursor position (`ScrollContainer:GetNormalizedCursorPosition`, `C_Map.GetMapInfoAtPosition`) | The zone tooltip needs to know which zone is hovered; Classic Era maps show only a one-line name label on hover, not a tooltip the addon could extend | Hover a zone on a continent map and run `/dump C_Map.GetMapInfoAtPosition(WorldMapFrame:GetMapID(), WorldMapFrame.ScrollContainer:GetNormalizedCursorPosition())` (bind it to a macro so the cursor stays on the map) |
 
+**Finding (P36, 2026-10-19):** Forever's Blizzard UI files load from `Mainline` folders (for example `Blizzard_GameTooltip/Mainline/GameTooltip.xml`), the retail version of the UI, not the Classic one. The APIs probed so far match Classic Era, but XML templates and Blizzard frame details can follow retail: check each one before relying on it.
+
 A failed probe changes the design, not just a line of code, so run the design probes (P1-P9) in the "Beta verification checklist" section before writing code.
 
 ## Feature set
@@ -124,7 +126,7 @@ Lodestar/             # repo root, linked into Interface/AddOns as Lodestar
     Instances.lua
     Tooltip.lua
     Waypoints.lua      # v2
-  Pins.xml             # virtual pin templates (MapCanvasPinTemplate) used by the map overlays
+  Pins.xml             # virtual pin templates (plain frames with a mixin) used by the map overlays
   Debug.lua            # /ls probe, /ls dump, the SavedVariables log and the copy window
   Options.lua          # slash commands, later a settings panel
   tests/               # run.lua harness and *_spec.lua unit tests for Logic.lua (and Util.lua against fakes), run outside the game; not listed in the .toc
@@ -247,7 +249,7 @@ Each module is independent, can be disabled, and reads only from the data layer 
 **How map overlays draw.** ZoneLabels, Instances and Waypoints each follow the same pattern, which is how Blizzard's own map icons work:
 
 - A data provider: a table made with `CreateFromMixins(MapCanvasDataProviderMixin)` that implements `RefreshAllData()` and `RemoveAllData()`. Blizzard calls `RefreshAllData` when the map opens and when it changes to another map.
-- A pin template in `Pins.xml` that inherits `MapCanvasPinTemplate`, with a Lua mixin based on `MapCanvasPinMixin`. `RefreshAllData` first calls `map:RemoveAllPinsByTemplate(template)`, then `map:AcquirePin(template, data)` for each item. The pin places itself with `self:SetPosition(x, y)` in the current map's normalized coordinates.
+- A pin template in `Pins.xml`: a virtual `Frame` with no base template, with a Lua mixin based on `MapCanvasPinMixin`. Forever's UI is Blizzard's Mainline (retail) code, which has no `MapCanvasPinTemplate`; its own pin templates inherit only POI-specific templates, so a plain frame with the mixin is the base (P36). `RefreshAllData` first calls `map:RemoveAllPinsByTemplate(template)`, then `map:AcquirePin(template, data)` for each item. The pin places itself with `self:SetPosition(x, y)` in the current map's normalized coordinates.
 - Scaling with zoom is set per template with `SetScalingLimits`, so text and icons stay readable when zoomed in instead of growing with the map.
 - The map owns the pin pools, so objects are reused across refreshes and no module keeps its own pool.
 - **Which maps get overlays.** `RefreshAllData` first removes its pins, then checks the current map's `mapType` from `C_Map.GetMapInfo`. ZoneLabels draws only on continent maps (`Enum.UIMapType.Continent`); Instances draws on continent and zone maps (`Continent` and `Zone`). On the world map (`World`), the cosmic map and anything else, the providers draw nothing, because about 45 labels on the small world map would overlap heavily.
