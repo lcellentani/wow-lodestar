@@ -18,10 +18,23 @@ end
 
 function provider:RefreshAllData()
   self:RemoveAllData()
+
   local mapID = WorldMapFrame:GetMapID()
   local mapInfo = C_Map.GetMapInfo(mapID)
-  if mapInfo and mapInfo.mapType == Enum.UIMapType.Continent then
-    WorldMapFrame:AcquirePin(TEMPLATE, "TEST", 0.5, 0.5)
+  if mapInfo == nil or mapInfo.mapType ~= Enum.UIMapType.Continent then
+    return
+  end
+
+  for _, child in ipairs(C_Map.GetMapChildrenInfo(mapID, Enum.UIMapType.Zone) or {}) do
+    local info = ns.GetZoneInfo(child.mapID)
+    local text = ns.Logic.FormatLevelRange(info.min, info.max, ns.LevelColorCode)
+    if text ~= nil then
+      local minX, maxX, minY, maxY = ns.GetZoneRect(child.mapID, mapID)
+      if minX ~= nil then
+        local x, y = ns.Logic.LabelPosition(info, minX, maxX, minY, maxY)
+        WorldMapFrame:AcquirePin(TEMPLATE, text, x, y)
+      end
+    end
   end
 end
 

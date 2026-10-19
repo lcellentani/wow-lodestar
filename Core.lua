@@ -1,6 +1,7 @@
 local addonName, ns = ...
 
 local eventFrame = CreateFrame("Frame")
+local rectCache = {}
 
 local DEFAULTS = {
   version = 1,
@@ -28,6 +29,31 @@ function ns.GetZoneInfo(mapID)
   end
 
   return ns.Logic.MergeZoneInfo(row, override, clientMin, clientMax)
+end
+
+function ns.GetZoneRect(zoneID, mapID)
+  local mapCache = rectCache[mapID]
+  if mapCache == nil then
+    mapCache = {}
+    rectCache[mapID] = mapCache
+  end
+
+  local rect = mapCache[zoneID]
+  if rect == nil then
+    local minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(zoneID, mapID)
+    if ns.Logic.IsRectOnMap(minX, maxX, minY, maxY) then
+      rect = { minX, maxX, minY, maxY }
+    else
+      rect = false
+    end
+    mapCache[zoneID] = rect
+  end
+
+  if rect == false then
+    return nil
+  end
+
+  return unpack(rect)
 end
 
 -- Module registry

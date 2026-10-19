@@ -220,3 +220,11 @@ function Logic.FormatLevelRange(min, max, codeFor)
 
   return codeFor(min) .. min .. "|r-" .. codeFor(max) .. max .. "|r"
 end
+
+function Logic.LabelPosition(info, minX, maxX, minY, maxY)
+  if info.labelX ~= nil and info.labelY ~= nil then
+    return info.labelX, info.labelY
+  end
+
+  return (minX + maxX) / 2, (minY + maxY) / 2
+end
