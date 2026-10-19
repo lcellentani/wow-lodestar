@@ -45,7 +45,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P31 | M2 /ls probe | [x] | 2026-10-19 | beta |
 | P32 | dungeon entrance API | [x] | 2026-10-19 | beta |
 | P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
-| P34 | M2 /ls probe here | [ ] | | |
+| P34 | M2 /ls probe here | [x] | 2026-10-19 | beta |
 
 ## Confirmed APIs
 
@@ -526,9 +526,11 @@ Line used from 2026-10-19 (prints map ID, name, type and position in one go):
 | Excavation Site: Wetlands | 1437 Wetlands (type 3) | 0.53649 | 0.65965 | 2026-10-19, beta, standing at the dungeon's **meeting stone**, not the portal (screenshot 012839); "Discovered Thelgen Rock" on arrival, so the portal is likely in or by the Thelgen Rock cave; the level 18 character could not go further |
 | The Stockade (vanilla) | 1453 Stormwind City (type 3) | 0.53353 | 0.70861 | 2026-10-19, beta, at the dungeon's meeting stone, which stands just outside the door of the building that holds the prison (screenshot 013104; user), so it marks the entrance well. The seeded approximate value (Claude's recall, 0.405, 0.559) was about 0.13 and 0.15 off, so recalled entrances can be badly wrong: check each one in game before trusting its marker |
 | Ragefire Chasm (vanilla) | 1454 Orgrimmar (type 3) | 0.51230 | 0.48991 | 2026-10-19, beta, Horde character at the dungeon's meeting stone (screenshot 014823). The seeded approximate value (0.513, 0.500) was close, within 0.001 and 0.010 |
+| City of Dalaran | 1416 Alterac Mountains (type 3) | 0.089 | 0.577 | 2026-10-19, beta, at the dungeon's meeting stone, read with `/ls probe here` (P34; screenshot 190032), so three decimals only. Confirms the zone assumed when seeding: Alterac Mountains, not Hillsbrad Foothills. The user reached it by travelling from Southshore, since the portal was gone |
 | Ruins of Lordaeron | 1458 Undercity (type 3) | 0.70740 | 0.17820 | 2026-10-19, beta, Horde character standing in front of the dungeon's meeting stone (screenshot 015445; first reported as the portal, corrected by the user). The entrance is in Undercity, not in Tirisfal Glades as the guides said |
 
-- City of Dalaran: not measured; the user's portal to Dalaran was no longer available on 2026-10-19 (probably disabled). Its row keeps no position and the assumed zone (Alterac Mountains); to measure on the live client.
+- City of Dalaran: the user's portal to Dalaran was no longer available on 2026-10-19 (probably disabled); the meeting stone was reached over land the same evening (row above).
+- From 2026-10-19 on, readings use `/ls probe here` (P34) instead of the `/run` line: same values, rounded to three decimals, and saved in the log.
 
 ## Other probes
 
@@ -1229,8 +1231,25 @@ All 71 (index, fullName, minLevelSuggestion, maxLevelSuggestion, maxNumPlayers):
 71 Stormwind Stockades 24 32 5
 ```
 
-- **41 zone activities** (players 0), each with Forever's suggested range. They are wider than the Classic wiki ranges seeded in `Data/Zones.lua` (Elwynn 1-14 vs 1-10, Westfall 8-24 vs 10-20) and include the Forever zones: Zephras Isle 1-14, Mount Hyjal 55-60, Riverglades 33-54. Missing: Moonglade, Deadwind Pass, Shen'dralas and the six capitals. Whether zone labels use these ranges is an M3 decision.
+- **41 zone activities** (players 0), each with Forever's suggested range. They are wider than the Classic wiki ranges seeded in `Data/Zones.lua` (Elwynn 1-14 vs 1-10, Westfall 8-24 vs 10-20) and include the Forever zones: Zephras Isle 1-14, Mount Hyjal 55-60, Riverglades 33-54. Missing: Moonglade, Deadwind Pass, Shen'dralas and the six capitals. Decided 2026-10-19: zone labels use these ranges; `Data/Zones.lua` was updated with all 41 (see the design doc's Zones "Level source").
 - **29 dungeons** (players 5, Upper Blackrock Spire 10), one activity per wing (Scarlet Monastery x4, Dire Maul x3, Stratholme x2). Four Forever dungeons are in the beta: Hall of Thanes 13-20, City of Dalaran 28-35, Ruins of Lordaeron 15-22, Excavation Site: Wetlands 26-33.
 - **Missing**: Ragefire Chasm for the Alliance character; a Horde character's list has it as `Ragefire Chasm 13 18` (2026-10-19, screenshot 014906), so the group finder lists faction dungeons only to their faction. Also missing: all raids (the guides say raids unlock on 2026-12-09), and the Forever dungeons the guides list but the beta lacks (The Drowned City, Krol'dok Stronghold, Alcaz Island Prison, Blackmaw Hold, Shaper's Terrace).
 - Only `minLevelSuggestion`, `maxLevelSuggestion`, `maxNumPlayers` and `fullName` were read per activity; `mapID` was 0 for `Custom` and is not yet checked for a dungeon.
 - Not used in addon code yet, so not added to `.luacheckrc`; Claude seeds `Data/Instances.lua` levels from this table.
+
+### P34: `/ls probe here` (M2 step 2.6e)
+
+`/ls probe here` reports the character's own map and position as one `P12 info` line, with a ready-made `x = ..., y = ...` fragment for `Data/Instances.lua` (`Logic.FormatEntrance`, three decimals). It replaces the long `/run` line of P12. Spec: `notes/spec-2.6-debug.md`.
+
+Result (2026-10-19, beta; screenshots 183343, 183529, 190032):
+
+```
+P12 info: player 4.7, 57.3 on 1437 Wetlands, Zone: x = 0.047, y = 0.573          <- by Menethil Harbor's docks
+P12 info: player 8.9, 57.7 on 1416 Alterac Mountains, Zone: x = 0.089, y = 0.577 <- City of Dalaran meeting stone
+```
+
+- **Matches the game's readout**: at Menethil the world map's `Player: 4.7, 57.3` (screenshot 183529) is the same as the readable part of the line.
+- **Copy window**: `/ls copy` after the Dalaran reading gave `2026-10-19 19:00:24 /ls probe` and the line above, so readings land in the output kept for `/ls copy` (and the log).
+- The spec's comparison at an already measured meeting stone (Hall of Thanes) was not repeated; the match with the map readout covers the same thing, since the `/run` line read the same `GetPlayerMapPosition`.
+- The copy header says `/ls probe`, not `/ls probe here`: `Emit` is given the command name only, as for `hover`.
+- No "not a zone map" case seen yet (both readings on zone maps).

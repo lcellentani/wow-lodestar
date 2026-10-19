@@ -180,6 +180,8 @@ ns.Zones = {
 
 Field values (decided 2026-10-18, when the table was seeded): `faction` is `"Alliance"`, `"Horde"` or `"Contested"` (Moonglade counts as Contested), or `""` while still unknown (the Forever zones, to fill in from the game); `kind` is `"zone"` or `"city"`. The six capitals are `kind = "city"` with no `min`/`max`, so they get no label but the tooltip can still name them as cities. `tests/zones_spec.lua` checks every row against these rules and against the zone IDs `/ls dump` listed (P30).
 
+**Level source** (decided 2026-10-19): `C_Map.GetMapLevels` returns zeros on the beta (P6), so `Zones.lua` is where labels get their ranges. They come from the beta's group finder (`C_LFGList` suggested ranges, P33) for the 41 zones it lists, marked `-- forever, group finder P33`. These are Forever's own numbers and wider than the vanilla ones (Elwynn 1-14 against 1-10); Eastern Plaguelands and Winterspring go to 63, above the level cap, and are stored as the client gives them. Moonglade, Deadwind Pass and Shen'dralas are not in the group finder and keep their earlier source. The table is a snapshot, so the ranges are re-checked on the live client; reading `C_LFGList` at runtime was considered and left out, since it needs more code and its activity `mapID` field is unprobed.
+
 `labelX` and `labelY` are optional, in the parent continent's normalized coordinates. Set them only where the rectangle center lands badly (for example an L-shaped zone, or a zone whose center sits in water); otherwise the label goes at the center of the zone's rectangle.
 
 **Instances** (`Data/Instances.lua`).

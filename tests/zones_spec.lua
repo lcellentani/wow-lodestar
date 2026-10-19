@@ -18,8 +18,11 @@ local DUMPED_IDS = {
 local FACTIONS = { Alliance = true, Horde = true, Contested = true, [""] = true }
 local KINDS = { zone = true, city = true }
 
+-- The group finder suggests ranges up to 63, above the level cap (P33).
+local MAX_SUGGESTED_LEVEL = 63
+
 local function isLevel(n)
-  return type(n) == "number" and n >= 1 and n <= 60 and n == math.floor(n)
+  return type(n) == "number" and n >= 1 and n <= MAX_SUGGESTED_LEVEL and n == math.floor(n)
 end
 
 -- Test cases
@@ -43,11 +46,11 @@ describe("Zones data", function()
     end
   end)
 
-  it("has min and max together, as levels 1-60 with min <= max", function()
+  it("has min and max together, as levels 1-63 with min <= max", function()
     for id, row in pairs(Zones) do
       assert((row.min == nil) == (row.max == nil), id .. ": min and max must come together")
       if row.min ~= nil then
-        assert(isLevel(row.min) and isLevel(row.max), id .. ": levels must be whole numbers 1-60")
+        assert(isLevel(row.min) and isLevel(row.max), id .. ": levels must be whole numbers 1-63")
         assert(row.min <= row.max, id .. ": min " .. row.min .. " above max " .. row.max)
       end
     end

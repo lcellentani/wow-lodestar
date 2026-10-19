@@ -1,6 +1,6 @@
 # M2 step 2.6: `Debug.lua` (log, copy window, dump, probe)
 
-Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c done (P30, 2026-10-18); 2.6d done (P31, 2026-10-19); 2.6e (`/ls probe here`) added and detailed 2026-10-19. User writes the code, Claude reviews.
+Status: spec agreed 2026-10-17; 2.6a done (P27, 2026-10-18); 2.6b done (P28-P29, 2026-10-18); 2.6c done (P30, 2026-10-18); 2.6d done (P31, 2026-10-19); 2.6e (`/ls probe here`) added and detailed 2026-10-19, done (P34, 2026-10-19). User writes the code, Claude reviews.
 Design doc reference: "Settings and slash commands", "Getting output out of the game".
 
 ## What this step is for
