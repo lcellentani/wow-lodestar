@@ -49,7 +49,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P35 | M4 zone info, colors in /ls probe hover | [x] | 2026-10-19 | beta |
 | P36 | pin hooks, pin template, label fonts | [x] | 2026-10-19 | beta |
 | P37 | M4 ZoneLabels test pin | [x] | 2026-10-19 | beta |
-| P38 | M4 ZoneLabels labels | [ ] | | |
+| P38 | M4 ZoneLabels labels | [x] | 2026-10-19 | beta |
 
 ## Confirmed APIs
 
@@ -1355,4 +1355,23 @@ Result (2026-10-19, beta, level 18 character in Stormwind; screenshots 225843, 2
 - No errors.
 - So a pin template with no base template works with the map's pin pool on Forever: the overlay design holds (assumption A3 in practice, not only by function names).
 - For 4.3: the text is small next to Blizzard's lettering; Blizzard draws small building icons on the continent maps (one sits just under the center), so real labels may meet some of them.
+
+### P38: ZoneLabels, one label per zone (M4 step 4.2b)
+
+`RefreshAllData` labels every child zone of the shown continent that has a range (`ns.GetZoneInfo`, `Logic.FormatLevelRange`) and a rectangle on it (`ns.GetZoneRect`, cached), at `Logic.LabelPosition` (the rectangle center unless `labelX, labelY` are set). Spec: `notes/spec-4.2-zone-labels.md`.
+
+Result (2026-10-19, beta, level 18 character; screenshots 232203, 232213, 232235):
+
+- **Eastern Kingdoms: 23 labels**, one per zone, none on Stormwind, Ironforge or Undercity (26 children minus the 3 capitals).
+- **Kalimdor: 19 labels**, none on the three capitals or Shen'dralas (no range); Teldrassil's island and Mount Hyjal labeled.
+- **Colors** match level 18 (P35): Stonetalon 13-32 and Redridge 13-30 green to red, Wetlands and Hillsbrad 18-34 yellow to red, the 1-14 and 8-24 zones grey at the low end.
+- **Zone map** (Elwynn Forest): no labels (`Westfall` at its top is Blizzard's hover name).
+- Same counts as the smoke test outside the game the same evening (real Lua files, P5's child lists, stubbed rectangles): 23, 19, 0.
+
+Problems for step 4.3:
+
+- **Overlapping labels** where a small zone's rectangle center lands near a neighbor's: Searing Gorge 43-60 and Badlands 33-50; Duskwood 18-34 and Deadwind Pass 55-60; Felwood 46-60 and Moonglade 55-60 (Moonglade lies inside Felwood's rectangle).
+- **Labels on Blizzard's capital icons** in the zones that hold a capital: Tirisfal Glades (Undercity), Dun Morogh (Ironforge), Durotar (Orgrimmar), Mulgore (Thunder Bluff), Teldrassil (Darnassus). Readable, but crowded.
+- The player arrow is drawn above the labels (Elwynn's `1` hidden under it): expected wherever the player stands; no change planned.
+- Fix in the design: `labelX, labelY` in `Data/Zones.lua` for the zones above, read off the map's `Cursor:` readout.
 
