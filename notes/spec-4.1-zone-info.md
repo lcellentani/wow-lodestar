@@ -34,7 +34,7 @@ Arguments, each possibly `nil`:
 - `override`: the user's saved override from `ns.db.overrides.zones[mapID]`, e.g. `{ min = 5, max = 10 }`.
 - `clientMin`, `clientMax`: the first two values of `C_Map.GetMapLevels(mapID)` (zeros on the beta, P6).
 
-Returns a new table `{ min, max, source, faction, kind, labelX, labelY }`:
+Returns a new table with the fields `min`, `max`, `source`, `faction`, `kind`, `labelX`, `labelY`. All but `source` are copied from the inputs; `source` is not in any input: the function writes it, as the string `"override"`, `"client"` or `"table"`, to record which input the range came from (the doc's lookup rule):
 
 - **Range**, from the first source that has one:
   1. `override`, if it has both `min` and `max`: `source = "override"`.
