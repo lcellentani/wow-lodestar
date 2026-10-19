@@ -1,6 +1,6 @@
 # M4 step 4.1: zone info and colored level ranges
 
-Status: spec written 2026-10-19; fallback colors probed and `DifficultyKey` change added the same day (P35). 4.1a done (`fa218ea`, 2026-10-19). User writes the code, Claude reviews.
+Status: spec written 2026-10-19; fallback colors probed and `DifficultyKey` change added the same day (P35). 4.1a done (`fa218ea`, 2026-10-19). 4.1b checked in game (P35, 2026-10-19). User writes the code, Claude reviews.
 Design doc reference: "Data model" (lookup rule, Zones "Level source"), "Feature set" (Difficulty colors), "Module specs" (ZoneLabels step 3).
 
 ## What this step is for

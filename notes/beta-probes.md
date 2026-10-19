@@ -46,7 +46,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P32 | dungeon entrance API | [x] | 2026-10-19 | beta |
 | P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
 | P34 | M2 /ls probe here | [x] | 2026-10-19 | beta |
-| P35 | M4 zone info, colors in /ls probe hover | [ ] | | difficulty colors done 2026-10-19 (beta); hover check to do |
+| P35 | M4 zone info, colors in /ls probe hover | [x] | 2026-10-19 | beta |
 
 ## Confirmed APIs
 
@@ -1257,7 +1257,7 @@ P12 info: player 8.9, 57.7 on 1416 Alterac Mountains, Zone: x = 0.089, y = 0.577
 
 ### P35: zone info and colored ranges (M4 step 4.1)
 
-Spec: `notes/spec-4.1-zone-info.md`. Two parts: the client's difficulty colors (for the fallback table and the `DifficultyKey` rule), then the hover check of 4.1b (to do).
+Spec: `notes/spec-4.1-zone-info.md`. Two parts: the client's difficulty colors (for the fallback table and the `DifficultyKey` rule), then the hover check of 4.1b.
 
 **Difficulty colors** (2026-10-19, beta, level 18 character in Stormwind; screenshots 191328, 191438, 191456, 191512, 191700):
 
@@ -1289,4 +1289,19 @@ The loop (player level 18), diff and level:
 - **Grey at or below 12 at level 18**, as `Logic.GreyLevel(18) = 18 - 1 - 5 = 12` says: the grey formula holds at this level; checked at one level only.
 - So at level 18 green is a single level (13). Not checked: above the player (+1, +2 yellow, +4 orange are assumed from P8's +3 orange and +5 red).
 - The five first colors become `FALLBACK_COLORS` in `Util.lua` (4.1b). Labels use the client's own colors anyway, since `GetQuestDifficultyColor` exists.
+
+**Hover check** (2026-10-19, beta, level 18 character; screenshot 222659). `/ls probe hover` with the world map on Eastern Kingdoms:
+
+```
+P7 info: cursor 39.0, 0.0 on 1415: no zone
+P7 info: cursor 45.7, 70.3 on 1415: 1429 Elwynn Forest, 1-14 (table)        <- 1 grey, 14 yellow
+P7 info: cursor 54.8, 70.2 on 1415: 1433 Redridge Mountains, 13-30 (table)  <- 13 green, 30 red
+P7 info: cursor 46.6, 30.2 on 1415: 1416 Alterac Mountains, 28-44 (table)   <- both red
+```
+
+
+- Every color matches the client's bands at level 18: 12 and below grey, 13 green, 14-18 yellow (the loop above), and red from 23 (level + 5). Redridge's 13 is the single green level, so the wider yellow band (`DifficultyKey` change in 4.1a) and the client agree in game.
+- Source `table` everywhere, as expected: `GetMapLevels` still returns zeros (P6) and no override is saved.
+- Not hovered in game: a city (Stormwind, `no level data`) and Burning Steppes. Both were checked outside the game the same evening with the real `Logic.lua`, `Util.lua`, `Core.lua` and `Data/Zones.lua` and stubbed WoW functions, which also showed the fallback colors (`GetQuestDifficultyColor` removed) giving the same result as the client at level 18.
+- The readings reach the SavedVariables log at the next `/reload` (the file was saved at 22:25, just before them).
 
