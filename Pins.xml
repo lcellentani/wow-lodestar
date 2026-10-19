@@ -9,6 +9,11 @@
             <Anchor point="CENTER"/>
           </Anchors>
         </FontString>
+        <FontString parentKey="Name" inherits="GameFontHighlightOutline">
+          <Anchors>
+            <Anchor point="BOTTOM" relativeKey="$parent.Label" relativePoint="TOP"/>
+          </Anchors>
+        </FontString>
       </Layer>
     </Layers>
   </Frame>
