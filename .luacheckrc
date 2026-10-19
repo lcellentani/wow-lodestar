@@ -8,7 +8,8 @@ ignore = { "211/addonName" }
 globals = {
   "LodestarDB", "SLASH_LODESTAR1", "SLASH_LODESTAR2", "SlashCmdList",
   "LodestarTooltip", "LodestarCopyFrame",
-  -- one line per pin mixin, e.g. "LodestarZoneLabelPinMixin",
+  -- one line per pin mixin
+  "LodestarZoneLabelPinMixin",
 }
 
 -- WoW API the addon reads. Only APIs confirmed in notes/beta-probes.md (evidence rule);

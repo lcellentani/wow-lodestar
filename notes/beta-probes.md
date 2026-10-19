@@ -47,6 +47,9 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P33 | group finder activities (levels) | [x] | 2026-10-19 | beta, Alliance character |
 | P34 | M2 /ls probe here | [x] | 2026-10-19 | beta |
 | P35 | M4 zone info, colors in /ls probe hover | [x] | 2026-10-19 | beta |
+| P36 | pin hooks, pin template, label fonts | [ ] | | |
+| P37 | M4 ZoneLabels test pin | [ ] | | |
+| P38 | M4 ZoneLabels labels | [ ] | | |
 
 ## Confirmed APIs
 
