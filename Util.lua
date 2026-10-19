@@ -2,6 +2,14 @@ local addonName, ns = ...
 
 -- Local helpers
 
+local FALLBACK_COLORS = {
+  red = { r = 1, g = 0.1, b = 0.1 },
+  orange = { r = 1, g = 0.5, b = 0.25 },
+  yellow = { r = 1, g = 0.82, b = 0 },
+  green = { r = 0.25, g = 0.75, b = 0.25 },
+  grey = { r = 0.5, g = 0.5, b = 0.5 },
+}
+
 local lastOutput = nil
 local LOG_MAX = 50
 
@@ -60,4 +68,15 @@ function ns.DebugPrint(...)
   if ns.debug then
     ns.Print(...)
   end
+end
+
+function ns.LevelColorCode(level)
+  local color
+  if GetQuestDifficultyColor ~= nil then
+    color = GetQuestDifficultyColor(level)
+  else
+    local key = ns.Logic.DifficultyKey(level, UnitLevel("player"))
+    color = FALLBACK_COLORS[key]
+  end
+  return ns.Logic.ColorCode(color.r, color.g, color.b)
 end

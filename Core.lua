@@ -16,6 +16,20 @@ local DEFAULTS = {
   log = {},
 }
 
+-- Zone lookup
+
+function ns.GetZoneInfo(mapID)
+  local row = ns.Zones[mapID]
+  local override = ns.db.overrides.zones[mapID]
+  local clientMin, clientMax
+
+  if C_Map.GetMapLevels then
+    clientMin, clientMax = C_Map.GetMapLevels(mapID)
+  end
+
+  return ns.Logic.MergeZoneInfo(row, override, clientMin, clientMax)
+end
+
 -- Module registry
 
 local modules = {}

@@ -203,6 +203,13 @@ ns.RegisterCommand(
         detail = detail .. "no zone"
       else
         detail = detail .. mapInfo.mapID .. " " .. mapInfo.name
+        local info = ns.GetZoneInfo(mapInfo.mapID)
+        local range = ns.Logic.FormatLevelRange(info.min, info.max, ns.LevelColorCode)
+        if range == nil then
+          detail = detail .. ", no level data"
+        else
+          detail = detail .. ", " .. range .. " (" .. info.source .. ")"
+        end
       end
       ns.Emit("probe", { ns.Logic.FormatProbe("P7", "info", detail) })
       return
