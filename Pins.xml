@@ -1,0 +1,15 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Frame name="LodestarZoneLabelPinTemplate" mixin="LodestarZoneLabelPinMixin"
+         enableMouse="false" virtual="true">
+    <Size x="1" y="1"/>
+    <Layers>
+      <Layer level="OVERLAY">
+        <FontString parentKey="Label" inherits="GameFontHighlightOutline">
+          <Anchors>
+            <Anchor point="CENTER"/>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+  </Frame>
+</Ui>

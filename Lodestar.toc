@@ -10,5 +10,7 @@ Util.lua
 Core.lua
 Data\Zones.lua
 Data\Instances.lua
+Modules\ZoneLabels.lua
+Pins.xml
 Debug.lua
 Options.lua
