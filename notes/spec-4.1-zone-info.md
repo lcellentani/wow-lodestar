@@ -69,6 +69,8 @@ Hints:
 
 ### `Logic.FormatLevelRange(min, max, codeFor)`
 
+What it is for: it builds the text a zone label shows, a range like `15-25` with each number in its own difficulty color and the dash left white. WoW colors text with escapes inside the string: `|cffRRGGBB` starts a color, `|r` ends it. For a level 21 character and a 15-25 zone, the label needs `|cff40bf4015|r-|cffff804025|r` (green 15, orange 25). Choosing a color needs the client (`GetQuestDifficultyColor`), which `Logic.lua` may not call, so the caller passes `codeFor`, a function that returns the code for a level; this function only puts the pieces in order. In game the caller passes `ns.LevelColorCode` (4.1b); the tests pass a fake that returns readable markers.
+
 - `codeFor` is a function: `codeFor(level)` returns a color code such as `"|cffff8040"`.
 - `min == nil`: returns `nil` (no label).
 - `min == max`: one colored number, `codeFor(min) .. min .. "|r"`.
