@@ -169,3 +169,7 @@ function Logic.FormatProbe(id, status, detail)
   local displayStatus = status == "fail" and "FAIL" or status
   return id .. " " .. displayStatus .. ": " .. detail
 end
+
+function Logic.FormatEntrance(x, y)
+  return string.format("x = %.3f, y = %.3f", x, y)
+end

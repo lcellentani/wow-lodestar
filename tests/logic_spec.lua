@@ -547,6 +547,18 @@ describe("FindKey", function()
   end)
 end)
 
+describe("FormatEntrance", function()
+  it("formats the Hall of Thanes position to three decimals", function()
+    local result = Logic.FormatEntrance(0.28077352046967, 0.47070151567459)
+    assert(result == "x = 0.281, y = 0.471", "got " .. tostring(result))
+  end)
+
+  it("keeps three decimals when rounding up across a digit", function()
+    local result = Logic.FormatEntrance(0.0996, 0.5)
+    assert(result == "x = 0.100, y = 0.500", "got " .. tostring(result))
+  end)
+end)
+
 describe("FormatProbe", function()
   it("formats a pass line", function()
     local result = Logic.FormatProbe("P1", "pass", "interface 16001")

@@ -47,7 +47,7 @@ end
 local LOG_CLEAR_USAGE = "log clear - empty the saved output log."
 local COPY_USAGE = "copy - show the last output, selected for Ctrl+C."
 local DUMP_USAGE = "dump - list the shown (or current) map's zones with ready-made Zones.lua rows."
-local PROBE_USAGE = "probe [hover] - re-run the design probes, or report the zone under the cursor."
+local PROBE_USAGE = "probe [hover|here] - re-run the design probes, or report the zone under the cursor or your position."
 local EXPECTED_INTERFACE = 16001 -- Must match ## Interface in Lodestar.toc.
 
 local PROBES = {
@@ -205,6 +205,34 @@ ns.RegisterCommand(
         detail = detail .. mapInfo.mapID .. " " .. mapInfo.name
       end
       ns.Emit("probe", { ns.Logic.FormatProbe("P7", "info", detail) })
+      return
+    elseif op == "here" and args[2] == nil then
+      local mapID = C_Map.GetBestMapForUnit("player")
+      if mapID == nil then
+        ns.Print("no player map")
+        return
+      end
+
+      local mapInfo = C_Map.GetMapInfo(mapID)
+      local position = C_Map.GetPlayerMapPosition(mapID, "player")
+      local detail
+      if position == nil then
+        detail = "no position on " .. mapID
+        if mapInfo ~= nil then
+          detail = detail .. " " .. mapInfo.name
+        end
+      elseif mapInfo == nil then
+        detail = "no map info on " .. mapID
+      else
+        local x, y = position:GetXY()
+        local coords = ns.Logic.FormatCoords(x, y) or "unknown"
+        local mapType = ns.Logic.FindKey(Enum.UIMapType, mapInfo.mapType)
+        detail = "player " .. coords .. " on " .. mapID .. " " .. mapInfo.name .. ", " .. tostring(mapType) .. ": " .. ns.Logic.FormatEntrance(x, y)
+        if mapInfo.mapType ~= Enum.UIMapType.Zone then
+          detail = detail .. ", not a zone map: read the zone map's cursor instead"
+        end
+      end
+      ns.Emit("probe", { ns.Logic.FormatProbe("P12", "info", detail) })
       return
     end
 
