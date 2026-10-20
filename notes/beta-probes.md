@@ -51,7 +51,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P37 | M4 ZoneLabels test pin | [x] | 2026-10-19 | beta |
 | P38 | M4 ZoneLabels labels | [x] | 2026-10-19 | beta |
 | P39 | M4 label names on the maximized map | [x] | 2026-10-19 | beta |
-| P40 | level-up event | [ ] | | |
+| P40 | level-up event | [x] | 2026-10-20 | beta |
 | P41 | dungeon and raid icons (atlases) | [ ] | | |
 | P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
 
@@ -1439,6 +1439,28 @@ Result (2026-10-19, beta, level 18 character; screenshots 234400, 234638, 234649
 - **`AddDataProvider` does not draw on a map that is already open**: after `/ls toggle ZoneLabels` off and on with the map open, labels came back only after a continent switch. `OnEnable` now calls `RefreshAllData` when the map is shown, and `OnDisable` calls `RemoveAllData` before `RemoveDataProvider`; toggling now works at once in both sizes.
 - The ranges sit at the zone centers in both sizes; names hang above them on the maximized map.
 - Still overlapping: Duskwood, Deadwind Pass and Swamp of Sorrows (both sizes); Searing Gorge and Badlands (small window). Candidate fix: automatic collision handling (nudge or hide), not hand-placed positions.
+
+### P40: the level-up event (M4 step 4.3 leftover, refresh on level-up)
+
+Registering an unknown event raises an error on this client, so `pcall` tells whether the event exists; the made-up name is the control.
+
+```
+/run local f=CreateFrame("Frame") print("PLAYER_LEVEL_UP", pcall(f.RegisterEvent, f, "PLAYER_LEVEL_UP"))
+```
+
+```
+/run local f=CreateFrame("Frame") print("LODESTAR_FAKE_EVENT", pcall(f.RegisterEvent, f, "LODESTAR_FAKE_EVENT"))
+```
+
+Result (2026-10-20, beta; screenshot 235126):
+
+```
+PLAYER_LEVEL_UP true true
+LODESTAR_FAKE_EVENT false Frame:RegisterEvent(): Frame:RegisterEvent(): Attempt to register unknown event "LODESTAR_FAKE_EVENT"
+```
+
+- `PLAYER_LEVEL_UP` exists. The control fails, so the check is meaningful: the client rejects unknown event names.
+- Its arguments (the new level first, in retail) are not probed; reading `UnitLevel("player")` in the handler avoids depending on them.
 
 ### P42: map size events, a hook-free replacement for the `Maximize`/`Minimize` hooks (P14 run 2)
 
