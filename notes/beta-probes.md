@@ -575,6 +575,10 @@ Locals: displayState=3 (DISPLAY_STATE_OPEN_MINIMIZED_WITH_LOG), hasSynchronizedD
 
 Whether this error comes from our taint or is a beta bug is open: re-run after the P15 fix.
 
+2026-10-20, run 2 (beta, with the `CheckMouseButtonPassthrough` override from P15): failed. The same error, now with the map maximized (`displayState=4`, `QuestLogOwnerMixin.lua:125`). Control test: with Lodestar disabled at character select, the same steps raise no error, so Lodestar causes it.
+
+In Blizzard's retail source (read, not copied), the two failing lines are the calls `self:Maximize()` (125, maximized state) and `self:Minimize()` (137, small map with log) in `SetDisplayState`. Those are the two methods `Modules/ZoneLabels.lua` hooks with `hooksecurefunc`, so the hooks are the main suspect. Retail's `Maximize` and `Minimize` also fire `EventRegistry` events `WorldMapMaximized` and `WorldMapMinimized`; P42 probes them as a hook-free replacement.
+
 ### P15: taint log (after M4, repeat at M5)
 
 `/console taintLog 1`, `/reload`, then open and close the map in combat and use an action bar ability while still in combat. No "Interface action failed because of an AddOn" message, and no Lodestar lines in `Logs/taint.log`. Afterwards `/console taintLog 0`.
@@ -592,6 +596,8 @@ Result:
 Every stack goes through `ZoneLabels.lua:47` (`WorldMapFrame:AcquirePin` in `RefreshAllData`), reached from the map's `OnMapChanged` (368 times) and from our `Maximize`/`Minimize` hook, `ZoneLabels.lua:63` (184 times).
 
 Cause: `AcquirePin` calls `pin:CheckMouseButtonPassthrough()`, which our pin inherits from `MapCanvasPinMixin` through a mixin table built by addon code, so the read is tainted. That method calls `SetPassThroughButtons`, which is protected in combat, so it is blocked. Our pins have `enableMouse="false"` and need no pass-through buttons.
+
+2026-10-20, run 2 (beta, after adding an empty `LodestarZoneLabelPinMixin:CheckMouseButtonPassthrough`): the game did not rewrite `Logs/taint.log` (still the 21:57 file from run 1, while `General.log` shows the run's reloads at 22:40), which suggests no taint was logged. Not conclusive, since the old file stayed; it was renamed to `Logs/taint-2026-10-20-run1.log` so the next run shows a fresh file only if there is taint.
 
 ## API probes (before M2)
 
