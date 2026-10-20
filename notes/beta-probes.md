@@ -25,8 +25,8 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P11 | data | [x] | 2026-10-19 | closed: zone ranges come from the group finder (P33), not from checks zone by zone |
 | P12 | data | [ ] | 2026-10-19 | beta, in progress |
 | P13 | v2 | [ ] | | |
-| P14 | taint | [ ] | | |
-| P15 | taint | [ ] | | |
+| P14 | taint | [ ] | 2026-10-20 | beta; failed: Blizzard quest log error on map open in combat, fix pending |
+| P15 | taint | [ ] | 2026-10-20 | beta; failed: 184 blocked `SetPassThroughButtons` from Lodestar pins, fix pending |
 | P16 | M2 APIs | [x] | 2026-10-13 | beta |
 | P17 | M4-M5 APIs | [x] | 2026-10-13 | beta |
 | P18 | A1, load | [x] | 2026-10-13 | beta |
@@ -558,11 +558,40 @@ Open the map in combat; no errors should appear.
 
 Result:
 
+2026-10-20, run 1 (beta): failed. Opening the map with `M` in combat (quest log side panel shown) raised a Blizzard error. Lodestar is not in its stack, but the P15 log shows Lodestar taint in the same fight:
+
+```
+Message: attempt to call a nil value
+[Interface/AddOns/Blizzard_WorldMap/QuestLogOwnerMixin.lua]:137: in function 'SetDisplayState'
+[Interface/AddOns/Blizzard_WorldMap/Blizzard_WorldMap.lua]:384
+[C]: in function 'Show'
+[.../UIParentPanelManager.lua]:498: in function 'SetUIPanel'
+[C]: in function 'SetAttribute'
+[.../UIParentPanelManager.lua]:900: in function 'ShowUIPanel'
+[Interface/AddOns/Blizzard_WorldMap/QuestLogOwnerMixin.lua]:115: in function 'SetDisplayState'
+[Interface/AddOns/Blizzard_WorldMap/Blizzard_WorldMap.lua]:1430: in function 'ToggleWorldMap'
+Locals: displayState=3 (DISPLAY_STATE_OPEN_MINIMIZED_WITH_LOG), hasSynchronizedDisplayState=false
+```
+
+Whether this error comes from our taint or is a beta bug is open: re-run after the P15 fix.
+
 ### P15: taint log (after M4, repeat at M5)
 
 `/console taintLog 1`, `/reload`, then open and close the map in combat and use an action bar ability while still in combat. No "Interface action failed because of an AddOn" message, and no Lodestar lines in `Logs/taint.log`. Afterwards `/console taintLog 0`.
 
 Result:
+
+2026-10-20, run 1 (beta): failed. `Logs/taint.log` (4968 lines), distinct messages:
+
+```
+184 An action was blocked in combat because of taint from Lodestar - Frame:SetPassThroughButtons()
+ 92 Execution tainted by Lodestar while reading field CheckMouseButtonPassthrough - Blizzard_MapCanvas.lua:331 WorldMapFrame:AcquirePin()
+ 92 Execution tainted by Lodestar while reading field ShouldMouseButtonBePassthrough - MapCanvas_DataProviderBase.lua:295 Frame:CheckMouseButtonPassthrough()
+```
+
+Every stack goes through `ZoneLabels.lua:47` (`WorldMapFrame:AcquirePin` in `RefreshAllData`), reached from the map's `OnMapChanged` (368 times) and from our `Maximize`/`Minimize` hook, `ZoneLabels.lua:63` (184 times).
+
+Cause: `AcquirePin` calls `pin:CheckMouseButtonPassthrough()`, which our pin inherits from `MapCanvasPinMixin` through a mixin table built by addon code, so the read is tainted. That method calls `SetPassThroughButtons`, which is protected in combat, so it is blocked. Our pins have `enableMouse="false"` and need no pass-through buttons.
 
 ## API probes (before M2)
 
