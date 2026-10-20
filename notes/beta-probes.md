@@ -53,6 +53,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P39 | M4 label names on the maximized map | [x] | 2026-10-19 | beta |
 | P40 | level-up event | [ ] | | |
 | P41 | dungeon and raid icons (atlases) | [ ] | | |
+| P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
 
 ## Confirmed APIs
 
@@ -1435,3 +1436,28 @@ Result (2026-10-19, beta, level 18 character; screenshots 234400, 234638, 234649
 - The ranges sit at the zone centers in both sizes; names hang above them on the maximized map.
 - Still overlapping: Duskwood, Deadwind Pass and Swamp of Sorrows (both sizes); Searing Gorge and Badlands (small window). Candidate fix: automatic collision handling (nudge or hide), not hand-placed positions.
 
+### P42: map size events, a hook-free replacement for the `Maximize`/`Minimize` hooks (P14 run 2)
+
+Run out of combat, Lodestar loaded:
+
+```
+/dump EventRegistry ~= nil, EventRegistry and EventRegistry.RegisterCallback ~= nil
+```
+
+```
+/run EventRegistry:RegisterCallback("WorldMapMaximized", function() print("WorldMapMaximized") end, "LodestarP42") EventRegistry:RegisterCallback("WorldMapMinimized", function() print("WorldMapMinimized") end, "LodestarP42")
+```
+
+Result (2026-10-20, beta; screenshot 231753), then maximize and minimize the map several times:
+
+```
+[1]=true, [2]=true
+WorldMapMaximized
+WorldMapMinimized
+WorldMapMaximized
+WorldMapMinimized
+WorldMapMaximized
+```
+
+- `EventRegistry:RegisterCallback(event, func, owner)` exists.
+- `WorldMapMaximized` and `WorldMapMinimized` fire once per size change, in order.

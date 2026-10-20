@@ -26,6 +26,7 @@ read_globals = {
   "time", "date", "GetTime", -- P16
   "CreateFromMixins", "Mixin", "MapCanvasDataProviderMixin", "GameTooltip", -- P17
   "GameFontHighlightOutline", "GameFontNormalOutline", -- P36
+  "EventRegistry",           -- P42
 }
 
 files["tests/**"] = { globals = { "describe", "it", "DEFAULT_CHAT_FRAME", "date" } }  -- harness helpers; fakes for util_spec
