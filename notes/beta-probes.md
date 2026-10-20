@@ -25,8 +25,8 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P11 | data | [x] | 2026-10-19 | closed: zone ranges come from the group finder (P33), not from checks zone by zone |
 | P12 | data | [ ] | 2026-10-19 | beta, in progress |
 | P13 | v2 | [ ] | | |
-| P14 | taint | [ ] | 2026-10-20 | beta; failed: Blizzard quest log error on map open in combat, fix pending |
-| P15 | taint | [ ] | 2026-10-20 | beta; failed: 184 blocked `SetPassThroughButtons` from Lodestar pins, fix pending |
+| P14 | taint | [x] | 2026-10-20 | beta; passed on run 3, after the hook fix (P42) |
+| P15 | taint | [x] | 2026-10-20 | beta; passed on run 3, no new `taint.log` |
 | P16 | M2 APIs | [x] | 2026-10-13 | beta |
 | P17 | M4-M5 APIs | [x] | 2026-10-13 | beta |
 | P18 | A1, load | [x] | 2026-10-13 | beta |
@@ -580,6 +580,8 @@ Whether this error comes from our taint or is a beta bug is open: re-run after t
 
 In Blizzard's retail source (read, not copied), the two failing lines are the calls `self:Maximize()` (125, maximized state) and `self:Minimize()` (137, small map with log) in `SetDisplayState`. Those are the two methods `Modules/ZoneLabels.lua` hooks with `hooksecurefunc`, so the hooks are the main suspect. Retail's `Maximize` and `Minimize` also fire `EventRegistry` events `WorldMapMaximized` and `WorldMapMinimized`; P42 probes them as a hook-free replacement.
 
+2026-10-20, run 3 (beta, `ZoneLabels.lua` listens to `WorldMapMaximized`/`WorldMapMinimized` through `EventRegistry` instead of hooking, P42): **passed**. Map opened in combat with the quest log panel and maximized, minimized and closed; no error popup, no "Interface action failed" in chat. Out of combat, names still follow the window size at once.
+
 ### P15: taint log (after M4, repeat at M5)
 
 `/console taintLog 1`, `/reload`, then open and close the map in combat and use an action bar ability while still in combat. No "Interface action failed because of an AddOn" message, and no Lodestar lines in `Logs/taint.log`. Afterwards `/console taintLog 0`.
@@ -599,6 +601,8 @@ Every stack goes through `ZoneLabels.lua:47` (`WorldMapFrame:AcquirePin` in `Ref
 Cause: `AcquirePin` calls `pin:CheckMouseButtonPassthrough()`, which our pin inherits from `MapCanvasPinMixin` through a mixin table built by addon code, so the read is tainted. That method calls `SetPassThroughButtons`, which is protected in combat, so it is blocked. Our pins have `enableMouse="false"` and need no pass-through buttons.
 
 2026-10-20, run 2 (beta, after adding an empty `LodestarZoneLabelPinMixin:CheckMouseButtonPassthrough`): the game did not rewrite `Logs/taint.log` (still the 21:57 file from run 1, while `General.log` shows the run's reloads at 22:40), which suggests no taint was logged. Not conclusive, since the old file stayed; it was renamed to `Logs/taint-2026-10-20-run1.log` so the next run shows a fresh file only if there is taint.
+
+2026-10-20, run 3 (beta, both fixes in): **passed**. After the run's reloads (23:13 to 23:23 in `General.log`) no new `Logs/taint.log` exists. Run 1 shows the client writes the file when there is taint, so no file means nothing was logged.
 
 ## API probes (before M2)
 

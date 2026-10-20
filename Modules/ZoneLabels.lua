@@ -52,12 +52,13 @@ end
 
 local ZoneLabels = {}
 local enabled = false
-local sizeHooked = false
+local sizeCallbacksAdded = false
 
 -- The map does not refresh its data providers when it is maximized or
 -- minimized, so names would keep the old window size's state until the
--- next map change. Secure hooks cannot be removed, so they are installed
--- once and check whether the module is enabled.
+-- next map change. Listen to the map's size events rather than hooking
+-- Maximize and Minimize: in combat those hooks broke the map (P14). The
+-- callbacks are added once and check whether the module is enabled.
 local function OnMapSizeChanged()
   if enabled and WorldMapFrame:IsShown() then
     provider:RefreshAllData()
@@ -68,14 +69,10 @@ function ZoneLabels:OnEnable() -- luacheck: ignore 212/self
   WorldMapFrame:AddDataProvider(provider)
   enabled = true
 
-  if not sizeHooked then
-    if WorldMapFrame.Maximize then
-      hooksecurefunc(WorldMapFrame, "Maximize", OnMapSizeChanged)
-    end
-    if WorldMapFrame.Minimize then
-      hooksecurefunc(WorldMapFrame, "Minimize", OnMapSizeChanged)
-    end
-    sizeHooked = true
+  if not sizeCallbacksAdded then
+    EventRegistry:RegisterCallback("WorldMapMaximized", OnMapSizeChanged, ZoneLabels)
+    EventRegistry:RegisterCallback("WorldMapMinimized", OnMapSizeChanged, ZoneLabels)
+    sizeCallbacksAdded = true
   end
 
   -- Adding a provider does not draw on a map that is already open.
