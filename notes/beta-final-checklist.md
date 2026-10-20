@@ -1,6 +1,6 @@
 # Beta final checklist (2026-10-20 to 2026-10-21)
 
-Status: written 2026-10-20. The beta closes 2026-10-21; whatever is left waits for the live client (2026-11-04).
+Status: done 2026-10-21. Every item ran: P14 and P15 passed on run 3 after two fixes (pin pass-through override, map size through `EventRegistry` instead of hooks, P42); P40, P41, P13 passed; P12 got the Deadmines stone; P26 answered. Results in `notes/beta-probes.md`.
 
 Goal: use the last beta days to consolidate, not to add features. Label style iterates on the live client. Run the items in order; each one is independent, so stopping halfway loses nothing. Send screenshots after each item; Claude records them in `notes/beta-probes.md`.
 

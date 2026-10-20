@@ -37,7 +37,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P23 | M2 map tick | [x] | 2026-10-16 | beta |
 | P24 | M2 slash commands | [x] | 2026-10-16 | beta |
 | P25 | M2 toggle, debug | [x] | 2026-10-17 | beta |
-| P26 | login vs /reload chat order | [ ] | | |
+| P26 | login vs /reload chat order | [x] | 2026-10-21 | beta |
 | P27 | M2 output and log | [x] | 2026-10-18 | beta |
 | P28 | copy window methods (no addon) | [x] | 2026-10-18 | beta |
 | P29 | M2 copy window | [x] | 2026-10-18 | beta |
@@ -993,7 +993,7 @@ Lodestar: /ls toggle <module> - turn a module on or off. Modules: TestA.   <- /l
 - The first cleanup `/run` did not take effect (file still had `TestA = false`); the second, checked with `/dump`, did. Check a `/run` edit with `/dump` before relying on it.
 - Chat order data point for P26: in the first screenshot (after `/reload`) the hello line came after the guild message of the day.
 
-### P26: login vs /reload chat order (pending)
+### P26: login vs /reload chat order
 
 P24 saw the Lodestar hello line after the guild message of the day on a fresh login; P18, P21 and P22 saw it before the login messages. Check whether the order depends on how the UI loads.
 
@@ -1004,6 +1004,22 @@ P24 saw the Lodestar hello line after the guild message of the day on a fresh lo
 Record for each run whether the hello line comes before or after the code-of-conduct line and the guild message of the day. Nothing in the design depends on the answer; it only tells whether login output can be expected at a fixed place in chat.
 
 Data point (2026-10-18, P27 screenshot 193029, after `/reload`): the hello line came after the guild message of the day.
+
+Result (2026-10-21, beta; screenshots 010332, 010343), one run of each:
+
+```
+Logout and login (screenshot 010332):
+Lodestar: loaded (interface 16001), db v1
+Remember to act responsibly, ... In-Game Code of Conduct ...
+Guild Message of the Day: "..."
+
+/reload (screenshot 010343):
+Guild Message of the Day: "..."
+Lodestar: loaded (interface 16001), db v1
+```
+
+- **The order depends on how the UI loads.** On a login the hello line comes first, before the code-of-conduct line and the guild message of the day; after `/reload` it comes after the guild message (and the code-of-conduct line is not shown). This matches every earlier data point (P18, P21, P22 on logins; P24 and P27 after reloads, P24 likely misread as a fresh login).
+- Nothing in the design depends on it; login output just has no fixed place in chat.
 
 ### P27: output and log (M2 step 2.6a)
 
