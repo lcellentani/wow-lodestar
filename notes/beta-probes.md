@@ -24,7 +24,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P10 | A5 | [x] | 2026-10-18 | beta; `Data/Zones.lua` built from the dump, checked by `tests/zones_spec.lua` |
 | P11 | data | [x] | 2026-10-19 | closed: zone ranges come from the group finder (P33), not from checks zone by zone |
 | P12 | data | [ ] | 2026-10-19 | beta, in progress |
-| P13 | v2 | [ ] | | |
+| P13 | v2 | [x] | 2026-10-20 | beta |
 | P14 | taint | [x] | 2026-10-20 | beta; passed on run 3, after the hook fix (P42) |
 | P15 | taint | [x] | 2026-10-20 | beta; passed on run 3, no new `taint.log` |
 | P16 | M2 APIs | [x] | 2026-10-13 | beta |
@@ -544,14 +544,19 @@ Line used from 2026-10-19 (prints map ID, name, type and position in one go):
 
 ### P13: exploration API (v2)
 
-```
-/dump C_MapExplorationInfo
-```
-
-Result:
+Run as one line from `notes/beta-final-checklist.md` (presence only, so the output fits the chat):
 
 ```
+/dump C_MapExplorationInfo ~= nil, C_MapExplorationInfo and C_MapExplorationInfo.GetExploredMapTextures ~= nil
 ```
+
+Result (2026-10-20, beta; screenshot 235300):
+
+```
+[1]=true, [2]=true
+```
+
+- `C_MapExplorationInfo.GetExploredMapTextures` exists, so the v2 "unexplored areas" idea has an API to start from. Its return values are not probed; that waits for v2 on the live client.
 
 ### P14: map in combat (after M4, repeat at M5)
 
