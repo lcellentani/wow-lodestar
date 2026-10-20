@@ -28,6 +28,7 @@ read_globals = {
   "GameFontHighlightOutline", "GameFontNormalOutline", -- P36
   "EventRegistry",           -- P42
   "C_Texture",               -- P41
+  "C_MapExplorationInfo",    -- P13
 }
 
 files["tests/**"] = { globals = { "describe", "it", "DEFAULT_CHAT_FRAME", "date" } }  -- harness helpers; fakes for util_spec
