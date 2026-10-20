@@ -23,7 +23,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P9 | A6 | [x] | 2026-10-12 | beta, interface 16001 |
 | P10 | A5 | [x] | 2026-10-18 | beta; `Data/Zones.lua` built from the dump, checked by `tests/zones_spec.lua` |
 | P11 | data | [x] | 2026-10-19 | closed: zone ranges come from the group finder (P33), not from checks zone by zone |
-| P12 | data | [ ] | 2026-10-19 | beta, in progress |
+| P12 | data | [ ] | 2026-10-21 | beta, in progress (Deadmines added) |
 | P13 | v2 | [x] | 2026-10-20 | beta |
 | P14 | taint | [x] | 2026-10-20 | beta; passed on run 3, after the hook fix (P42) |
 | P15 | taint | [x] | 2026-10-20 | beta; passed on run 3, no new `taint.log` |
@@ -536,6 +536,7 @@ Line used from 2026-10-19 (prints map ID, name, type and position in one go):
 | Ragefire Chasm (vanilla) | 1454 Orgrimmar (type 3) | 0.51230 | 0.48991 | 2026-10-19, beta, Horde character at the dungeon's meeting stone (screenshot 014823). The seeded approximate value (0.513, 0.500) was close, within 0.001 and 0.010 |
 | City of Dalaran | 1416 Alterac Mountains (type 3) | 0.089 | 0.577 | 2026-10-19, beta, at the dungeon's meeting stone, read with `/ls probe here` (P34; screenshot 190032), so three decimals only. Confirms the zone assumed when seeding: Alterac Mountains, not Hillsbrad Foothills. The user reached it by travelling from Southshore, since the portal was gone |
 | Ruins of Lordaeron | 1458 Undercity (type 3) | 0.70740 | 0.17820 | 2026-10-19, beta, Horde character standing in front of the dungeon's meeting stone (screenshot 015445; first reported as the portal, corrected by the user). The entrance is in Undercity, not in Tirisfal Glades as the guides said |
+| The Deadmines (vanilla) | 1436 Westfall (type 3) | 0.416 | 0.723 | 2026-10-21, beta, at the dungeon's meeting stone, read with `/ls probe here` (screenshot 003829). The seeded value (Warcraft Wiki, 0.424, 0.726) was close, within 0.008 and 0.003 |
 
 - City of Dalaran: the user's portal to Dalaran was no longer available on 2026-10-19 (probably disabled); the meeting stone was reached over land the same evening (row above).
 - From 2026-10-19 on, readings use `/ls probe here` (P34) instead of the `/run` line: same values, rounded to three decimals, and saved in the log.

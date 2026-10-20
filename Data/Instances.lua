@@ -9,7 +9,7 @@ local addonName, ns = ...
 -- One row per instance: wings and instances behind one entrance share its position.
 ns.Instances = {
   -- Eastern Kingdoms, vanilla
-  { name = "The Deadmines", map = 1436, x = 0.424, y = 0.726, min = 17, max = 26, kind = "dungeon" },  -- Westfall; levels P33, entrance Warcraft Wiki
+  { name = "The Deadmines", map = 1436, x = 0.416, y = 0.723, min = 17, max = 26, kind = "dungeon" },  -- Westfall; levels P33, its meeting stone, 2026-10-21 (P12; the seeded 0.424, 0.726 was close)
   { name = "Shadowfang Keep", map = 1421, x = 0.448, y = 0.678, min = 20, max = 30, kind = "dungeon" },  -- Silverpine Forest; levels P33, entrance approximate
   { name = "The Stockade", map = 1453, x = 0.534, y = 0.709, min = 24, max = 32, kind = "dungeon" },  -- Stormwind City; levels P33, its meeting stone, just outside the prison building's door, 2026-10-19 (P12; the recalled 0.405, 0.559 was far off)
   { name = "Gnomeregan", map = 1426, x = 0.243, y = 0.398, min = 29, max = 38, kind = "dungeon" },  -- Dun Morogh; levels P33, entrance approximate
