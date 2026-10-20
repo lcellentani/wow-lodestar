@@ -52,7 +52,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P38 | M4 ZoneLabels labels | [x] | 2026-10-19 | beta |
 | P39 | M4 label names on the maximized map | [x] | 2026-10-19 | beta |
 | P40 | level-up event | [x] | 2026-10-20 | beta |
-| P41 | dungeon and raid icons (atlases) | [ ] | | |
+| P41 | dungeon and raid icons (atlases) | [x] | 2026-10-20 | beta |
 | P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
 
 ## Confirmed APIs
@@ -1461,6 +1461,26 @@ LODESTAR_FAKE_EVENT false Frame:RegisterEvent(): Frame:RegisterEvent(): Attempt 
 
 - `PLAYER_LEVEL_UP` exists. The control fails, so the check is meaningful: the client rejects unknown event names.
 - Its arguments (the new level first, in retail) are not probed; reading `UnitLevel("player")` in the handler avoids depending on them.
+
+### P41: icons for dungeon and raid markers (M5, Instances)
+
+```
+/dump C_Texture ~= nil, C_Texture.GetAtlasInfo("Dungeon") ~= nil, C_Texture.GetAtlasInfo("Raid") ~= nil
+```
+
+```
+/run local t=UIParent:CreateTexture() print("SetAtlas", t.SetAtlas ~= nil)
+```
+
+Result (2026-10-20, beta; screenshot 235228):
+
+```
+[1]=true, [2]=true, [3]=true
+SetAtlas true
+```
+
+- `C_Texture.GetAtlasInfo` exists and knows the atlases `Dungeon` and `Raid`.
+- Textures have `SetAtlas`. Not yet seen: how the two atlases look on the map (first M5 in-game check).
 
 ### P42: map size events, a hook-free replacement for the `Maximize`/`Minimize` hooks (P14 run 2)
 

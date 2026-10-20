@@ -27,6 +27,7 @@ read_globals = {
   "CreateFromMixins", "Mixin", "MapCanvasDataProviderMixin", "GameTooltip", -- P17
   "GameFontHighlightOutline", "GameFontNormalOutline", -- P36
   "EventRegistry",           -- P42
+  "C_Texture",               -- P41
 }
 
 files["tests/**"] = { globals = { "describe", "it", "DEFAULT_CHAT_FRAME", "date" } }  -- harness helpers; fakes for util_spec
