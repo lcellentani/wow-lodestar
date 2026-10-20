@@ -18,6 +18,11 @@ function LodestarZoneLabelPinMixin:OnAcquired(name, text, x, y)
   self:SetScalingLimits(1, 1.0, 1.2)
 end
 
+-- AcquirePin calls this; the inherited one calls SetPassThroughButtons,
+-- which is blocked in combat. Our pins ignore the mouse, so skip it.
+function LodestarZoneLabelPinMixin:CheckMouseButtonPassthrough() -- luacheck: ignore 212/self
+end
+
 local provider = CreateFromMixins(MapCanvasDataProviderMixin)
 
 function provider:RemoveAllData() -- luacheck: ignore 212/self
