@@ -12,6 +12,12 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 - Mark dungeon and raid entrances with their level ranges.
 - Stay data-driven: zones added by Forever's expansions are added by editing a table, not code.
 
+**Principles** (decided 2026-10-24, reasoning in `notes/brainstorm-2026-10-24-map-ux.md`)
+
+- **Danger is graded, not forbidden.** The map makes a zone's threat readable before the player crosses its border; crossing a zone a little above your level is fine when you know it.
+- **Facts are earned by discovery, like flight paths.** Zone level ranges are known from the start (safety); a zone's instances are revealed once the character has entered the zone, and an entrance's marker once the character has explored the sub-area holding it (see "Discovery" in Feature set).
+- **No GPS.** Lodestar gives the facts a well-informed fellow player would share, never routes, paths, boat connections or travel instructions.
+
 **Non-goals (MVP)**
 
 - No quest-giver, vendor or resource-node database.
@@ -26,8 +32,8 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 
 1. **Loads cleanly.** With `/console scriptErrors 1`, no Lua errors at login, at `/reload`, when opening the map, or when switching between world, continent and zone maps. Checked on the beta and again on the live client.
 2. **Zone labels.** Every zone row in `Zones.lua` shows a label on its continent map, with both ends colored correctly for the player's current level; `/ls dump` reports no zone row without a label.
-3. **Instance markers.** Every entry in `Instances.lua` shows a marker on its zone map and on its continent map; hovering one shows name, kind and level range.
-4. **Zone tooltip.** Hovering a zone on a continent map shows its name, range, faction and instances, and the tooltip hides when the cursor leaves the zone.
+3. **Instance markers.** Every discovered entry in `Instances.lua` (see "Discovery") shows a marker on its zone map and on its continent map, and with the debug switch on every entry does; hovering one shows name, kind and level range.
+4. **Zone tooltip.** Hovering a zone on a continent map shows its name, range, faction and, once the zone has been entered, its instances; the tooltip hides when the cursor leaves the zone.
 5. **Idle cost.** With the map closed, the addon has no `OnUpdate` handler running; `/ls debug` reports whether the map tick is active, so this can be checked in game.
 6. **Survives.** `/reload`, a level-up (labels recolor), opening the map in combat (no errors, and no taint per P15), and `/ls toggle` of each module (off and back on without `/reload`, with overlays disappearing and reappearing immediately).
 
@@ -59,14 +65,29 @@ The MVP is three map overlays that read from one data table; v2 adds user-genera
 | Feature | Tier | Behavior | Needs |
 | --- | --- | --- | --- |
 | Zone level labels | MVP | Text on each zone of the continent maps (not the world map showing both continents): `min-max`, colored by difficulty against the player's level; faction tag for Alliance, Horde or contested | Zone table, child-zone rectangles (`GetMapRectOnMap`) |
-| Instance markers | MVP | Icon on each dungeon or raid entrance with name and level range; tooltip on hover | Instance table |
-| Zone tooltip | MVP | Hover over a zone: level range, faction control, instances inside it | Zone and instance tables |
+| Instance markers | MVP | Icon on each discovered dungeon or raid entrance with name and level range; tooltip on hover | Instance table, exploration API (probe on live) |
+| Zone tooltip | MVP | Hover over a zone: level range, faction control, and the instances inside it once the zone has been entered | Zone and instance tables, exploration API (probe on live) |
+| Neighbor threat overlay | v2 | On continent maps, tint the zones that share a border with the player's current zone in their threat color | Neighbor lists in the zone table, zone shapes (see the module spec) |
 | Waypoints and notes | v2 | Right-click to drop a pin; `/way x y` command; saved per account | SavedVariables |
 | Unexplored areas | v2 | Tint sub-areas the character has not discovered yet | Exploration API (probe first) |
 | Map look and feel | v2 | Opacity, scale and movable window | Frame hooks |
 | Zones off the continents | v2 | Show the level range on the zone's own map for zones no continent shows (Zephras Isle on the beta), if the live client still leaves them off the world map | Zone table |
-| Best zone for your level | v2 | Highlight zones where the player's level falls inside the range | Zone table |
+| Best zone for your level | v2 | Highlight zones where the player's level falls inside the range. On hold since 2026-10-24: threat colors on every zone may already answer "where do I level next?"; decide on live | Zone table |
 
+**Discovery** (decided 2026-10-24). What Lodestar shows depends on what the character has done:
+
+| The character has | Lodestar shows |
+| --- | --- |
+| Done nothing yet | Every zone's level range on the continent maps |
+| Entered a zone | That zone's instances in the zone tooltip: name, kind and level range, no location |
+| Explored the sub-area holding an entrance | That entrance's marker on the zone and continent maps |
+
+- "Explored" is the game's own fog of war, read through `C_MapExplorationInfo` (exists, P13; return values unprobed, first live probe). "Entered a zone" is assumed to mean "any sub-area of the zone is explored", so one source drives both rows; to confirm with the same probe.
+- Raids follow the same rule as dungeons. *(Claude's call.)*
+- If the exploration API cannot answer either question on live, the fallback is a per-character record in `LodestarDB` of zones entered, from `C_Map.GetBestMapForUnit("player")` on zone change; markers then appear once their zone is entered. *(Claude's call; needs a decision only if the probe fails.)*
+- A debug switch shows everything regardless of discovery, so markers and data can still be checked in game. *(Claude's call; command name decided in the step spec.)*
+- **Neighbor** means two zones share a border on the map, whether or not it can be walked across; "walkable" was rejected because it gives away where the passes are.
+- Connection points between zones (passes, tunnels) and other orientation aids are parked until the user has played the live client for a while.
 **Difficulty colors** follow the game's own convention: grey for trivial, green for easy, yellow for even, orange for challenging, red for too high.
 
 - **Each end is colored on its own.** In a `min-max` label, `min` gets the color of its level and `max` gets the color of its level; the dash stays neutral (white). At level 21, Redridge `15-25` shows a green `15` and an orange `25`: the zone is open now, and its top end is still worth coming back for. A single-level zone shows one colored number. Instance markers and tooltips use the same rule.
@@ -184,6 +205,8 @@ Field values (decided 2026-10-18, when the table was seeded): `faction` is `"All
 
 **Level source** (decided 2026-10-19): `C_Map.GetMapLevels` returns zeros on the beta (P6), so `Zones.lua` is where labels get their ranges. They come from the beta's group finder (`C_LFGList` suggested ranges, P33) for the 41 zones it lists, marked `-- forever, group finder P33`. These are Forever's own numbers and wider than the vanilla ones (Elwynn 1-14 against 1-10); Eastern Plaguelands and Winterspring go to 63, above the level cap, and are stored as the client gives them. Moonglade, Deadwind Pass and Shen'dralas are not in the group finder and keep their earlier source. The table is a snapshot, so the ranges are re-checked on the live client; reading `C_LFGList` at runtime was considered and left out, since it needs more code and its activity `mapID` field is unprobed.
 
+**Neighbors** (decided 2026-10-24, for the neighbor threat overlay): each zone row gets an optional `neighbors` list of the uiMapIDs that share a border with it on the continent map, written by hand (facts). A unit test checks that the lists are symmetric and point at existing rows; the zone-shape grid (see "NeighborOverlay") can cross-check them.
+
 `labelX` and `labelY` are optional, in the parent continent's normalized coordinates. Set them only where the rectangle center lands badly (for example an L-shaped zone, or a zone whose center sits in water); otherwise the label goes at the center of the zone's rectangle.
 
 **Instances** (`Data/Instances.lua`).
@@ -278,7 +301,7 @@ Edge cases: a zone with no data shows no label; a zone with a single level shows
 **Instances**
 
 - A data provider with one icon pin template; the pin's `OnMouseEnter` shows a tooltip with name, kind and level range.
-- In `RefreshAllData`, if the current map is a continent or a zone, then for each entry in `ns.Instances`:
+- In `RefreshAllData`, if the current map is a continent or a zone, then for each discovered entry in `ns.Instances` (see "Discovery"; every entry while the debug switch is on):
   - If `entry.map` is the current map, place the pin at `entry.x, entry.y` as is.
   - Otherwise, if `ns.GetZoneRect(entry.map, currentMapID)` returns a rectangle, place the pin at `Logic.ProjectToParent(minX, maxX, minY, maxY, entry.x, entry.y)` using that rectangle.
   - Otherwise, skip the entry: its zone is not on this map.
@@ -295,9 +318,18 @@ Classic Era maps do not show a tooltip when hovering a zone, only a one-line nam
   1. Zone name (from `C_Map.GetMapInfo`).
   2. `Levels min-max`, each end colored as in "Difficulty colors"; `No level data` in grey when no source has a range.
   3. Faction: Alliance (blue), Horde (red) or Contested (yellow).
-  4. Instances in the zone (the entries of `ns.Instances` whose `map` equals the hovered zone's uiMapID), one line each with name, colored range and kind; the section is left out when there are none.
+  4. Instances in the zone (the entries of `ns.Instances` whose `map` equals the hovered zone's uiMapID), one line each with name, colored range and kind; the section is left out when there are none, and also when the character has not entered the zone yet, so an unvisited zone does not reveal how many instances it holds *(Claude's call)*.
 - **Hide** when the cursor leaves the map canvas, moves over a part of the continent with no zone, or the map closes.
 - Uses the same `ns.GetZoneInfo` lookup as ZoneLabels, so there is no second source of truth.
+
+**NeighborOverlay (v2)** (idea from 2026-10-24; reasoning in `notes/brainstorm-2026-10-24-map-ux.md`)
+
+- **What:** on a continent map, each zone listed in the `neighbors` of the player's current zone gets a translucent overlay in its threat color. Hovering a zone still opens the Tooltip for details. Rows to settle in the step spec, each Claude's call until then: the threat color is that of the zone's `min` (the level at which you enter it); the player's own zone is not tinted, since Blizzard's arrow marks it; a city counts as the zone around it; nothing is drawn when the player is on another continent; the overlay recolors on `PLAYER_LEVEL_UP`. Whether it shows on the small map only (as first described) or also on the maximized map is decided on live.
+- **Zone shapes**, best first:
+  1. **Blizzard's highlight art.** Forever's continent map lights up the hovered zone in its real shape (P7). If the live client lets us fetch that art for any zone (in Mainline, an API that takes a map and a point returns the highlight texture of the zone under it) and tint it (`SetVertexColor`, or the `MOD` blend mode), use it. Unprobed: first live probe for this module.
+  2. **Masks from grid sampling.** A one-off `/ls probe` asks `C_Map.GetMapInfoAtPosition` (P7) which zone owns each cell of a grid over each continent and saves the result to SavedVariables. A Claude-written script outside the game turns it into one smoothed white mask per zone (`.tga`, power-of-two size), cropped to the zone's rectangle from `GetMapRectOnMap` (P5), shipped in the addon folder and tinted with `SetVertexColor`. Grid size, file encoding and spreading the sampling over several frames are left to the step spec. Loading a texture from the addon folder is unprobed in Forever.
+  3. **Screenshots** as the backup for tier 2: one screenshot of the continent without hover and one per hovered zone; the difference is the zone's highlight. Traced from Blizzard's art, so it is used only if tier 2 looks too rough.
+- Pins come from `Pins.xml` as for the other overlays; one pin per neighbor, nothing created per refresh.
 
 **Waypoints (v2)**
 
@@ -494,4 +526,7 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 
 - [x] Which client language do you play in? **English**, so no locale table is needed (see Non-goals).
 - [x] Is this for personal use, or will you publish it on a site such as CurseForge? **Personal use; no release on addon sites.** The source is public on GitHub under the **MIT license** (`LICENSE` in the repo root). Seed data taken from Warcraft Wiki is limited to facts (IDs, level ranges, coordinates); no wiki text and no Blizzard UI source is copied into the repo.
-- [ ] Should v2 start with waypoints or unexplored-area highlighting?
+- [ ] Should v2 start with waypoints or unexplored-area highlighting? (Since 2026-10-24, the neighbor threat overlay is a third candidate.)
+- [ ] Live probes for 2026-10-24's decisions, numbered when the step specs are written: what `C_MapExplorationInfo` returns (drives "Discovery"); whether Blizzard's zone highlight art can be fetched for any zone and tinted; whether a texture loads from the addon folder.
+- [ ] Is "Best zone for your level" still wanted, or do threat colors on every zone answer "where do I level next?"
+- [ ] Parked until a few weeks of live play: connection points between zones, and which orientation information the map actually fails to give.
