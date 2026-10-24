@@ -61,6 +61,6 @@ After the first write-up, "Best zone for your level" turned out to be the **glob
 4. **Label anchors from the grid:** the point deepest inside each zone's shape replaces the rectangle center, with hand-set `labelX, labelY` as the override. This replaces the earlier plan of automatic collision handling. The grid probe runs once even if Blizzard's art is used, for the anchors alone.
 5. **"Best zone for your level" is dropped:** the maximized overlay is that answer.
 
-## Open after this session
+## Closed: the caveat on the reveal table
 
-- The user has a presentation caveat about the reveal table, held for the presentation pass.
+The user's caveat on the first row ("every zone's level range, always on") was about text labels on every zone of the small map. It is resolved by the split above: the small map shows no text labels, only the neighbor overlay, and the ranges stay always known through the maximized map and the tooltip.
