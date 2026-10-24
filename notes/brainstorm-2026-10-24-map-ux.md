@@ -51,7 +51,16 @@ In the beta the user was optimizing to reach test spots, not playing, so these w
 - **Connection points between zones** (passes, tunnels, bridges). They are facts about places, so not against the no-GPS rule, but the explored map art already shows most passes, and there is no data source (each would be measured by hand, as the meeting stones were in P12).
 - **What orientation information is actually missing** when the map is opened. Note each time the map fails to answer a question.
 
+## Follow-up: two map sizes, two questions
+
+After the first write-up, "Best zone for your level" turned out to be the **global** question ("anywhere on this continent, which zones fit me?"), while the neighbor overlay answers the **local** one ("from here, what is next door, and is it OK?"). At 30 in Stranglethorn the best next zone may be Arathi, far from any border you touch. Decided:
+
+1. **Small map:** neighbor overlay only, no text labels. In the beta the labels could not be kept from spilling over small zones; color fills the zone's own shape and cannot. The current labels stay until the overlay works on live, so the small map is never empty.
+2. **Maximized map:** overlay on every zone, names and ranges on top. The overlay carries one color (the zone's minimum); the labels keep both colored ends (Redridge at 21: green 15, orange 25).
+3. **The overlay becomes MVP** (it was v2), so M5 depends on zone shapes: Blizzard's art if the live probe allows, otherwise grid masks.
+4. **Label anchors from the grid:** the point deepest inside each zone's shape replaces the rectangle center, with hand-set `labelX, labelY` as the override. This replaces the earlier plan of automatic collision handling. The grid probe runs once even if Blizzard's art is used, for the anchors alone.
+5. **"Best zone for your level" is dropped:** the maximized overlay is that answer.
+
 ## Open after this session
 
-- "Best zone for your level" (v2 in the design doc) versus seeing every zone's threat at a glance: the user did not answer before moving on to the overlay idea.
 - The user has a presentation caveat about the reveal table, held for the presentation pass.
