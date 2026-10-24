@@ -534,6 +534,6 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 - [x] Which client language do you play in? **English**, so no locale table is needed (see Non-goals).
 - [x] Is this for personal use, or will you publish it on a site such as CurseForge? **Personal use; no release on addon sites.** The source is public on GitHub under the **MIT license** (`LICENSE` in the repo root). Seed data taken from Warcraft Wiki is limited to facts (IDs, level ranges, coordinates); no wiki text and no Blizzard UI source is copied into the repo.
 - [ ] Should v2 start with waypoints or unexplored-area highlighting?
-- [ ] Live probes for 2026-10-24's decisions, numbered when the step specs are written: what `C_MapExplorationInfo` returns (drives "Discovery"); whether Blizzard's zone highlight art can be fetched for any zone and tinted; whether a texture loads from the addon folder.
+- [ ] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (drives "Discovery"); whether Blizzard's zone highlight art can be fetched for any zone and tinted; whether a texture loads from the addon folder.
 - [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the threat overlay on the maximized map answers "where on this continent fits me?", and the row was removed from the feature set.
 - [ ] Parked until a few weeks of live play: connection points between zones, and which orientation information the map actually fails to give.
