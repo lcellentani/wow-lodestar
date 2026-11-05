@@ -57,6 +57,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P43 | addon loads on the live client | [x] | 2026-11-05 | live, interface 16001 |
 | P44 | exploration API returns | [x] | 2026-11-05 | live |
 | P45 | zone highlight art | [x] | 2026-11-05 | live; can be fetched, cannot tint zones |
+| P46 | texture from the addon folder | [x] | 2026-11-05 | live |
 
 ## Confirmed APIs
 
@@ -1596,3 +1597,10 @@ Additive test on the map (screenshots 181446, 181516, 181416, 181422). A frame o
 - The same frame with `SetColorTexture(1,0,0,0.5)` and `BLEND` shows a clear red rectangle over Elwynn Forest: the position and size fractions, the frame level and alpha tinting on the map all work.
 - Conclusion: tier 1 is out. `ADD` can only brighten, and the parchment is already bright, so it cannot turn a zone red; `BLEND` and `MOD` show the black square. ThreatOverlay needs shapes with an alpha channel (tier 2), and the green comparison was skipped as unnecessary.
 - The function still gives each zone's bounding box as map fractions.
+
+### P46: a texture from the addon folder (M5 step 5.0)
+
+Command in `notes/spec-5.0-live-probes.md`. Result (2026-11-05, live; screenshot 182002): chat printed `true`, and a yellow disc with soft edges appeared.
+
+- `SetTexture("Interface\AddOns\Lodestar\Media\probe-white")` loads a `.tga` from the addon folder and returns `true`.
+- The alpha channel loads (soft edges, no square), and `SetVertexColor` colors a white mask. Tier 2 masks can ship.
