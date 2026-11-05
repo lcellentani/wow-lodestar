@@ -55,7 +55,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P41 | dungeon and raid icons (atlases) | [x] | 2026-10-20 | beta |
 | P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
 | P43 | addon loads on the live client | [x] | 2026-11-05 | live, interface 16001 |
-| P44 | exploration API returns | [ ] | 2026-11-05 | live; steps 1-4 done, step 5 (count grows) open |
+| P44 | exploration API returns | [x] | 2026-11-05 | live |
 
 ## Confirmed APIs
 
@@ -1561,10 +1561,12 @@ Step 3: [1]={
 }
 Step 4, where the character stood: [1]={ [1]=154 }
 Step 4, middle of Tanaris: empty result
+Step 5, before and after "Discovered Cold Hearth Manor": [1]=1, [2]=0, then [1]=2, [2]=0
 ```
 
 - `C_MapExplorationInfo.GetExploredMapTextures`, `C_MapExplorationInfo.GetExploredAreaIDsAtPosition` and `CreateVector2D` exist.
 - Step 2: the character's zone has one explored piece, unvisited Tanaris none. The game does not reveal maps without exploring them, so "entered a zone = any explored piece" holds and "Discovery" uses the game's fog of war, not a record of Lodestar's own.
 - Step 4: `GetExploredAreaIDsAtPosition(mapID, vector)` returns a table of area IDs for an explored point and nothing for an unexplored one.
+- Step 5 (screenshot 175402): the count grows as soon as the game announces the discovery, so the API follows exploration live within a session.
 - Step 3's field names are recorded for tier 2 and v2; step 4 makes them unnecessary for markers.
 - Not seen yet: a marker test at a real entrance. Most vanilla entrances are approximate, so a point near an area's edge could read as unexplored.
