@@ -84,7 +84,7 @@ The MVP is four map overlays that read from one data table; v2 adds user-generat
 | Entered a zone | That zone's instances in the zone tooltip: name, kind and level range, no location |
 | Explored the sub-area holding an entrance | That entrance's marker on the zone and continent maps |
 
-- "Explored" is the game's own fog of war, read through `C_MapExplorationInfo` (exists, P13; return values unprobed, first live probe). "Entered a zone" is assumed to mean "any sub-area of the zone is explored", so one source drives both rows; to confirm with the same probe.
+- "Explored" is the game's own fog of war, read through `C_MapExplorationInfo` (P44). "Entered a zone" means `GetExploredMapTextures(mapID)` returns at least one piece; an entrance's area is explored when `GetExploredAreaIDsAtPosition(mapID, vector)` returns area IDs at its position. One source drives both rows, and Lodestar keeps no record of its own.
 - Raids follow the same rule as dungeons. *(Claude's call.)*
 - If the exploration API cannot answer either question on live, the fallback is a per-character record in `LodestarDB` of zones entered, from `C_Map.GetBestMapForUnit("player")` on zone change; markers then appear once their zone is entered. *(Claude's call; needs a decision only if the probe fails.)*
 - A debug switch shows everything regardless of discovery, so markers and data can still be checked in game. *(Claude's call; command name decided in the step spec.)*
@@ -534,6 +534,6 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 - [x] Which client language do you play in? **English**, so no locale table is needed (see Non-goals).
 - [x] Is this for personal use, or will you publish it on a site such as CurseForge? **Personal use; no release on addon sites.** The source is public on GitHub under the **MIT license** (`LICENSE` in the repo root). Seed data taken from Warcraft Wiki is limited to facts (IDs, level ranges, coordinates); no wiki text and no Blizzard UI source is copied into the repo.
 - [ ] Should v2 start with waypoints or unexplored-area highlighting?
-- [ ] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (drives "Discovery"); whether Blizzard's zone highlight art can be fetched for any zone and tinted; whether a texture loads from the addon folder.
+- [ ] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (answered, P44); whether Blizzard's zone highlight art can be fetched for any zone and tinted; whether a texture loads from the addon folder.
 - [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the threat overlay on the maximized map answers "where on this continent fits me?", and the row was removed from the feature set.
 - [ ] Parked until a few weeks of live play: connection points between zones, and which orientation information the map actually fails to give.

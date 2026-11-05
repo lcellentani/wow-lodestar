@@ -55,6 +55,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P41 | dungeon and raid icons (atlases) | [x] | 2026-10-20 | beta |
 | P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
 | P43 | addon loads on the live client | [x] | 2026-11-05 | live, interface 16001 |
+| P44 | exploration API returns | [ ] | 2026-11-05 | live; steps 1-4 done, step 5 (count grows) open |
 
 ## Confirmed APIs
 
@@ -1544,3 +1545,26 @@ Dump: value=(select(4, GetBuildInfo()))
 - The live client's interface number is `16001`, the same as the beta, so `Lodestar.toc` needs no change.
 - `/ls` lists all its commands.
 - Found here: the help line shows `/ls probe [hoverere]`, because `Debug.lua`'s `PROBE_USAGE` holds `hover|here` and the chat frame reads `|h` as an escape code.
+
+### P44: what `C_MapExplorationInfo` returns (M5 step 5.0)
+
+Commands in `notes/spec-5.0-live-probes.md`. Result (2026-11-05, live; level 1 Undead in Tirisfal Glades, screenshots 174051, 174112, 174242):
+
+```
+Step 1: [1]=true, [2]=true, [3]=true
+Step 2: [1]=1, [2]=0
+Step 3: [1]={
+  hitRect={ top=366, right=411, left=279, bottom=488 },
+  fileDataIDs={ [1]=7958240 },
+  offsetX=227, textureHeight=256, textureWidth=256, offsetY=328,
+  isDrawOnTopLayer=false, isShownByMouseOver=false
+}
+Step 4, where the character stood: [1]={ [1]=154 }
+Step 4, middle of Tanaris: empty result
+```
+
+- `C_MapExplorationInfo.GetExploredMapTextures`, `C_MapExplorationInfo.GetExploredAreaIDsAtPosition` and `CreateVector2D` exist.
+- Step 2: the character's zone has one explored piece, unvisited Tanaris none. The game does not reveal maps without exploring them, so "entered a zone = any explored piece" holds and "Discovery" uses the game's fog of war, not a record of Lodestar's own.
+- Step 4: `GetExploredAreaIDsAtPosition(mapID, vector)` returns a table of area IDs for an explored point and nothing for an unexplored one.
+- Step 3's field names are recorded for tier 2 and v2; step 4 makes them unnecessary for markers.
+- Not seen yet: a marker test at a real entrance. Most vanilla entrances are approximate, so a point near an area's edge could read as unexplored.
