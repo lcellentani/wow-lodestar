@@ -56,7 +56,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
 | P43 | addon loads on the live client | [x] | 2026-11-05 | live, interface 16001 |
 | P44 | exploration API returns | [x] | 2026-11-05 | live |
-| P45 | zone highlight art | [ ] | 2026-11-05 | live; fetch and blend modes done, additive test on the map open |
+| P45 | zone highlight art | [x] | 2026-11-05 | live; can be fetched, cannot tint zones |
 
 ## Confirmed APIs
 
@@ -1585,3 +1585,14 @@ MOD
 
 - `C_Map.GetMapHighlightInfoAtPosition(mapID, x, y)` answers for a zone that is neither hovered nor visited. Its eight values: file ID, atlas ID (`nil` here), two texture coordinates, then size and top-left position as fractions of the map.
 - The art has no alpha: a soft, blurry zone shape on an opaque black square. With the default blend it draws a dark rectangle holding a dim red shape; with `MOD` the rectangle goes almost fully black. Neither can tint a zone, so the spec's multiply idea fails for this art.
+
+Additive test on the map (screenshots 181446, 181516, 181416, 181422). A frame on `WorldMapFrame.ScrollContainer.Child` at level 2950, placed from the fractions above, holding the art with `SetBlendMode("ADD")` and red `SetVertexColor`:
+
+```
+[1]=true, [2]=true, [3]=98.800720214844, [4]=65.886871337891, [5]=2950, [6]=true, [7]="ADD"
+```
+
+- With `ADD` the black square disappears, but the zone only looks slightly more shaded, barely visible.
+- The same frame with `SetColorTexture(1,0,0,0.5)` and `BLEND` shows a clear red rectangle over Elwynn Forest: the position and size fractions, the frame level and alpha tinting on the map all work.
+- Conclusion: tier 1 is out. `ADD` can only brighten, and the parchment is already bright, so it cannot turn a zone red; `BLEND` and `MOD` show the black square. ThreatOverlay needs shapes with an alpha channel (tier 2), and the green comparison was skipped as unnecessary.
+- The function still gives each zone's bounding box as map fractions.
