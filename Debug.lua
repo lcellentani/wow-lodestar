@@ -47,7 +47,7 @@ end
 local LOG_CLEAR_USAGE = "log clear - empty the saved output log."
 local COPY_USAGE = "copy - show the last output, selected for Ctrl+C."
 local DUMP_USAGE = "dump - list the shown (or current) map's zones with ready-made Zones.lua rows."
-local PROBE_USAGE = "probe [hover|here] - re-run the design probes, or report the zone under the cursor or your position."
+local PROBE_USAGE = "probe [hover||here] - re-run the design probes, or report the zone under the cursor or your position."
 local EXPECTED_INTERFACE = 16001 -- Must match ## Interface in Lodestar.toc.
 
 local PROBES = {
