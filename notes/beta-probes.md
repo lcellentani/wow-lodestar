@@ -56,6 +56,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
 | P43 | addon loads on the live client | [x] | 2026-11-05 | live, interface 16001 |
 | P44 | exploration API returns | [x] | 2026-11-05 | live |
+| P45 | zone highlight art | [ ] | 2026-11-05 | live; fetch and blend modes done, additive test on the map open |
 
 ## Confirmed APIs
 
@@ -1570,3 +1571,17 @@ Step 5, before and after "Discovered Cold Hearth Manor": [1]=1, [2]=0, then [1]=
 - Step 5 (screenshot 175402): the count grows as soon as the game announces the discovery, so the API follows exploration live within a session.
 - Step 3's field names are recorded for tier 2 and v2; step 4 makes them unnecessary for markers.
 - Not seen yet: a marker test at a real entrance. Most vanilla entrances are approximate, so a point near an area's edge could read as unexplored.
+
+### P45: Blizzard's zone highlight art (M5 step 5.0)
+
+Commands in `notes/spec-5.0-live-probes.md`. Result (2026-11-05, live; Elwynn Forest on Eastern Kingdoms, never visited by the character; screenshots 175937, 180636, 180656):
+
+```
+/dump C_Map.GetMapHighlightInfoAtPosition ~= nil
+[1]=true
+137138 nil 1 0.66686654090881 0.098603487014771 0.098633050918579 0.41092681884766 0.65651535987854
+MOD
+```
+
+- `C_Map.GetMapHighlightInfoAtPosition(mapID, x, y)` answers for a zone that is neither hovered nor visited. Its eight values: file ID, atlas ID (`nil` here), two texture coordinates, then size and top-left position as fractions of the map.
+- The art has no alpha: a soft, blurry zone shape on an opaque black square. With the default blend it draws a dark rectangle holding a dim red shape; with `MOD` the rectangle goes almost fully black. Neither can tint a zone, so the spec's multiply idea fails for this art.
