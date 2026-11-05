@@ -99,12 +99,12 @@ Open the world map on any continent first (the call does not need it, but the sc
 /run local a,b,c,d=C_Map.GetMapRectOnMap(1429,1415) LSH={C_Map.GetMapHighlightInfoAtPosition(1415,(a+b)/2,(c+d)/2)} print(unpack(LSH))
 ```
 
-Expected: `true`, then eight values: a texture file ID, an atlas ID, two fractions between 0 and 1, two sizes, two positions. If the first value is `0` or `nil` and the second is not, the art is an atlas; send the line and Claude adapts step 2.
+Expected: `true`, then eight values: a texture file ID, an atlas ID, two texture coordinates, two sizes and two positions (the sizes and positions are fractions of the map, not pixels: seen 2026-11-05). If the first value is `0` or `nil` and the second is not, the art is an atlas; send the line and Claude adapts step 2.
 
-**Step 2, draw it tinted.** The zone's shape should appear in the middle of the screen in red (it is not placed on the map; this only checks that it can be drawn and tinted):
+**Step 2, draw it tinted.** Close the map first: the texture sits on `UIParent`, under the map window. The zone's shape should appear in the middle of the screen in red, at a fixed 300x200 (it is not placed on the map; this only checks that it can be drawn and tinted):
 
 ```
-/run local t=UIParent:CreateTexture(nil,"OVERLAY") LST=t t:SetPoint("CENTER") t:SetSize(LSH[5],LSH[6]) t:SetTexture(LSH[1]) t:SetTexCoord(0,LSH[3],0,LSH[4]) t:SetVertexColor(1,0.2,0.2,0.8)
+/run local t=UIParent:CreateTexture(nil,"OVERLAY") LST=t t:SetPoint("CENTER") t:SetSize(300,200) t:SetTexture(LSH[1]) t:SetTexCoord(0,LSH[3],0,LSH[4]) t:SetVertexColor(1,0.2,0.2,0.8)
 ```
 
 Expected: Elwynn's outline in red. Then the multiply blend mode, which should darken the screen under it instead:
