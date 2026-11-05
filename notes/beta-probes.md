@@ -54,6 +54,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P40 | level-up event | [x] | 2026-10-20 | beta |
 | P41 | dungeon and raid icons (atlases) | [x] | 2026-10-20 | beta |
 | P42 | map size events (EventRegistry) | [x] | 2026-10-20 | beta |
+| P43 | addon loads on the live client | [x] | 2026-11-05 | live, interface 16001 |
 
 ## Confirmed APIs
 
@@ -1529,3 +1530,17 @@ WorldMapMaximized
 
 - `EventRegistry:RegisterCallback(event, func, owner)` exists.
 - `WorldMapMaximized` and `WorldMapMinimized` fire once per size change, in order.
+
+### P43: the addon loads on the live client (M5 step 5.0)
+
+`/console scriptErrors 1`, then `/dump (select(4, GetBuildInfo()))` and `/ls`. Result (2026-11-05, live; screenshot 165938):
+
+```
+Lodestar: loaded (interface 16001), db v1
+Dump: value=(select(4, GetBuildInfo()))
+[1]=16001
+```
+
+- The live client's interface number is `16001`, the same as the beta, so `Lodestar.toc` needs no change.
+- `/ls` lists all its commands.
+- Found here: the help line shows `/ls probe [hoverere]`, because `Debug.lua`'s `PROBE_USAGE` holds `hover|here` and the chat frame reads `|h` as an escape code.
