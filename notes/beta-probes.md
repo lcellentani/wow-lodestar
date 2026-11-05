@@ -58,6 +58,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P44 | exploration API returns | [x] | 2026-11-05 | live |
 | P45 | zone highlight art | [x] | 2026-11-05 | live; can be fetched, cannot tint zones |
 | P46 | texture from the addon folder | [x] | 2026-11-05 | live |
+| P47 | grid sampling speed | [x] | 2026-11-05 | live |
 
 ## Confirmed APIs
 
@@ -1604,3 +1605,18 @@ Command in `notes/spec-5.0-live-probes.md`. Result (2026-11-05, live; screenshot
 
 - `SetTexture("Interface\AddOns\Lodestar\Media\probe-white")` loads a `.tga` from the addon folder and returns `true`.
 - The alpha channel loads (soft edges, no square), and `SetVertexColor` colors a white mask. Tier 2 masks can ship.
+
+### P47: grid sampling speed (M5 step 5.0)
+
+Commands in `notes/spec-5.0-live-probes.md`, plus a count of what the same loop returns. Result (2026-11-05, live; 100 x 100 grid on Eastern Kingdoms, 1415; screenshots 182210, 182348):
+
+```
+/dump debugprofilestop ~= nil
+[1]=true
+8.4445999860764
+2317 27 54
+```
+
+- `debugprofilestop` exists. 10,000 lookups took 8.4 ms, one run.
+- The count line reads: 2317 points returned a map, 27 different maps, 54 points in Elwynn Forest (1429). The other points returned nothing, so sea points are `nil` and the speed is partly theirs.
+- A 128 x 128 grid (16,384 points) should take about 14 ms by simple scaling, so it can run in one go; no spreading over frames and no freeze warning needed.
