@@ -2,22 +2,31 @@
 
 Local paths for the dev loop (design doc, "Dev environment setup"). `<ACCOUNT>` stands for the Battle.net account folder under `WTF\Account`; there is only one, so list that folder to find it. It is left out on purpose because the repo is public.
 
-## Beta client (until Oct 21, 2026)
+## Live client (since Nov 4, 2026)
 
 | What | Path |
 | --- | --- |
 | Install root (launcher) | `D:\GAMES\World of Warcraft` |
-| Client folder | `D:\GAMES\World of Warcraft\_classic_beta_` (`WowB.exe`) |
-| Addon junction | `D:\GAMES\World of Warcraft\_classic_beta_\Interface\AddOns\Lodestar` -> `D:\DEV\wow-lodestar` (created 2026-10-13) |
-| SavedVariables log | `D:\GAMES\World of Warcraft\_classic_beta_\WTF\Account\<ACCOUNT>\SavedVariables\Lodestar.lua` |
+| Client folder | `D:\GAMES\World of Warcraft\_forever_` (`Wow.exe`) |
+| Addon junction | `D:\GAMES\World of Warcraft\_forever_\Interface\AddOns\Lodestar` -> `D:\DEV\wow-lodestar` (created 2026-11-05) |
+| SavedVariables log | `D:\GAMES\World of Warcraft\_forever_\WTF\Account\<ACCOUNT>\SavedVariables\Lodestar.lua` |
 
-## Live client (from Nov 4, 2026)
+The client also holds addons the user plays with (Baganator, Chattynator, DialogueUI, the Spoken family). Turn them off in the character screen's AddOns list for probes and taint checks, so that errors and taint can only come from Lodestar; turn them back on to play.
 
-Not installed yet. The live client will likely use its own `_classic_..._` folder; when it does, create the junction again there and add its paths here:
+To recreate the junction (with the game closed: the client only sees files that exist when it starts):
 
 ```powershell
-New-Item -ItemType Junction -Path "<client folder>\Interface\AddOns\Lodestar" -Target "D:\DEV\wow-lodestar"
+New-Item -ItemType Junction -Path "D:\GAMES\World of Warcraft\_forever_\Interface\AddOns\Lodestar" -Target "D:\DEV\wow-lodestar"
 ```
+
+## Beta client (closed Oct 21, 2026)
+
+Kept for reference.
+
+| What | Path |
+| --- | --- |
+| Client folder | `D:\GAMES\World of Warcraft\_classic_beta_` (`WowB.exe`) |
+| Addon junction | `D:\GAMES\World of Warcraft\_classic_beta_\Interface\AddOns\Lodestar` -> `D:\DEV\wow-lodestar` (created 2026-10-13) |
 
 ## Junction safety
 

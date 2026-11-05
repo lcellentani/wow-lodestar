@@ -19,7 +19,8 @@ The function names in P44 and P45 come from Blizzard's Mainline (retail) API, wh
 
 ## Before the session
 
-- **Junction.** Install the live client, then create the junction in its folder and add its paths to `notes/environment.md` (Claude does the notes; the command is in that file's "Live client" section).
+- **Junction.** Done 2026-11-05: the client is in `_forever_`, paths in `notes/environment.md`.
+- **Other addons.** Turn off everything but Lodestar in the character screen's AddOns list, so errors can only come from Lodestar.
 - **Test texture.** `Media/probe-white.tga` (64x64 white disc with soft edges, made by Claude 2026-10-24) is already in the repo, so the junction shows it. The game only sees files that existed when it started, so start the client after the junction exists.
 - **Character.** A fresh character is ideal: only its starting area is explored, which is exactly what P44 needs. Any faction.
 - Script errors on:
