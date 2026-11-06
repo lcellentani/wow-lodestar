@@ -54,5 +54,6 @@ ns.Instances = {
   { name = "Krol'dok Stronghold", map = 2548, min = 40, max = 47, kind = "dungeon" },  -- Riverglades (guides); levels live group finder (P49)
   { name = "Alcaz Prison", map = 1445, min = 48, max = 55, kind = "dungeon" },  -- Dustwallow Marsh (guides); name and levels live group finder (P49)
   { name = "The Shaper's Terrace", map = 1449, min = 58, max = 60, kind = "dungeon" },  -- Un'Goro Crater (guides); name and levels live group finder (P49)
+  { name = "Blackmaw Hold", map = 1447, min = 55, max = 60, kind = "dungeon" },  -- Azshara (guides); levels live group finder (P49)
   { name = "Hyjal Summit", map = 2482, min = 60, max = 60, kind = "raid" },  -- Mount Hyjal (guides); raids unlock 2026-12-09
 }

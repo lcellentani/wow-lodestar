@@ -1664,7 +1664,7 @@ Blackmaw Hold 55 60 5
 The Shaper's Terrace 58 60 5
 ```
 
-- Four of them replace the guide values in `Data/Instances.lua`, two with the client's name. Blackmaw Hold has no row yet: its zone is unknown.
+- Four of them replace the guide values in `Data/Instances.lua`, two with the client's name. Blackmaw Hold is a new row (43 instances now); its zone, Azshara, comes from guides, not from the client.
 - Zephras Isle has exploration data (10 pieces), so "Discovery" can work there. Not known: whether a character that never visited it reads 0.
 - The world map still shows no player arrow and no Zephras Isle area for a character on the island (screenshot 190845).
 - Not run: the Dalaran portal, which needs a character that can reach it.
