@@ -191,6 +191,42 @@ Expected: a red oval over Elwynn Forest, proving masks work. A full rectangle or
 | Nothing | The art's alpha may be empty, or the swap failed: send the screenshot |
 | The oval is unchanged | The swap did not apply: Claude sends a variant |
 
+## P49: re-checks of beta results (added 2026-11-06)
+
+Repeats what the beta left to confirm on live. Results go to `LodestarDB.p49` or the log, so Claude reads them from the SavedVariables file after a `/reload`; the key is a temporary one, removed at the end. Run on a character standing on Zephras Isle, for the third value of step 2.
+
+**Step 1, the addon's own probes.** Then, with the map open on Eastern Kingdoms and the cursor over Elwynn Forest, the hover line (type it first and press Enter with the cursor in place).
+
+```
+/ls probe
+```
+
+```
+/ls probe hover
+```
+
+**Step 2, client data.** `GetMapLevels` for Elwynn Forest (P6), `GetDungeonEntrancesForMap` for Westfall (P32), and the explored pieces of Zephras Isle (P44).
+
+```
+/run LodestarDB.p49={levels={C_Map.GetMapLevels(1429)},entrances=C_EncounterJournal.GetDungeonEntrancesForMap(1436),zephras=#(C_MapExplorationInfo.GetExploredMapTextures(2521) or {})}
+```
+
+**Step 3, group finder ranges** (P33), compared by Claude with the 71 recorded rows. The beta ran on a level 18 character; a smaller list at level 1 would itself be a result.
+
+```
+/run local r={} for _,id in ipairs(C_LFGList.GetAvailableActivities()) do local t=C_LFGList.GetActivityInfoTable(id) r[#r+1]=t.fullName.." "..t.minLevelSuggestion.." "..t.maxLevelSuggestion.." "..t.maxNumPlayers end LodestarDB.p49.lfg=r
+```
+
+**Step 4, Zephras Isle on the world map.** Open the map at the "World" level and screenshot it: does the island show now?
+
+**Step 5, save.** `/reload`, tell Claude, and after Claude has read the file:
+
+```
+/run LodestarDB.p49=nil
+```
+
+The Dalaran portal check waits for a character that can reach it.
+
 ## After the session
 
 Claude records P43-P47 in `notes/beta-probes.md`, adds the confirmed names to `.luacheckrc` (at least `CreateVector2D` and `debugprofilestop` if they exist), closes or updates the design doc's open question on live probes, and writes the step spec for the first M5 module with the results in hand. Commits as before: Claude's notes and data `[T4]`; no user code in this step.
