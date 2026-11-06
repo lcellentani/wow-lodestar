@@ -1626,6 +1626,7 @@ Commands in `notes/spec-5.0-live-probes.md`, plus a count of what the same loop 
 
 Commands in `notes/spec-5.0-live-probes.md`. Result (2026-11-06, live; solid red `SetColorTexture(1,0,0,0.8)` over Elwynn Forest, on a level 1 character on Zephras Isle; screenshots 185936, 190009, 190023):
 
+- Step 1 printed `true true` (screenshot 190146), and the art values match P45 on this other character.
 - Control: `CreateMaskTexture`, `AddMaskTexture` and the mask's `SetTexture` work. With `Media/probe-white` as the mask, the red shows as a soft-edged oval over Elwynn Forest.
 - Test: with `SetTexture(LSH[1])` and `SetTexCoord` on the same mask, the red fills the whole rectangle.
 - Masks read alpha, and the art's alpha is solid everywhere. Tier 1 is closed: fetched art cannot give a tinted zone shape by blending or masking.
