@@ -45,3 +45,6 @@ screenshots/
 
 # Downloaded dev tools (lua5.1, luacheck); see the design doc, "Dev environment setup"
 tools/
+
+# Masks traced from Blizzard art stay local (notes/spec-5.2-traced-mask-slice.md)
+Media/traced/
