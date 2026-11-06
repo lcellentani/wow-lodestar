@@ -59,6 +59,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P45 | zone highlight art | [x] | 2026-11-05 | live; can be fetched, cannot tint zones |
 | P46 | texture from the addon folder | [x] | 2026-11-05 | live |
 | P47 | grid sampling speed | [x] | 2026-11-05 | live |
+| P48 | highlight art as a mask | [x] | 2026-11-06 | live; masks work, the art cannot be one |
 
 ## Confirmed APIs
 
@@ -1620,3 +1621,12 @@ Commands in `notes/spec-5.0-live-probes.md`, plus a count of what the same loop 
 - `debugprofilestop` exists. 10,000 lookups took 8.4 ms, one run.
 - The count line reads: 2317 points returned a map, 27 different maps, 54 points in Elwynn Forest (1429). The other points returned nothing, so sea points are `nil` and the speed is partly theirs.
 - A 128 x 128 grid (16,384 points) should take about 14 ms by simple scaling, so it can run in one go; no spreading over frames and no freeze warning needed.
+
+### P48: Blizzard's art as a mask (M5 step 5.0, added 2026-11-06)
+
+Commands in `notes/spec-5.0-live-probes.md`. Result (2026-11-06, live; solid red `SetColorTexture(1,0,0,0.8)` over Elwynn Forest, on a level 1 character on Zephras Isle; screenshots 185936, 190009, 190023):
+
+- Control: `CreateMaskTexture`, `AddMaskTexture` and the mask's `SetTexture` work. With `Media/probe-white` as the mask, the red shows as a soft-edged oval over Elwynn Forest.
+- Test: with `SetTexture(LSH[1])` and `SetTexCoord` on the same mask, the red fills the whole rectangle.
+- Masks read alpha, and the art's alpha is solid everywhere. Tier 1 is closed: fetched art cannot give a tinted zone shape by blending or masking.
+- Seen in the control: the frame at level 2950 draws over the `14` label, and red text under a red tint is hard to read. ThreatOverlay must stay under ZoneLabels, as the doc says.
