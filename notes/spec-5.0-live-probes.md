@@ -147,6 +147,50 @@ Expected: a yellow disc with soft edges in the middle of the screen; the chat va
 
 Expected: `true`, then a number. Below about 200 ms, a 128 x 128 grid can run in one go behind a "the screen will freeze for a moment" warning; above it, the grid probe spreads its work over several frames. The game may freeze briefly during this line: that is the measurement.
 
+## P48: Blizzard's art as a mask (added 2026-11-06)
+
+A last try at tier 1 after P45: cut a solid color to the highlight art's shape with a mask texture. `CreateMaskTexture` and `AddMaskTexture` come from Mainline and are unconfirmed. Start from a `/reload`, with the world map open on Eastern Kingdoms.
+
+**Step 1, the functions exist.**
+
+```
+/run local t=UIParent:CreateTexture() print(UIParent.CreateMaskTexture~=nil, t.AddMaskTexture~=nil)
+```
+
+Expected: `true true`. If either is `false`, stop: the option is closed.
+
+**Step 2, fetch the art and place a frame over Elwynn Forest** (the same commands as P45).
+
+```
+/run local a,b,c,d=C_Map.GetMapRectOnMap(1429,1415) LSH={C_Map.GetMapHighlightInfoAtPosition(1415,(a+b)/2,(c+d)/2)} print(unpack(LSH))
+```
+
+```
+/run local c=WorldMapFrame.ScrollContainer.Child local w,h=c:GetSize() local f=CreateFrame("Frame",nil,c) f:SetFrameLevel(2950) f:SetPoint("TOPLEFT",LSH[7]*w,-LSH[8]*h) f:SetSize(LSH[5]*w,LSH[6]*h) LSM=f
+```
+
+**Step 3, control: mask with our own disc,** which has real alpha.
+
+```
+/run local t=LSM:CreateTexture() t:SetAllPoints() t:SetColorTexture(1,0,0,0.8) LSMT=t local m=LSM:CreateMaskTexture() m:SetAllPoints() m:SetTexture("Interface\AddOns\Lodestar\Media\probe-white") LSMK=m t:AddMaskTexture(m)
+```
+
+Expected: a red oval over Elwynn Forest, proving masks work. A full rectangle or nothing means masks do not work here, and step 4 proves nothing.
+
+**Step 4, the real test: swap the mask to Blizzard's art.**
+
+```
+/run LSMK:SetTexture(LSH[1]) LSMK:SetTexCoord(0,LSH[3],0,LSH[4])
+```
+
+| What appears | Meaning |
+| --- | --- |
+| Clear red Elwynn shape | Masks read brightness: tier 1 is back, compare it with grid masks |
+| Faint or blurry red shape | Masks read brightness, but the art is too weak: tier 1 stays out unless it still looks good |
+| Full red rectangle | Masks read alpha and the art has none: tier 1 is closed |
+| Nothing | The art's alpha may be empty, or the swap failed: send the screenshot |
+| The oval is unchanged | The swap did not apply: Claude sends a variant |
+
 ## After the session
 
 Claude records P43-P47 in `notes/beta-probes.md`, adds the confirmed names to `.luacheckrc` (at least `CreateVector2D` and `debugprofilestop` if they exist), closes or updates the design doc's open question on live probes, and writes the step spec for the first M5 module with the results in hand. Commits as before: Claude's notes and data `[T4]`; no user code in this step.
