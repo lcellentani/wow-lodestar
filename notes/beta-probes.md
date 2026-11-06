@@ -61,6 +61,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P47 | grid sampling speed | [x] | 2026-11-05 | live |
 | P48 | highlight art as a mask | [x] | 2026-11-06 | live; masks work, the art cannot be one |
 | P49 | re-checks of beta results | [ ] | 2026-11-06 | live; Dalaran portal open |
+| P50 | grid masks on the map | [x] | 2026-11-06 | live; draw well, fit fails |
 
 ## Confirmed APIs
 
@@ -1668,3 +1669,12 @@ The Shaper's Terrace 58 60 5
 - Zephras Isle has exploration data (10 pieces), so "Discovery" can work there. Not known: whether a character that never visited it reads 0.
 - The world map still shows no player arrow and no Zephras Isle area for a character on the island (screenshot 190845).
 - Not run: the Dalaran portal, which needs a character that can reach it.
+
+### P50: grid masks on the map (M5 step 5.1)
+
+Commands in `notes/spec-5.1-grid-mask-slice.md`. Result (2026-11-06, live; screenshots 194754, 194801, 194822). Elwynn Forest with Stormwind City (red), Wetlands (green) and Silverpine Forest (yellow), 256 x 256 grid, 0.45 opacity:
+
+- Drawing works: `.tga` masks from `scripts/make_masks.py` load after a client restart, sit in the right place, and scale with the map on the small and maximized sizes.
+- Layering works: frame level 1000 on `WorldMapFrame.ScrollContainer.Child` is above the map art and under the labels, which stay on top. Red range text on the red zone is the weakest case.
+- Color reads clearly at 0.45. The lighter 0.5 `SetAlpha` step shows no clear difference between the screenshots, so tint strength is still open.
+- **Fit fails.** `GetMapInfoAtPosition` hover areas are not the painted zones: they cover sea and overlap neighbors. Silverpine Forest fills a wide block of sea to its west, Wetlands a block to its northwest and part of Dun Morogh, and Elwynn Forest a block to its west. A filled tint makes this obvious, and no grid size fixes it.
