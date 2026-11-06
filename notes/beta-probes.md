@@ -60,6 +60,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P46 | texture from the addon folder | [x] | 2026-11-05 | live |
 | P47 | grid sampling speed | [x] | 2026-11-05 | live |
 | P48 | highlight art as a mask | [x] | 2026-11-06 | live; masks work, the art cannot be one |
+| P49 | re-checks of beta results | [ ] | 2026-11-06 | live; Dalaran portal open |
 
 ## Confirmed APIs
 
@@ -1631,3 +1632,39 @@ Commands in `notes/spec-5.0-live-probes.md`. Result (2026-11-06, live; solid red
 - Test: with `SetTexture(LSH[1])` and `SetTexCoord` on the same mask, the red fills the whole rectangle.
 - Masks read alpha, and the art's alpha is solid everywhere. Tier 1 is closed: fetched art cannot give a tinted zone shape by blending or masking.
 - Seen in the control: the frame at level 2950 draws over the `14` label, and red text under a red tint is hard to read. ThreatOverlay must stay under ZoneLabels, as the doc says.
+
+### P49: re-checks of beta results (M5 step 5.0, added 2026-11-06)
+
+Commands in `notes/spec-5.0-live-probes.md`. Result (2026-11-06, live; level 1-2 character on Zephras Isle; screenshots 190938, 190845; the rest read from `LodestarDB.p49` in the SavedVariables file):
+
+```
+P1 pass: interface 16001
+P2 pass: player map 2521 Zephras Isle, Zone
+P3 pass: data providers and pins available
+P4 pass: WorldMapFrame loaded
+P5 pass: Eastern Kingdoms 26 zones, Kalimdor 23 zones, Elwynn rect ok
+P6 info: Elwynn Forest client levels: none
+P8 pass: level 12 is orange (QuestDifficulty_VeryDifficult)
+probes: 7, failed: 0
+P7 info: cursor 46.9, 69.8 on 1415: 1429 Elwynn Forest, 1-14 (table)
+levels = 0, 0, 0, 0     (GetMapLevels 1429)
+entrances = {}          (GetDungeonEntrancesForMap 1436)
+zephras = 10            (GetExploredMapTextures 2521, count)
+lfg = 76 rows
+```
+
+- `/ls probe` passes unchanged. `GetMapLevels` and `GetDungeonEntrancesForMap` are still empty on live: `Data/Zones.lua` and `Data/Instances.lua` stay the source.
+- Group finder: all 71 beta rows are unchanged, so `Data/Zones.lua` needs no change. Five rows are new:
+
+```
+The Drowned City 35 42 5
+Krol'dok Stronghold 40 47 5
+Alcaz Prison 48 55 5
+Blackmaw Hold 55 60 5
+The Shaper's Terrace 58 60 5
+```
+
+- Four of them replace the guide values in `Data/Instances.lua`, two with the client's name. Blackmaw Hold has no row yet: its zone is unknown.
+- Zephras Isle has exploration data (10 pieces), so "Discovery" can work there. Not known: whether a character that never visited it reads 0.
+- The world map still shows no player arrow and no Zephras Isle area for a character on the island (screenshot 190845).
+- Not run: the Dalaran portal, which needs a character that can reach it.

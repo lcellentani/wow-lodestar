@@ -1,7 +1,7 @@
 local addonName, ns = ...
 
--- Dungeon and raid entrances. Levels: the group finder on the beta (P33, 2026-10-19) where it lists
--- the instance; otherwise vanilla values (raids) or third-party guides (Forever). Vanilla entrances:
+-- Dungeon and raid entrances. Levels: the group finder (P33 on the beta, P49 on live) where it lists
+-- the instance; otherwise vanilla values (raids). Vanilla entrances:
 -- Claude's recall of Classic Era data, approximate (Deadmines from Warcraft Wiki), to check when the
 -- markers draw. Forever entrances: unknown until found in game (P12), so x and y are left out.
 -- { name, map = zone uiMapID, x, y (0-1 on that zone's map), min, max, kind }
@@ -50,9 +50,9 @@ ns.Instances = {
   { name = "Ruins of Lordaeron", map = 1458, x = 0.707, y = 0.178, min = 15, max = 22, kind = "dungeon" },  -- Undercity (guides said Tirisfal Glades); levels P33, its meeting stone 2026-10-19 (P12)
   { name = "Excavation Site: Wetlands", map = 1437, x = 0.536, y = 0.660, min = 26, max = 33, kind = "dungeon" },  -- Wetlands; levels P33, position of its meeting stone by Thelgen Rock 2026-10-19 (P12), portal nearby
   { name = "City of Dalaran", map = 1416, x = 0.089, y = 0.577, min = 28, max = 35, kind = "dungeon" },  -- Alterac Mountains; levels P33, its meeting stone 2026-10-19 (P12, P34)
-  { name = "The Drowned City", map = 1434, kind = "dungeon" },  -- Stranglethorn Vale (guides); not in the beta, guides disagree on levels
-  { name = "Krol'dok Stronghold", map = 2548, kind = "dungeon" },  -- Riverglades (guides); not in the beta, guides disagree on levels
-  { name = "Alcaz Island Prison", map = 1445, min = 48, max = 53, kind = "dungeon" },  -- Dustwallow Marsh (guides); not in the beta, levels from one guide
-  { name = "Shaper's Terrace", map = 1449, min = 58, max = 60, kind = "dungeon" },  -- Un'Goro Crater (guides); not in the beta, levels from guides
+  { name = "The Drowned City", map = 1434, min = 35, max = 42, kind = "dungeon" },  -- Stranglethorn Vale (guides); levels live group finder (P49)
+  { name = "Krol'dok Stronghold", map = 2548, min = 40, max = 47, kind = "dungeon" },  -- Riverglades (guides); levels live group finder (P49)
+  { name = "Alcaz Prison", map = 1445, min = 48, max = 55, kind = "dungeon" },  -- Dustwallow Marsh (guides); name and levels live group finder (P49)
+  { name = "The Shaper's Terrace", map = 1449, min = 58, max = 60, kind = "dungeon" },  -- Un'Goro Crater (guides); name and levels live group finder (P49)
   { name = "Hyjal Summit", map = 2482, min = 60, max = 60, kind = "raid" },  -- Mount Hyjal (guides); raids unlock 2026-12-09
 }
