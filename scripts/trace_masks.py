@@ -6,7 +6,8 @@ prints the zone's rectangle on the map from LodestarDB.art in the SavedVariables
 
 The output derives from Blizzard's art, so it goes to the git-ignored Media/traced/ only.
 
-Usage: python scripts/trace_masks.py <Lodestar.lua> <outdir> <mapID>=<screenshot.png> ...
+Usage: python scripts/trace_masks.py [--edge=0.5] [--suffix=] <Lodestar.lua> <outdir> <mapID>=<screenshot.png> ...
+--edge sets the contour as a fraction of the brightest pixel; --suffix is added to each file name.
 """
 import re
 import struct
@@ -84,7 +85,7 @@ def art_box(img):
     return x0 + 1, y0 + 1, x1 - 1, y1 - 1   # one pixel in, away from the blended edge
 
 
-def mask_from(img, box):
+def mask_from(img, box, edge=EDGE):
     x0, y0, x1, y1 = box
     light = [[max(img[y][x]) for x in range(x0, x1 + 1)] for y in range(y0, y1 + 1)]
     peak = max(max(line) for line in light) or 1
@@ -99,7 +100,8 @@ def mask_from(img, box):
             ix, tx = int(max(0, fx)), max(0, fx) - int(max(0, fx))
             v = (light[iy][ix] * (1 - tx) + light[iy][ix + 1] * tx) * (1 - ty) + \
                 (light[iy + 1][ix] * (1 - tx) + light[iy + 1][ix + 1] * tx) * ty
-            t = min(1.0, max(0.0, (v / peak - (EDGE - SOFT)) / (2 * SOFT)))
+            soft = min(SOFT, edge * 0.8)
+            t = min(1.0, max(0.0, (v / peak - (edge - soft)) / (2 * soft)))
             line.append(t * t * (3 - 2 * t))
         out.append(line)
     return out, peak
@@ -125,16 +127,19 @@ def read_rects(path):
 
 
 def main():
-    rects = read_rects(sys.argv[1])
-    for spec in sys.argv[3:]:
+    opts = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--"))
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    edge, suffix = float(opts.get("edge", EDGE)), opts.get("suffix", "")
+    rects = read_rects(args[0])
+    for spec in args[2:]:
         map_id, png = spec.split("=", 1)
         map_id = int(map_id)
         img = read_png(png)
         box = art_box(img)
-        alpha, peak = mask_from(img, box)
-        write_tga(f"{sys.argv[2]}/mask-{map_id}.tga", alpha)
+        alpha, peak = mask_from(img, box, edge)
+        write_tga(f"{args[1]}/mask-{map_id}{suffix}.tga", alpha)
         w, h, x, y = rects[map_id]
-        print(f"mask-{map_id}: box {box} peak {peak} -> x={x:.5f} y={y:.5f} w={w:.5f} h={h:.5f}")
+        print(f"mask-{map_id}{suffix}: box {box} peak {peak} -> x={x:.5f} y={y:.5f} w={w:.5f} h={h:.5f}")
 
 
 if __name__ == "__main__":
