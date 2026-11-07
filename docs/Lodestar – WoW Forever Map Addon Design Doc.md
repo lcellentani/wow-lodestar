@@ -63,7 +63,7 @@ A failed probe changes the design, not just a line of code, so run the design pr
 
 The MVP is four map overlays that read from one data table; v2 adds user-generated and exploration features.
 
-**Two map sizes, two questions** (decided 2026-10-24). The small map (Map & Quest Log) answers the local question "from here, what is next door, and is it safe?": a threat marker on each zone bordering the player's zone, no text labels, and the tooltip on hover for any zone. The maximized map answers the global question "where on this continent fits me?": names and colored ranges on every zone, no markers and no tint. Text labels left the small map because in the beta they could not be kept inside small zones; a marker is a fixed small shape at one point, so it fits where text did not. Until the markers work on live, the small map keeps its current range labels, so it is never empty. *(Revised 2026-11-07: zone tints were dropped after P45-P51, see ThreatOverlay.)*
+**Two map sizes, two questions** (decided 2026-10-24). The small map (Map & Quest Log) answers the local question "from here, what is next door, and is it safe?": a threat marker on each zone bordering the player's zone, no text labels, and the tooltip on hover for any zone. The maximized map answers the global question "where on this continent fits me?": names and colored ranges on every zone, no markers and no tint. Text labels left the small map because in the beta they could not be kept inside small zones; a marker is a fixed small shape at one point, so it fits where text did not. Since 2026-11-07 the small map shows no range labels; it stays empty until the threat markers exist. *(Revised 2026-11-07: zone tints were dropped after P45-P51, see ThreatOverlay.)*
 
 | Feature | Tier | Behavior | Needs |
 | --- | --- | --- | --- |
@@ -282,7 +282,7 @@ Each module is independent, can be disabled, and reads only from the data layer 
 | Map | ZoneLabels | ThreatOverlay | Instances |
 | --- | --- | --- | --- |
 | World (both continents) | none | none | none |
-| Continent, small | none (range labels until the markers work) | the player's neighbors | projected markers |
+| Continent, small | none | the player's neighbors | projected markers |
 | Continent, maximized | name and range per zone | none | projected markers |
 | Zone | none | none | markers at stored positions |
 
@@ -297,9 +297,9 @@ Fallback if P3 fails (assumption A3): each module creates its own pool of frames
 
 **Zones off the continents.** On the beta, Zephras Isle (2521) is a zone whose parent is the world map (947), and it has no placement there: `GetMapRectOnMap(2521, 947)` returns four zeros and the world map does not draw it. So no continent map shows it, ZoneLabels never labels it, and the zone tooltip can never hover it. It still gets a row in `Zones.lua`, so `/ls dump` and lookups know its range. This is a known MVP gap, to re-check on the live client after Nov 4, 2026, where the island may get a place on the world map; a label on the island's own zone map is a v2 option.
 
-**Names on the maximized map** (decided 2026-10-19, P39): on the maximized map each label shows the zone name above its range; in the small Map & Quest Log window, the range alone, since names there overlap badly (zone details on hover come from the Tooltip). The map does not refresh data providers on maximize or minimize, so the module listens to the `EventRegistry` events `WorldMapMaximized` and `WorldMapMinimized` (P42) and refreshes (hooking `Maximize` and `Minimize` with `hooksecurefunc` broke the map in combat, P14); `AddDataProvider` does not draw on an open map either, so enabling the module refreshes when the map is shown. Remaining overlaps (Duskwood, Deadwind Pass, Swamp of Sorrows) were first meant for automatic collision handling; that is replaced by grid anchors (below).
+**Names on the maximized map** (decided 2026-10-19, P39): on the maximized map each label shows the zone name above its range; in the small Map & Quest Log window, the range alone, since names there overlap badly (zone details on hover come from the Tooltip). Since 2026-11-07 the small window shows no labels at all (see "Small map"). The map does not refresh data providers on maximize or minimize, so the module listens to the `EventRegistry` events `WorldMapMaximized` and `WorldMapMinimized` (P42) and refreshes (hooking `Maximize` and `Minimize` with `hooksecurefunc` broke the map in combat, P14); `AddDataProvider` does not draw on an open map either, so enabling the module refreshes when the map is shown. Remaining overlaps (Duskwood, Deadwind Pass, Swamp of Sorrows) were first meant for automatic collision handling; that is replaced by grid anchors (below).
 
-**Small map** (decided 2026-10-24): once the threat markers work on live, ZoneLabels draws on the maximized map only; until then it keeps the small-map range labels.
+**Small map** (decided 2026-10-24, done 2026-11-07): ZoneLabels draws on the maximized map only; the small map is for the threat markers.
 
 **Label anchors** (decided 2026-10-24, revised 2026-11-07): every zone gets a hand-set `labelX, labelY`, shared by its label and its threat marker, read in game by hovering the spot and logging it with `/ls probe hover` (a macro on a key makes it one press per zone). Before that, and for any zone without one, the hover-area grid (P50) gives the point deepest inside its shape, the spot farthest from any border. It never lands in the sea or in the wrong arm of an L-shaped zone, so it replaces the rectangle center. The offline script that reads the grid writes these default anchors into the data.
 

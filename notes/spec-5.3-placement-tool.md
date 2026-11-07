@@ -65,7 +65,7 @@ A new file after `Debug.lua` in `Lodestar.toc`, starting with `local addonName, 
 Build it the first time the tool turns on, never again (CLAUDE.md: no frames created per refresh):
 
 - **The frame**: `CreateFrame("Frame", nil, WorldMapFrame.ScrollContainer.Child)`, `SetAllPoints()` on that child, `SetFrameLevel(3000)` so it sits above the map's pins (they use about 2000-2920, P3), and hidden by default.
-- **Grid lines**: 20 cells, so 19 vertical and 19 horizontal textures from `Logic.GridLines(20)`, each `SetColorTexture(1, 1, 1, 0.12)` and 1 pixel thick. Faint is the point: they help you judge spacing without covering the map.
+- **Grid lines**: 20 cells, so 19 vertical and 19 horizontal textures from `Logic.GridLines(20)`, each `SetColorTexture(1, 1, 1, 0.25)` (0.12 was barely visible, 2026-11-07) and 1 pixel thick. Faint is the point: they help you judge spacing without covering the map.
 - **Placing the lines**: the canvas changes size when the map is maximized, so position them in an `OnSizeChanged` script on your frame: for a vertical line at fraction `f`, `SetPoint("TOPLEFT", frame, "TOPLEFT", f * width, 0)` and `SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", f * width, 0)`, then `SetWidth(1)`; the horizontal lines the same way with the height. Call the same function once after building, since the size is already set.
 - **Dots**: one texture per zone, created the first time that zone needs one and kept in a local table keyed by zone ID. Use `Media/probe-white.tga` (the soft disc from P46) at about 10 x 10, tinted with `SetVertexColor`: white for points already saved, yellow for the one you just placed. Optional: a small `FontString` with the zone name next to each dot.
 
