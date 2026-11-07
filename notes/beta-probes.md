@@ -1689,3 +1689,4 @@ Commands in `notes/spec-5.2-traced-mask-slice.md`. Capture 2026-11-07 (screensho
 - Color: at 0.45, red, green and blue read clearly; **yellow barely shows** on the yellow parchment. At 0.25, green still reads but red is faint. A shape drawn twice (about 0.7) is strong and still leaves the map legible.
 - Labels stay on top and readable; red range text on the red zone is the weakest case.
 - Masks derive from Blizzard's art and live only in the git-ignored `Media/traced/`.
+- The art itself limits precision (user, screenshots 120831, 120841, 120845, 120856): Blizzard's own hover highlight bleeds past the painted borders, Wetlands into Loch Modan and toward Arathi Highlands, Silverpine Forest past its edge. A threshold only trades missing thin parts against spill, so traced masks reach at best Blizzard's hover precision, not the painted borders.
