@@ -49,7 +49,37 @@ A script reads each screenshot and the rectangles, and writes white `.tga` masks
 
 ## Step 3: restart and draw (user)
 
-Full client restart, then the P50 draw commands with the traced paths and rectangles, which Claude supplies. Compare fit, readability and labels with P50, and try tint strengths again.
+Result of steps 1-2 (2026-11-07): `scripts/trace_masks.py` built the three masks from screenshots 114916, 114931 and 114948. The art is dim (brightest pixel 28-51 of 255) but the edge is clean; rectangles come from `LodestarDB.art`.
+
+Full client restart, then, with the map open on Eastern Kingdoms (the same helpers as P50, with the traced path):
+
+```
+/run LSC=WorldMapFrame.ScrollContainer.Child LSD=function(x,y,W,H) local w,h=LSC:GetSize() local f=CreateFrame("Frame",nil,LSC) f:SetFrameLevel(1000) f:SetPoint("TOPLEFT",x*w,-y*h) f:SetSize(W*w,H*h) return f end
+```
+
+```
+/run LST=function(f,i,r,g,b,a) local t=f:CreateTexture() t:SetAllPoints() t:SetTexture("Interface\AddOns\Lodestar\Media\traced\mask-"..i) t:SetVertexColor(r,g,b,a) return t end
+```
+
+```
+/run LT1=LST(LSD(0.41093,0.65652,0.09860,0.09863),1429,1,0.2,0.2,0.45)
+```
+
+```
+/run LT2=LST(LSD(0.46561,0.40971,0.11748,0.11745),1437,0.2,1,0.2,0.45)
+```
+
+```
+/run LT3=LST(LSD(0.35654,0.24716,0.11932,0.11932),1421,1,0.8,0,0.45)
+```
+
+The same zones at 0.25 opacity, for comparison:
+
+```
+/run LT1:SetVertexColor(1,0.2,0.2,0.25) LT2:SetVertexColor(0.2,1,0.2,0.25) LT3:SetVertexColor(1,0.8,0,0.25)
+```
+
+Compare fit, readability and labels with P50, on the small and the maximized map.
 
 ## After the slice
 
