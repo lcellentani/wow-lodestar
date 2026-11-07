@@ -228,3 +228,11 @@ function Logic.LabelPosition(info, minX, maxX, minY, maxY)
 
   return (minX + maxX) / 2, (minY + maxY) / 2
 end
+
+function Logic.GridLines(cells)
+  local fractions = {}
+  for i = 1, cells - 1 do
+    fractions[i] = i / cells
+  end
+  return fractions
+end

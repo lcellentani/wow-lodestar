@@ -725,3 +725,29 @@ describe("LabelPosition", function()
     assert(near(y, 0.706), "got y " .. tostring(y))
   end)
 end)
+
+describe("GridLines", function()
+  it("returns the three inner lines of a 4-cell grid, at quarters", function()
+    local fractions = Logic.GridLines(4)
+    local size = #fractions
+    local expected = { 0.25, 0.5, 0.75 }
+    assert(size == 3, "expected 3 lines, got " .. tostring(size) .. " lines")
+    for i in ipairs(expected) do
+      assert(near(expected[i], fractions[i]), "expected " .. expected[i] .. ", got " .. tostring(fractions[i]))
+    end
+  end)
+
+  it("returns no lines for a single cell", function()
+    local fractions = Logic.GridLines(1)
+    local size = #fractions
+    assert(size == 0, "expected 0 lines, got " .. tostring(size) .. " lines")
+  end)
+
+  it("returns 19 lines for a 20-cell grid, from 0.05 to 0.95", function()
+    local fractions = Logic.GridLines(20)
+    local size = #fractions
+    assert(size == 19, "expected 19 lines, got " .. tostring(size) .. " lines")
+    assert(near(fractions[1], 0.05), "expected 0.05, got " .. tostring(fractions[1]))
+    assert(near(fractions[size], 0.95), "expected 0.95, got " .. tostring(fractions[size]))
+  end)
+end)
