@@ -13,4 +13,5 @@ Data\Instances.lua
 Modules\ZoneLabels.lua
 Pins.xml
 Debug.lua
+Place.lua
 Options.lua
