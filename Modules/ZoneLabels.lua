@@ -38,8 +38,11 @@ function provider:RefreshAllData()
     return
   end
 
-  -- Names fit only on the maximized map; the small window shows ranges alone.
-  local showNames = WorldMapFrame:IsMaximized()
+  -- Labels show on the maximized map only; the small map is for the threat
+  -- markers (decided 2026-11-07).
+  if not WorldMapFrame:IsMaximized() then
+    return
+  end
 
   for _, child in ipairs(C_Map.GetMapChildrenInfo(mapID, Enum.UIMapType.Zone) or {}) do
     local info = ns.GetZoneInfo(child.mapID)
@@ -48,8 +51,7 @@ function provider:RefreshAllData()
       local minX, maxX, minY, maxY = ns.GetZoneRect(child.mapID, mapID)
       if minX ~= nil then
         local x, y = ns.Logic.LabelPosition(info, minX, maxX, minY, maxY)
-        local name = showNames and child.name or nil
-        WorldMapFrame:AcquirePin(TEMPLATE, name, text, x, y)
+        WorldMapFrame:AcquirePin(TEMPLATE, child.name, text, x, y)
       end
     end
   end
