@@ -29,7 +29,9 @@ Expected out of combat: `true`, `false`.
 /run local f=CreateFrame("Frame") f:RegisterEvent("PLAYER_REGEN_DISABLED") f:RegisterEvent("PLAYER_REGEN_ENABLED") f:SetScript("OnEvent",function(_,e) print(e, InCombatLockdown()) end)
 ```
 
-Then attack something weak and let the fight end. Expected: `PLAYER_REGEN_DISABLED true` when combat starts, `PLAYER_REGEN_ENABLED false` when it ends. Claude records P52 and adds the names to `.luacheckrc`.
+Then attack something weak and let the fight end. Claude records P52 and adds the names to `.luacheckrc`.
+
+Result (2026-11-07): `PLAYER_REGEN_DISABLED` fires just **before** the lockdown, so `InCombatLockdown()` is still `false` in its handler. That is what the tool needs: turning itself off on that event is still allowed. One more check, typed during a fight: `/dump InCombatLockdown()`, expected `true`.
 
 ## Logic.lua (pure, unit tested)
 

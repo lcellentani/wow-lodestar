@@ -31,6 +31,7 @@ read_globals = {
   "C_MapExplorationInfo",    -- P13
   "CreateVector2D",          -- P44
   "debugprofilestop",        -- P47
+  "InCombatLockdown",        -- P52
 }
 
 files["tests/**"] = { globals = { "describe", "it", "DEFAULT_CHAT_FRAME", "date" } }  -- harness helpers; fakes for util_spec

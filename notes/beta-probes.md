@@ -63,6 +63,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P49 | re-checks of beta results | [ ] | 2026-11-06 | live; Dalaran portal open |
 | P50 | grid masks on the map | [x] | 2026-11-06 | live; draw well, fit fails |
 | P51 | traced masks on the map | [x] | 2026-11-07 | live; fit passes, yellow too weak |
+| P52 | combat API | [ ] | 2026-11-07 | live; `true` in combat still to see |
 
 ## Confirmed APIs
 
@@ -1690,3 +1691,19 @@ Commands in `notes/spec-5.2-traced-mask-slice.md`. Capture 2026-11-07 (screensho
 - Labels stay on top and readable; red range text on the red zone is the weakest case.
 - Masks derive from Blizzard's art and live only in the git-ignored `Media/traced/`.
 - The art itself limits precision (user, screenshots 120831, 120841, 120845, 120856): Blizzard's own hover highlight bleeds past the painted borders, Wetlands into Loch Modan and toward Arathi Highlands, Silverpine Forest past its edge. A threshold only trades missing thin parts against spill, so traced masks reach at best Blizzard's hover precision, not the painted borders.
+
+### P52: combat API (M5 step 5.3)
+
+Commands in `notes/spec-5.3-placement-tool.md`. Result (2026-11-07, live; screenshot 164105):
+
+```
+/dump InCombatLockdown ~= nil, InCombatLockdown()
+[1]=true, [2]=false
+PLAYER_REGEN_ENABLED false     <- end of a fight already running when the frame was registered
+PLAYER_REGEN_DISABLED false    <- a new fight starts
+PLAYER_REGEN_ENABLED false     <- it ends
+```
+
+- `InCombatLockdown`, `PLAYER_REGEN_DISABLED` and `PLAYER_REGEN_ENABLED` exist.
+- `PLAYER_REGEN_DISABLED` fires **before** the lockdown starts: `InCombatLockdown()` is still `false` in its handler. So a handler on it can still hide frames and change mouse settings safely.
+- Not seen yet: `InCombatLockdown()` returning `true` during a fight.
