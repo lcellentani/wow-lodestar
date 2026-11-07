@@ -62,6 +62,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P48 | highlight art as a mask | [x] | 2026-11-06 | live; masks work, the art cannot be one |
 | P49 | re-checks of beta results | [ ] | 2026-11-06 | live; Dalaran portal open |
 | P50 | grid masks on the map | [x] | 2026-11-06 | live; draw well, fit fails |
+| P51 | traced masks on the map | [x] | 2026-11-07 | live; fit passes, yellow too weak |
 
 ## Confirmed APIs
 
@@ -1678,3 +1679,13 @@ Commands in `notes/spec-5.1-grid-mask-slice.md`. Result (2026-11-06, live; scree
 - Layering works: frame level 1000 on `WorldMapFrame.ScrollContainer.Child` is above the map art and under the labels, which stay on top. Red range text on the red zone is the weakest case.
 - Color reads clearly at 0.45. The lighter 0.5 `SetAlpha` step shows no clear difference between the screenshots, so tint strength is still open.
 - **Fit fails.** `GetMapInfoAtPosition` hover areas are not the painted zones: they cover sea and overlap neighbors. Silverpine Forest fills a wide block of sea to its west, Wetlands a block to its northwest and part of Dun Morogh, and Elwynn Forest a block to its west. A filled tint makes this obvious, and no grid size fixes it.
+
+### P51: traced masks on the map (M5 step 5.2)
+
+Commands in `notes/spec-5.2-traced-mask-slice.md`. Capture 2026-11-07 (screenshots 114916, 114931, 114948); draw on a client restarted after the masks were built (screenshots 115420, 115428, 115441, 115906, 115920).
+
+- Capture works: `C_Map.GetMapHighlightInfoAtPosition` art drawn on a magenta frame, one PNG per zone, then `scripts/trace_masks.py`. The art is dim (brightest pixel 28-51 of 255) but has a clean edge.
+- **Fit passes.** Elwynn Forest (red) and Wetlands (green) follow the painted borders with no sea and no spill into neighbors. Silverpine Forest (blue) sits on its zone too, maybe slightly narrow at the south; its first draw was about 9 pixels west because Claude's chat message gave the grid mask's x (0.34766) instead of the traced one (0.35654).
+- Color: at 0.45, red, green and blue read clearly; **yellow barely shows** on the yellow parchment. At 0.25, green still reads but red is faint. A shape drawn twice (about 0.7) is strong and still leaves the map legible.
+- Labels stay on top and readable; red range text on the red zone is the weakest case.
+- Masks derive from Blizzard's art and live only in the git-ignored `Media/traced/`.
