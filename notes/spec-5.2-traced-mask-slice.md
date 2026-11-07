@@ -58,7 +58,7 @@ Full client restart, then, with the map open on Eastern Kingdoms (the same helpe
 ```
 
 ```
-/run LST=function(f,i,r,g,b,a) local t=f:CreateTexture() t:SetAllPoints() t:SetTexture("Interface\AddOns\Lodestar\Media\traced\mask-"..i) t:SetVertexColor(r,g,b,a) return t end
+/run LST=function(f,i,r,g,b,a) local t=f:CreateTexture() t:SetAllPoints() t:SetTexture("Interface\\AddOns\\Lodestar\\Media\\traced\\mask-"..i) t:SetVertexColor(r,g,b,a) return t end
 ```
 
 ```
