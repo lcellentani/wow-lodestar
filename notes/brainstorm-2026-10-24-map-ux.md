@@ -64,3 +64,13 @@ After the first write-up, "Best zone for your level" turned out to be the **glob
 ## Closed: the caveat on the reveal table
 
 The user's caveat on the first row ("every zone's level range, always on") was about text labels on every zone of the small map. It is resolved by the split above: the small map shows no text labels, only the neighbor overlay, and the ranges stay always known through the maximized map and the tooltip.
+
+## Follow-up 2026-11-07: markers instead of tints
+
+The live probes and two slices (P45-P51) showed that no zone shape fits the painted borders: Blizzard's highlight art cannot be tinted, grid masks from hover areas spill into the sea and neighbors, and masks traced from the highlight art only reach the precision of Blizzard's own hover glow. Tints also fight the map's painted greens, yellows and oranges.
+
+Mockups (a private artifact page, 2026-11-07) compared point markers (level badge, range chip, threat glyph), border chevrons and a compass ring, then variants of the glyph. Chosen:
+
+1. **Small map:** a marker on each neighbor zone, a flat skull in the threat color on a dark disc with a thin threat-color outline, and a dark tab underneath with the minimum level in a light, neutral number. Rejected along the way: a medallion with rim and shading (muddy at small size), the skull alone (yellow vanishes on the parchment), white round badges (busy), pennant, signal bars, gauge and sign shapes (crossed swords were the only close alternative).
+2. **Maximized map:** no markers and no tint; the colored range labels answer "where fits me".
+3. **Position:** every zone gets a hand-set point, since grid anchors suit inland zones and rectangle centers suit coastal ones, and neither suits both.

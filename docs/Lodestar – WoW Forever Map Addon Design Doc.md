@@ -35,8 +35,8 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 3. **Instance markers.** Every discovered entry in `Instances.lua` (see "Discovery") shows a marker on its zone map and on its continent map, and with the debug switch on every entry does; hovering one shows name, kind and level range.
 4. **Zone tooltip.** Hovering a zone on a continent map shows its name, range, faction and, once the zone has been entered, its instances; the tooltip hides when the cursor leaves the zone.
 5. **Idle cost.** With the map closed, the addon has no `OnUpdate` handler running; `/ls debug` reports whether the map tick is active, so this can be checked in game.
-6. **Threat overlay.** On the small map, the zones bordering the player's zone are tinted in their threat color, and no others; on the maximized map every zone with a level range is.
-7. **Survives.** `/reload`, a level-up (labels and overlay recolor), opening the map in combat (no errors, and no taint per P15), and `/ls toggle` of each module (off and back on without `/reload`, with overlays disappearing and reappearing immediately).
+6. **Threat markers.** On the small map, each zone bordering the player's zone shows a marker in its threat color with its minimum level, and no others; the maximized map shows no markers, because its colored range labels already carry the threat.
+7. **Survives.** `/reload`, a level-up (labels and markers recolor), opening the map in combat (no errors, and no taint per P15), and `/ls toggle` of each module (off and back on without `/reload`, with overlays disappearing and reappearing immediately).
 
 ## Target client and API assumptions
 
@@ -63,14 +63,14 @@ A failed probe changes the design, not just a line of code, so run the design pr
 
 The MVP is four map overlays that read from one data table; v2 adds user-generated and exploration features.
 
-**Two map sizes, two questions** (decided 2026-10-24). The small map (Map & Quest Log) answers the local question "from here, what is next door, and is it safe?": the threat overlay on the zones bordering the player's zone, no text labels, and the tooltip on hover for any zone. The maximized map answers the global question "where on this continent fits me?": the threat overlay on every zone, with names and ranges on top. Text labels left the small map because in the beta they could not be kept inside small zones; color fills the zone's own shape and cannot spill. Until the overlay works on live, the small map keeps its current range labels, so it is never empty.
+**Two map sizes, two questions** (decided 2026-10-24). The small map (Map & Quest Log) answers the local question "from here, what is next door, and is it safe?": a threat marker on each zone bordering the player's zone, no text labels, and the tooltip on hover for any zone. The maximized map answers the global question "where on this continent fits me?": names and colored ranges on every zone, no markers and no tint. Text labels left the small map because in the beta they could not be kept inside small zones; a marker is a fixed small shape at one point, so it fits where text did not. Until the markers work on live, the small map keeps its current range labels, so it is never empty. *(Revised 2026-11-07: zone tints were dropped after P45-P51, see ThreatOverlay.)*
 
 | Feature | Tier | Behavior | Needs |
 | --- | --- | --- | --- |
 | Zone level labels | MVP | Text on each zone of the maximized continent maps (not the world map showing both continents): name and `min-max`, colored by difficulty against the player's level; faction tag for Alliance, Horde or contested | Zone table, child-zone rectangles (`GetMapRectOnMap`), label anchors (see ZoneLabels) |
 | Instance markers | MVP | Icon on each discovered dungeon or raid entrance with name and level range; tooltip on hover | Instance table, exploration API (probe on live) |
 | Zone tooltip | MVP | Hover over a zone: level range, faction control, and the instances inside it once the zone has been entered | Zone and instance tables, exploration API (probe on live) |
-| Threat overlay | MVP | Tint zones in their threat color: on the small continent map the zones that share a border with the player's current zone, on the maximized map every zone | Neighbor lists in the zone table, zone shapes (see ThreatOverlay) |
+| Threat markers | MVP | On the small continent map, a marker in the threat color with the minimum level on each zone that shares a border with the player's current zone | Neighbor lists and marker positions in the zone table (see ThreatOverlay) |
 | Waypoints and notes | v2 | Right-click to drop a pin; `/way x y` command; saved per account | SavedVariables |
 | Unexplored areas | v2 | Tint sub-areas the character has not discovered yet | Exploration API (probe first) |
 | Map look and feel | v2 | Opacity, scale and movable window | Frame hooks |
@@ -207,7 +207,7 @@ Field values (decided 2026-10-18, when the table was seeded): `faction` is `"All
 
 **Level source** (decided 2026-10-19): `C_Map.GetMapLevels` returns zeros on the beta (P6), so `Zones.lua` is where labels get their ranges. They come from the beta's group finder (`C_LFGList` suggested ranges, P33) for the 41 zones it lists, marked `-- forever, group finder P33`. These are Forever's own numbers and wider than the vanilla ones (Elwynn 1-14 against 1-10); Eastern Plaguelands and Winterspring go to 63, above the level cap, and are stored as the client gives them. Moonglade, Deadwind Pass and Shen'dralas are not in the group finder and keep their earlier source. The table is a snapshot, so the ranges are re-checked on the live client; reading `C_LFGList` at runtime was considered and left out, since it needs more code and its activity `mapID` field is unprobed.
 
-**Neighbors** (decided 2026-10-24, for the neighbor threat overlay): each zone row gets an optional `neighbors` list of the uiMapIDs that share a border with it on the continent map, written by hand (facts). A unit test checks that the lists are symmetric and point at existing rows; the zone-shape grid (see "ThreatOverlay") can cross-check them.
+**Neighbors** (decided 2026-10-24, for the neighbor threat markers): each zone row gets an optional `neighbors` list of the uiMapIDs that share a border with it on the continent map, written by hand (facts). A unit test checks that the lists are symmetric and point at existing rows; the zone-shape grid (see "ThreatOverlay") can cross-check them.
 
 `labelX` and `labelY` are optional, in the parent continent's normalized coordinates. Set them only where the rectangle center lands badly (for example an L-shaped zone, or a zone whose center sits in water); otherwise the label goes at the center of the zone's rectangle.
 
@@ -282,8 +282,8 @@ Each module is independent, can be disabled, and reads only from the data layer 
 | Map | ZoneLabels | ThreatOverlay | Instances |
 | --- | --- | --- | --- |
 | World (both continents) | none | none | none |
-| Continent, small | none (range labels until the overlay works) | the player's neighbors | projected markers |
-| Continent, maximized | name and range per zone | every zone | projected markers |
+| Continent, small | none (range labels until the markers work) | the player's neighbors | projected markers |
+| Continent, maximized | name and range per zone | none | projected markers |
 | Zone | none | none | markers at stored positions |
 
 Fallback if P3 fails (assumption A3): each module creates its own pool of frames parented to `WorldMapFrame.ScrollContainer.Child` and refreshes from a `hooksecurefunc(WorldMapFrame, "OnMapChanged", ...)` hook. The module specs below do not change; only this drawing layer does.
@@ -299,9 +299,9 @@ Fallback if P3 fails (assumption A3): each module creates its own pool of frames
 
 **Names on the maximized map** (decided 2026-10-19, P39): on the maximized map each label shows the zone name above its range; in the small Map & Quest Log window, the range alone, since names there overlap badly (zone details on hover come from the Tooltip). The map does not refresh data providers on maximize or minimize, so the module listens to the `EventRegistry` events `WorldMapMaximized` and `WorldMapMinimized` (P42) and refreshes (hooking `Maximize` and `Minimize` with `hooksecurefunc` broke the map in combat, P14); `AddDataProvider` does not draw on an open map either, so enabling the module refreshes when the map is shown. Remaining overlaps (Duskwood, Deadwind Pass, Swamp of Sorrows) were first meant for automatic collision handling; that is replaced by grid anchors (below).
 
-**Small map** (decided 2026-10-24): once the threat overlay works on live, ZoneLabels draws on the maximized map only; until then it keeps the small-map range labels.
+**Small map** (decided 2026-10-24): once the threat markers work on live, ZoneLabels draws on the maximized map only; until then it keeps the small-map range labels.
 
-**Label anchors** (decided 2026-10-24): the zone-shape grid (see ThreatOverlay, tier 2) gives each zone the point deepest inside its shape, the spot farthest from any border. It never lands in the sea or in the wrong arm of an L-shaped zone, so it replaces the rectangle center. The offline script that reads the grid writes these anchors into the data, and hand-set `labelX, labelY` stay the override for what still looks wrong.
+**Label anchors** (decided 2026-10-24, revised 2026-11-07): every zone gets a hand-set `labelX, labelY`, shared by its label and its threat marker, read in game by hovering the spot and logging it with `/ls probe hover` (a macro on a key makes it one press per zone). Before that, and for any zone without one, the hover-area grid (P50) gives the point deepest inside its shape, the spot farthest from any border. It never lands in the sea or in the wrong arm of an L-shaped zone, so it replaces the rectangle center. The offline script that reads the grid writes these default anchors into the data.
 
 Edge cases: a zone with no data shows no label; a zone with a single level shows `n`; if Blizzard draws permanent zone names on the continent map (note it during P9), offset labels below the name; otherwise center them. Test at both map sizes.
 
@@ -331,12 +331,15 @@ Classic Era maps do not show a tooltip when hovering a zone, only a one-line nam
 
 **ThreatOverlay** (MVP since 2026-10-24; reasoning in `notes/brainstorm-2026-10-24-map-ux.md`)
 
-- **What:** a translucent overlay in each zone's threat color, on continent maps only. On the small map, only the zones listed in the `neighbors` of the player's current zone; on the maximized map, every zone with a level range, under the ZoneLabels text. It follows map size through the same `WorldMapMaximized`/`WorldMapMinimized` events as ZoneLabels (P42). Hovering a zone still opens the Tooltip for details. Rows to settle in the step spec, each Claude's call until then: the threat color is that of the zone's `min` (the level at which you enter it; the labels and tooltip keep both ends); the player's own zone is not tinted on the small map, since Blizzard's arrow marks it; a city counts as the zone around it; on the small map nothing is drawn when the player is on another continent; the overlay recolors on `PLAYER_LEVEL_UP`. The tint strength, so the map art stays readable under 40-plus tinted zones, is tuned on live.
-- **Zone shapes**, best first:
-  1. **Blizzard's highlight art.** Forever's continent map lights up the hovered zone in its real shape (P7). If the live client lets us fetch that art for any zone (in Mainline, an API that takes a map and a point returns the highlight texture of the zone under it) and tint it (`SetVertexColor`, or the `MOD` blend mode), use it. **Ruled out (P45):** `C_Map.GetMapHighlightInfoAtPosition` returns the art for any zone, but it is a soft shape on opaque black with no alpha, so only `ADD` hides the square, and `ADD` barely shows on the bright parchment. As a mask texture it fails too: masks read alpha, and its alpha is solid (P48).
-  2. **Masks from grid sampling.** A one-off `/ls probe` asks `C_Map.GetMapInfoAtPosition` (P7) which zone owns each cell of a grid over each continent and saves the result to SavedVariables. A Claude-written script outside the game turns it into one smoothed white mask per zone (`.tga`, power-of-two size), cropped to the zone's rectangle from `GetMapRectOnMap` (P5), shipped in the addon folder and tinted with `SetVertexColor`. Grid size and file encoding are left to the step spec; sampling can run in one go (P47), and textures load from the addon folder with their alpha (P46). **Tried (P50):** masks draw and layer well, but hover areas cover sea and overlap neighbors, so the fit fails.
-  3. **Screenshots** as the backup for tier 2: one screenshot of the continent without hover and one per hovered zone; the difference is the zone's highlight. Traced from Blizzard's art, so it is used only if tier 2 looks too rough.
-- Pins come from `Pins.xml` as for the other overlays; one pin per tinted zone, nothing created per refresh.
+- **What** (decided 2026-11-07, replacing zone tints): a marker on each zone listed in the `neighbors` of the player's current zone, on the small continent map only. The maximized map has none; its ZoneLabels already show names and colored ranges. It follows map size through the same `WorldMapMaximized`/`WorldMapMinimized` events as ZoneLabels (P42). Hovering a zone still opens the Tooltip for details. Rows to settle in the step spec, each Claude's call until then: the color is that of the zone's `min` (the level at which you enter it); the player's own zone gets no marker, since Blizzard's arrow marks it; a city counts as the zone around it; nothing is drawn when the player is on another continent; markers recolor on `PLAYER_LEVEL_UP`.
+- **Look** (chosen from mockups, 2026-11-07): flat, no rims, gradients or shadows, which lost readability at small-map size. Three parts, top to bottom:
+  1. A **skull** in the zone's threat color.
+  2. A **dark disc** behind it, with a thin outline in the threat color. The plate gives every color the same contrast on the yellow parchment, where a plain yellow tint barely showed (P51).
+  3. A **dark tab** under the disc, with the same plate and outline, holding the zone's minimum level in a light, neutral number.
+- **Art:** our own flat textures, so they can live in the repo: a white skull and a white ring, both tinted with `SetVertexColor` (P46), a dark disc and tab plate, and a `FontString` for the number. A script can draw them, as for `Media/probe-white.tga`.
+- **Position:** the zone's `labelX, labelY`, shared with ZoneLabels (see "Label anchors"). No automatic point is right everywhere: the hover-area grid's deepest point suits inland zones and drifts toward the sea on coasts, the rectangle center does the opposite, so every zone gets a hand-set point.
+- **Why not zone tints** (P45-P51): Blizzard's highlight art can be fetched but not tinted, by blending or as a mask (P45, P48); grid masks from hover areas cover sea and overlap neighbors (P50); masks traced from the highlight art fit better but stay at the precision of Blizzard's own hover glow, which also bleeds past the borders (P51). Tints also clash with the map's painted greens and oranges. The tools from those tests stay in `scripts/` (`make_masks.py`, `trace_masks.py`).
+- Pins come from `Pins.xml` as for the other overlays; one pin per marked zone, nothing created per refresh.
 
 **Waypoints (v2)**
 
@@ -516,7 +519,7 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 3. **M2, skeleton:** `.toc`, core, module registry, `Debug.lua` (`/ls probe`, `/ls dump`, the log and `/ls copy`) run in game with no errors, and Claude Code can read the log from the SavedVariables file.
 4. **M3, data:** `/ls dump` output is used to check the seeded tables, add the new zones and dungeons, and fix any differences; checked rows are re-marked as verified.
 5. **M4, overlays:** ZoneLabels works on the continent maps.
-6. **M5, MVP complete:** Instances, Tooltip and ThreatOverlay work (zone shapes from grid masks, since Blizzard's art cannot tint zones, P45), ZoneLabels moves to the maximized map with grid anchors, and all seven success criteria in the Overview pass.
+6. **M5, MVP complete:** Instances, Tooltip and ThreatOverlay work (threat markers on the small map, decided 2026-11-07 after P45-P51), ZoneLabels moves to the maximized map with grid anchors, and all seven success criteria in the Overview pass.
 7. **M6, v2:** waypoints, unexplored areas and map look and feel, in the order the API allows.
 
 **Risks**
@@ -535,5 +538,5 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 - [x] Is this for personal use, or will you publish it on a site such as CurseForge? **Personal use; no release on addon sites.** The source is public on GitHub under the **MIT license** (`LICENSE` in the repo root). Seed data taken from Warcraft Wiki is limited to facts (IDs, level ranges, coordinates); no wiki text and no Blizzard UI source is copied into the repo.
 - [ ] Should v2 start with waypoints or unexplored-area highlighting?
 - [x] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (answered, P44); whether Blizzard's zone highlight art can be fetched for any zone and tinted (fetched yes, tinted no, P45); whether a texture loads from the addon folder (yes, with alpha, P46). Grid sampling is fast enough to run in one go (P47).
-- [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the threat overlay on the maximized map answers "where on this continent fits me?", and the row was removed from the feature set.
+- [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the colored range labels on the maximized map answer "where on this continent fits me?", and the row was removed from the feature set.
 - [ ] Parked until a few weeks of live play: connection points between zones, and which orientation information the map actually fails to give.
