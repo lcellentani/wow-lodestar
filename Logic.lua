@@ -236,3 +236,42 @@ function Logic.GridLines(cells)
   end
   return fractions
 end
+
+function Logic.SetPlacement(overrides, zoneID, x, y)
+  local row = overrides[zoneID] or {}
+  overrides[zoneID] = row
+  row.labelX = x
+  row.labelY = y
+end
+
+function Logic.ClearPlacement(overrides, zoneID)
+  local row = overrides[zoneID]
+  if row == nil then
+    return
+  end
+
+  row.labelX = nil
+  row.labelY = nil
+
+  if next(row) == nil then
+    overrides[zoneID] = nil
+  end
+end
+
+function Logic.ClearAllPlacements(overrides)
+  local zoneIDs = {}
+
+  for zoneID in pairs(overrides) do
+    zoneIDs[#zoneIDs + 1] = zoneID
+  end
+
+  local count = 0
+  for _, zoneID in ipairs(zoneIDs) do
+    local row = overrides[zoneID]
+    if row.labelX ~= nil or row.labelY ~= nil then
+      count = count + 1
+    end
+    Logic.ClearPlacement(overrides, zoneID)
+  end
+  return count
+end

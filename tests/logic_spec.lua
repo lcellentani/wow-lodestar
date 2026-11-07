@@ -751,3 +751,69 @@ describe("GridLines", function()
     assert(near(fractions[size], 0.95), "expected 0.95, got " .. tostring(fractions[size]))
   end)
 end)
+
+describe("SetPlacement", function()
+  it("creates a row for a zone with no override", function()
+    local zones = {}
+
+    Logic.SetPlacement(zones, 1429, 0.3, 0.75)
+
+    local row = zones[1429]
+    assert(row ~= nil, "expected a row for zone 1429")
+    assert(near(row.labelX, 0.3), "expected labelX 0.3, got " .. tostring(row.labelX))
+    assert(near(row.labelY, 0.75), "expected labelY 0.75, got " .. tostring(row.labelY))
+  end)
+
+  it("moves the point when set again", function()
+    local zones = {}
+
+    Logic.SetPlacement(zones, 1429, 0.3, 0.75)
+    local row1 = zones[1429]
+    assert(near(row1.labelX, 0.3), "expected labelX 0.3, got " .. tostring(row1.labelX))
+    assert(near(row1.labelY, 0.75), "expected labelY 0.75, got " .. tostring(row1.labelY))
+
+    Logic.SetPlacement(zones, 1429, 0.66, 0.045)
+    local row2 = zones[1429]
+    assert(near(row2.labelX, 0.66), "expected labelX 0.66, got " .. tostring(row2.labelX))
+    assert(near(row2.labelY, 0.045), "expected labelY 0.045, got " .. tostring(row2.labelY))
+  end)
+
+  it("keeps a level range already in the row", function()
+    local zones = { [1429] = { min = 10, max = 20 } }
+
+    Logic.SetPlacement(zones, 1429, 0.3, 0.75)
+    local row = zones[1429]
+    assert(near(row.labelX, 0.3), "expected labelX 0.3, got " .. tostring(row.labelX))
+    assert(near(row.labelY, 0.75), "expected labelY 0.75, got " .. tostring(row.labelY))
+    assert(row.min == 10, "expected min 10, got " .. tostring(row.min))
+    assert(row.max == 20, "expected max 20, got " .. tostring(row.max))
+  end)
+end)
+
+describe("ClearPlacement", function()
+  it("removes a row that held only a point", function()
+    local zones = { [1429] = { labelX = 0.3, labelY = 0.56 } }
+
+    Logic.ClearPlacement(zones, 1429)
+    assert(zones[1429] == nil, "expected the row for zone 1429 to be removed")
+  end)
+
+  it("keeps the level range and clears only the point", function()
+    local zones = { [1429] = { labelX = 0.3, labelY = 0.56, min = 10, max = 20 } }
+
+    Logic.ClearPlacement(zones, 1429)
+    local row = zones[1429]
+    assert(row ~= nil, "expected the row for zone 1429 to stay")
+    assert(row.labelX == nil, "expected no labelX")
+    assert(row.labelY == nil, "expected no labelY")
+    assert(row.min == 10, "expected min 10, got " .. tostring(row.min))
+    assert(row.max == 20, "expected max 20, got " .. tostring(row.max))
+  end)
+
+  it("does nothing for a zone with no row", function()
+    local zones = {}
+
+    Logic.ClearPlacement(zones, 1429)
+    assert(next(zones) == nil, "expected empty zones table")
+  end)
+end)
