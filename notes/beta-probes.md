@@ -64,6 +64,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P50 | grid masks on the map | [x] | 2026-11-06 | live; draw well, fit fails |
 | P51 | traced masks on the map | [x] | 2026-11-07 | live; fit passes, yellow too weak |
 | P52 | combat API | [x] | 2026-11-07 | live |
+| P53 | placement tool | [x] | 2026-11-07 | live; combat auto-off and click-through not seen |
 
 ## Confirmed APIs
 
@@ -1707,3 +1708,12 @@ PLAYER_REGEN_ENABLED false     <- it ends
 - `InCombatLockdown`, `PLAYER_REGEN_DISABLED` and `PLAYER_REGEN_ENABLED` exist.
 - `PLAYER_REGEN_DISABLED` fires **before** the lockdown starts: `InCombatLockdown()` is still `false` in its handler. So a handler on it can still hide frames and change mouse settings safely.
 - During a fight (screenshot 164608: `PLAYER_REGEN_DISABLED false`, then `/dump InCombatLockdown ~= nil, InCombatLockdown()` gives `[1]=true, [2]=true`, then `PLAYER_REGEN_ENABLED false`): `InCombatLockdown()` is `true` once the fight is under way, so the tool can refuse to turn on in combat.
+
+### P53: the placement tool (M5 step 5.3)
+
+Checklist in `notes/spec-5.3-placement-tool.md`. Result (2026-11-07, live; screenshots 190717, 191939, 192006; points read from the SavedVariables file):
+
+- Works: the hint with the map closed; "not in combat" in a fight; grid lines (0.12 too faint, 0.25 good); left click places and moves a point, right click removes it; the Stormwind City hint; Kalimdor (Thousand Needles placed); "placement off: map closed"; after `/reload` the points come back.
+- The placeholder markers (threat-colored disc, dark tab with the minimum level, zone name) show the footprint at small-map size; names crowd where zones are close (Western and Eastern Plaguelands, Searing Gorge and Badlands).
+- 40 zones placed in this session, both continents. Not placed: Deadwind Pass (1430), Swamp of Sorrows (1435), Shen'dralas (2652); Zephras Isle (2521) has no continent map, so it needs none.
+- Not seen: the tool turning itself off when a fight starts, and clicks reaching the map after `/ls place` turns it off.
