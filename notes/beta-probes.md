@@ -63,7 +63,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P49 | re-checks of beta results | [ ] | 2026-11-06 | live; Dalaran portal open |
 | P50 | grid masks on the map | [x] | 2026-11-06 | live; draw well, fit fails |
 | P51 | traced masks on the map | [x] | 2026-11-07 | live; fit passes, yellow too weak |
-| P52 | combat API | [ ] | 2026-11-07 | live; `true` in combat still to see |
+| P52 | combat API | [x] | 2026-11-07 | live |
 
 ## Confirmed APIs
 
@@ -1706,4 +1706,4 @@ PLAYER_REGEN_ENABLED false     <- it ends
 
 - `InCombatLockdown`, `PLAYER_REGEN_DISABLED` and `PLAYER_REGEN_ENABLED` exist.
 - `PLAYER_REGEN_DISABLED` fires **before** the lockdown starts: `InCombatLockdown()` is still `false` in its handler. So a handler on it can still hide frames and change mouse settings safely.
-- Not seen yet: `InCombatLockdown()` returning `true` during a fight.
+- During a fight (screenshot 164608: `PLAYER_REGEN_DISABLED false`, then `/dump InCombatLockdown ~= nil, InCombatLockdown()` gives `[1]=true, [2]=true`, then `PLAYER_REGEN_ENABLED false`): `InCombatLockdown()` is `true` once the fight is under way, so the tool can refuse to turn on in combat.

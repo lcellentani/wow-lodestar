@@ -31,7 +31,7 @@ Expected out of combat: `true`, `false`.
 
 Then attack something weak and let the fight end. Claude records P52 and adds the names to `.luacheckrc`.
 
-Result (2026-11-07): `PLAYER_REGEN_DISABLED` fires just **before** the lockdown, so `InCombatLockdown()` is still `false` in its handler. That is what the tool needs: turning itself off on that event is still allowed. One more check, typed during a fight: `/dump InCombatLockdown()`, expected `true`.
+Result (2026-11-07): `PLAYER_REGEN_DISABLED` fires just **before** the lockdown, so `InCombatLockdown()` is still `false` in its handler. That is what the tool needs: turning itself off on that event is still allowed. During a fight `InCombatLockdown()` returns `true` (P52 done).
 
 ## Logic.lua (pure, unit tested)
 
