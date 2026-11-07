@@ -817,3 +817,42 @@ describe("ClearPlacement", function()
     assert(next(zones) == nil, "expected empty zones table")
   end)
 end)
+
+describe("ClearAllPlacements", function()
+  it("clears every point and keeps level ranges", function()
+    local zones = {
+      [1429] = { labelX = 0.3, labelY = 0.75 },
+      [1437] = { labelX = 0.52, labelY = 0.47 },
+      [1433] = { min = 15, max = 25 },
+    }
+
+    local count = Logic.ClearAllPlacements(zones)
+    assert(count == 2, "expected 2 points cleared, got " .. tostring(count))
+    assert(zones[1429] == nil, "expected the row for zone 1429 to be removed")
+    assert(zones[1437] == nil, "expected the row for zone 1437 to be removed")
+    local row = zones[1433]
+    assert(row ~= nil, "expected the row for zone 1433 to stay")
+    assert(row.min == 15, "expected min 15, got " .. tostring(row.min))
+    assert(row.max == 25, "expected max 25, got " .. tostring(row.max))
+  end)
+
+  it("clears the point of a row that also has a level range", function()
+    local zones = { [1429] = { labelX = 0.3, labelY = 0.75, min = 1, max = 14 } }
+
+    local count = Logic.ClearAllPlacements(zones)
+    assert(count == 1, "expected 1 point cleared, got " .. tostring(count))
+    local row = zones[1429]
+    assert(row ~= nil, "expected the row for zone 1429 to stay")
+    assert(row.labelX == nil, "expected no labelX")
+    assert(row.labelY == nil, "expected no labelY")
+    assert(row.min == 1, "expected min 1, got " .. tostring(row.min))
+  end)
+
+  it("returns 0 for an empty table", function()
+    local zones = {}
+
+    local count = Logic.ClearAllPlacements(zones)
+    assert(count == 0, "expected 0 points cleared, got " .. tostring(count))
+    assert(next(zones) == nil, "expected empty zones table")
+  end)
+end)
