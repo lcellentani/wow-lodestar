@@ -33,7 +33,7 @@ ns.Zones = {
   [1456] = { faction = "Horde",    kind = "city" },  -- Thunder Bluff, vanilla, unverified
   [1457] = { faction = "Alliance", kind = "city" },  -- Darnassus, vanilla, unverified
   [2482] = { min = 55, max = 60, faction = "", kind = "zone", labelX = 0.534, labelY = 0.329 },  -- Mount Hyjal, forever, group finder P33
-  [2652] = { faction = "", kind = "zone" },  -- Shen'dralas, forever, unverified (not in the group finder; guides disagree on the range)
+  [2652] = { faction = "", kind = "zone", labelX = 0.444, labelY = 0.639 },  -- Shen'dralas, forever, unverified (not in the group finder; guides disagree on the range)
 
   -- Eastern Kingdoms (1415)
   [1416] = { min = 28, max = 44, faction = "Contested", kind = "zone", labelX = 0.469, labelY = 0.295 },  -- Alterac Mountains, forever, group finder P33
