@@ -65,7 +65,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P51 | traced masks on the map | [x] | 2026-11-07 | live; fit passes, yellow too weak |
 | P52 | combat API | [x] | 2026-11-07 | live |
 | P53 | placement tool | [x] | 2026-11-07 | live; all checks pass (8-9 on 2026-11-08) |
-| P54 | threat markers | [~] | 2026-11-08 | live; 1-4 and 7 pass; 5, 6, 8, 9 pending |
+| P54 | threat markers | [~] | 2026-11-08 | live; 1-4, 7 and 8 pass; 5, 6, 9 pending |
 
 ## Confirmed APIs
 
@@ -1729,4 +1729,5 @@ Checklist in `notes/spec-5.4-threat-markers.md`. Result (2026-11-08, live, after
 - 3 passes: maximized, no markers, range labels on every zone.
 - 4 passes: Kalimdor and the world map show no markers.
 - 7 passes: `/ls toggle ThreatOverlay` prints off/on/off, markers gone when off.
-- Pending: 5 (crossing a border with the map open), 6 (a city or cave), 8 (a fight with the map open), 9 (level-up recolor; at level 4 the Silverpine 8 should turn orange).
+- 8 passes (user report): a fight with the small map open on Eastern Kingdoms, no error or blocked-action message, markers stay visible.
+- Pending: 5 (crossing a border with the map open), 6 (a city or cave), 9 (level-up recolor; at level 4 the Silverpine 8 should turn orange).
