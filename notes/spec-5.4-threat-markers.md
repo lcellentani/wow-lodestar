@@ -28,7 +28,7 @@ Claude writes `scripts/make_marker_art.py` and three white textures with the sha
 | `Media/threat-tab.tga` | filled rounded rectangle | the same, for the tab |
 | `Media/threat-skull.tga` | flat skull | the skull (threat color) |
 
-The outline is the colored shape drawn behind a dark copy 2 pixels smaller, so three textures give the whole look. **New files need a full client restart**, not just `/reload`: the game only sees files that existed when it started (P46).
+The outline is the colored shape drawn behind a dark copy 2 pixels smaller (1 pixel since the 2026-11-08 tuning), so three textures give the whole look. **New files need a full client restart**, not just `/reload`: the game only sees files that existed when it started (P46).
 
 ## Logic.lua (pure, unit tested)
 
@@ -53,12 +53,12 @@ Returns the zone whose neighbors get markers, or `nil` for "away".
 | parentKey | Layer | Size | Anchor |
 | --- | --- | --- | --- |
 | `DiscEdge` | `BACKGROUND` | 20 x 20 | `CENTER` |
-| `TabEdge` | `BACKGROUND` | 20 x 13 | `TOP` to `DiscEdge`'s `BOTTOM`, y offset 1 (overlap) |
-| `Disc`, `Tab` | `BORDER` | 2 pixels smaller each way | `CENTER` on their edge |
+| `TabEdge` | `BACKGROUND` | 22 x 16 | `TOP` to `DiscEdge`'s `BOTTOM`, y offset 1 (overlap) |
+| `Disc`, `Tab` | `BORDER` | 1 pixel smaller each way: 18 x 18, 20 x 14 | `CENTER` on their edge |
 | `Skull` | `ARTWORK` | 14 x 14 | `CENTER` on `Disc` |
-| `Level` (FontString, `GameFontHighlightOutline`, P36) | `OVERLAY` | | `CENTER` on `Tab` |
+| `Level` (FontString, `GameFontHighlightSmallOutline`, 10 pt, P55) | `OVERLAY` | | `CENTER` on `Tab` |
 
-Textures: `file="Interface\AddOns\Lodestar\Media\threat-disc"` and so on. The sizes are the placeholder's from the placement tool, which you saw on the small map; the look iterates on the live client.
+Textures: `file="Interface\AddOns\Lodestar\Media\threat-disc"` and so on. The sizes started from the placement tool's placeholder and were tuned on the live client on 2026-11-08: a 1-pixel outline instead of 2, a 10 pt number, and a tab grown so the number has about 3 pixels of margin (screenshots 200747, 201140, 201147).
 
 ### `Modules/ThreatOverlay.lua`
 

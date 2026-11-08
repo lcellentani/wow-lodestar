@@ -33,7 +33,7 @@
           </Anchors>
         </Texture>
         <Texture parentKey="TabEdge" file="Interface\AddOns\Lodestar\Media\threat-tab">
-          <Size x="20" y="13"/>
+          <Size x="22" y="16"/>
           <Anchors>
             <Anchor point="TOP" relativeKey="$parent.DiscEdge" relativePoint="BOTTOM" y="1"/>
           </Anchors>
@@ -47,7 +47,7 @@
           </Anchors>
         </Texture>
         <Texture parentKey="Tab" file="Interface\AddOns\Lodestar\Media\threat-tab">
-          <Size x="18" y="11"/>
+          <Size x="20" y="14"/>
           <Anchors>
             <Anchor point="CENTER" relativeKey="$parent.TabEdge"/>
           </Anchors>
