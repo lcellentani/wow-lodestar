@@ -1717,3 +1717,4 @@ Checklist in `notes/spec-5.3-placement-tool.md`. Result (2026-11-07, live; scree
 - The placeholder markers (threat-colored disc, dark tab with the minimum level, zone name) show the footprint at small-map size; names crowd where zones are close (Western and Eastern Plaguelands, Searing Gorge and Badlands).
 - 40 zones placed in this session, both continents. Not placed: Deadwind Pass (1430), Swamp of Sorrows (1435), Shen'dralas (2652); Zephras Isle (2521) has no continent map, so it needs none.
 - 2026-11-08 (user report): starting a fight with the tool on turns it off, and after `/ls place` turns it off, clicks reach the map again. All P53 checks pass.
+- 2026-11-08: Deadwind Pass and Swamp of Sorrows placed (42 points), copied into `Data/Zones.lua` as `labelX, labelY` (3 decimals). Shen'dralas (2652) is a small area between Mulgore and Feralas (screenshot 162515); its point was not yet saved to the file.
