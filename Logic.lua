@@ -293,7 +293,7 @@ function Logic.PlayerZone(zones, mapID, isMicro, parentID)
 
   if isMicro then
     local parent = zones[parentID]
-    if parent ~= nil and parent.kind == "zone" then
+    if parent and parent.kind == "zone" then
       return parentID
     end
   end
