@@ -11,6 +11,7 @@ Core.lua
 Data\Zones.lua
 Data\Instances.lua
 Modules\ZoneLabels.lua
+Modules\ThreatOverlay.lua
 Pins.xml
 Debug.lua
 Place.lua

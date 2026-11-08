@@ -7,6 +7,7 @@ local DEFAULTS = {
   version = 1,
   modules = {
     ZoneLabels = true,
+    ThreatOverlay = true,
     Instances = true,
     Tooltip = true,
   },

@@ -17,4 +17,57 @@
       </Layer>
     </Layers>
   </Frame>
+
+  <!-- Threat marker (notes/spec-5.4-threat-markers.md): the disc sits on the zone's
+       point, the tab hangs under it. The colored edges are full size; the dark plates
+       on top are 2 pixels smaller each way, which leaves the outline. -->
+  <Frame name="LodestarThreatPinTemplate" mixin="LodestarThreatPinMixin"
+         enableMouse="false" virtual="true">
+    <Size x="1" y="1"/>
+    <Layers>
+      <Layer level="BACKGROUND">
+        <Texture parentKey="DiscEdge" file="Interface\AddOns\Lodestar\Media\threat-disc">
+          <Size x="20" y="20"/>
+          <Anchors>
+            <Anchor point="CENTER"/>
+          </Anchors>
+        </Texture>
+        <Texture parentKey="TabEdge" file="Interface\AddOns\Lodestar\Media\threat-tab">
+          <Size x="20" y="13"/>
+          <Anchors>
+            <Anchor point="TOP" relativeKey="$parent.DiscEdge" relativePoint="BOTTOM" y="1"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="BORDER">
+        <Texture parentKey="Disc" file="Interface\AddOns\Lodestar\Media\threat-disc">
+          <Size x="16" y="16"/>
+          <Anchors>
+            <Anchor point="CENTER" relativeKey="$parent.DiscEdge"/>
+          </Anchors>
+        </Texture>
+        <Texture parentKey="Tab" file="Interface\AddOns\Lodestar\Media\threat-tab">
+          <Size x="16" y="9"/>
+          <Anchors>
+            <Anchor point="CENTER" relativeKey="$parent.TabEdge"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="ARTWORK">
+        <Texture parentKey="Skull" file="Interface\AddOns\Lodestar\Media\threat-skull">
+          <Size x="14" y="14"/>
+          <Anchors>
+            <Anchor point="CENTER" relativeKey="$parent.Disc"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="OVERLAY">
+        <FontString parentKey="Level" inherits="GameFontHighlightOutline">
+          <Anchors>
+            <Anchor point="CENTER" relativeKey="$parent.Tab"/>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+  </Frame>
 </Ui>

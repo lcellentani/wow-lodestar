@@ -1,6 +1,6 @@
 # M5 step 5.4: threat markers
 
-Status: spec written 2026-11-08. Probe number reserved: P54 (the markers in game). No API probe needed: everything used is already confirmed (P2, P5, P8, P17, P40, P42, P46).
+Status: spec written 2026-11-08; `Logic.PlayerZone` by the user, the rest delegated to Claude and written 2026-11-08, awaiting P54. Probe number reserved: P54 (the markers in game). No API probe needed: everything used is already confirmed (P2, P5, P8, P17, P40, P42, P46).
 Design doc reference: "ThreatOverlay" (What, Look, Art, Position), "Neighbors" (Data model), "Architecture" (one namespace, no taint, pins from `Pins.xml`).
 
 ## What this step is for
