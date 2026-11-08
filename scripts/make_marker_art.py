@@ -23,9 +23,9 @@ SS = 4  # supersamples per axis for anti-aliased edges
 
 # Pin layout in screen pixels, as in the spec's Pins.xml table.
 DISC = 20
-EDGE = 2          # outline width: the dark plate is 2 pixels smaller each way
+EDGE = 1          # outline width: the dark plate is 1 pixel smaller each way
 SKULL = 14
-TAB_W, TAB_H = 20, 13
+TAB_W, TAB_H = 22, 16
 TAB_OVERLAP = 1
 
 PLATE = (0.1, 0.08, 0.05)
@@ -53,19 +53,25 @@ def tab(x, y):
 
 
 def skull(x, y):
-    # Drawn on a 64-unit grid, then scaled to the unit square.
-    u, v = x * 64, y * 64
-    cranium = (u - 32) ** 2 + (v - 27) ** 2 <= 23 ** 2
-    jaw = 19 <= u <= 45 and 36 <= v <= 59 and rounded_rect((u - 19) / 26, (v - 36) / 23, 26, 23, 5)
-    if not (cranium or jaw):
+    # The skull chosen in the 2026-11-07 mockups: a dome with straight sides, cheekbones
+    # angling in to a square jaw, large low eyes, three teeth, no nose. Drawn in the
+    # mockup's units (x -8..8, y -9..7), scaled to fill the texture with a small margin.
+    sx = (x * 64 - 32) / 3.6
+    sy = (y * 64 - 32) / 3.6 - 1
+    ax = abs(sx)
+    if sy <= -1:
+        inside = sx ** 2 + (sy + 1) ** 2 <= 8 ** 2      # dome
+    elif sy <= 2:
+        inside = ax <= 8                                 # straight sides
+    elif sy <= 4:
+        inside = ax <= 8 - (sy - 2) * 1.5                # cheekbones, 8 in to 5
+    else:
+        inside = sy <= 7 and ax <= 5                     # jaw
+    if not inside:
         return False
-    eye_l = (u - 23.5) ** 2 + (v - 31) ** 2 <= 7.2 ** 2
-    eye_r = (u - 40.5) ** 2 + (v - 31) ** 2 <= 7.2 ** 2
-    # Nose: an upside-down V cut, apex at the top.
-    nose = 38 <= v <= 46 and abs(u - 32) <= (v - 38) * 0.45 + 0.6
-    # Teeth: two thin gaps in the jaw.
-    teeth = 50 <= v <= 60 and (abs(u - 28) <= 1.3 or abs(u - 36) <= 1.3)
-    return not (eye_l or eye_r or nose or teeth)
+    eyes = (ax - 3.2) ** 2 + (sy + 0.5) ** 2 <= 2.2 ** 2
+    teeth = 4.5 <= sy and min(abs(sx + 2.5), ax, abs(sx - 2.5)) <= 0.55
+    return not (eyes or teeth)
 
 
 def coverage(shape, w, h):

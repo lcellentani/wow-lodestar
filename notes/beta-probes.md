@@ -1731,6 +1731,7 @@ Checklist in `notes/spec-5.4-threat-markers.md`. Result (2026-11-08, live, after
 - 4 passes: Kalimdor and the world map show no markers.
 - 7 passes: `/ls toggle ThreatOverlay` prints off/on/off, markers gone when off.
 - 8 passes (user report): a fight with the small map open on Eastern Kingdoms, no error or blocked-action message, markers stay visible. Switching to Kalimdor and back during the fight hides and redraws them as expected (pins acquired and released in combat without error).
+- Look tuned on 2026-11-08 (screenshots 200747-201628): 1-pixel outline, 10 pt number (P55), tab 22 x 16, and the skull redrawn from the mockup's shape. A changed texture file with the same name loads on `/reload`; only new files need a client restart (P46).
 - Pending: 5 (crossing a border with the map open), 6 (a city or cave), 9 (level-up recolor; at level 4 the Silverpine 8 should turn orange).
 
 ### P55: small font objects (M5 step 5.4, the marker's level number)
