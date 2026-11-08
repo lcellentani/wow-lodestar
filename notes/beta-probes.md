@@ -66,6 +66,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P52 | combat API | [x] | 2026-11-07 | live |
 | P53 | placement tool | [x] | 2026-11-07 | live; all checks pass (8-9 on 2026-11-08) |
 | P54 | threat markers | [~] | 2026-11-08 | live; 1-4, 7 and 8 pass; 5, 6, 9 pending |
+| P55 | small fonts | [x] | 2026-11-08 | live; SmallOutline is 10 pt with no outline |
 
 ## Confirmed APIs
 
@@ -1731,3 +1732,23 @@ Checklist in `notes/spec-5.4-threat-markers.md`. Result (2026-11-08, live, after
 - 7 passes: `/ls toggle ThreatOverlay` prints off/on/off, markers gone when off.
 - 8 passes (user report): a fight with the small map open on Eastern Kingdoms, no error or blocked-action message, markers stay visible. Switching to Kalimdor and back during the fight hides and redraws them as expected (pins acquired and released in combat without error).
 - Pending: 5 (crossing a border with the map open), 6 (a city or cave), 9 (level-up recolor; at level 4 the Silverpine 8 should turn orange).
+
+### P55: small font objects (M5 step 5.4, the marker's level number)
+
+```
+/run for _,n in ipairs({"GameFontHighlightOutline","GameFontHighlightSmallOutline","GameFontHighlightSmall","NumberFontNormalSmall","SystemFont_Shadow_Small"}) do local p,s,fl=_G[n]:GetFont() print(n,s,fl) end
+```
+
+Result (2026-11-08, live; screenshot 200438; an earlier run, 200259, printed only the file because `f and f:GetFont()` keeps one value):
+
+```
+GameFontHighlightOutline 12 OUTLINE
+GameFontHighlightSmallOutline 10
+GameFontHighlightSmall 10
+NumberFontNormalSmall 12 OUTLINE
+SystemFont_Shadow_Small 10
+```
+
+- All five exist. All use `Fonts\FRIZQT__.TTF` except `NumberFontNormalSmall` (`Fonts\ARIALN.TTF`).
+- `GameFontHighlightSmallOutline` is 10 pt and, despite its name, has **no** `OUTLINE` flag on Forever. On the marker's dark tab the number still reads (screenshot 200438: 8, 28, 48), so it is used there.
+- The same screenshot shows the 1-pixel outline (plates 18 x 18 and 18 x 11 inside 20 x 20 and 20 x 13).
