@@ -356,7 +356,7 @@ The MVP has no settings window; everything is a slash command, which is fast to 
 | Command | Effect |
 | --- | --- |
 | `/ls` | Print the command list |
-| `/ls toggle <module>` | Enable or disable a module (`ZoneLabels`, `Instances`, `Tooltip`). Takes effect immediately: the core calls the module's `OnDisable` or `OnEnable`, which removes or adds its data provider and map tick subscription. The choice is saved in `LodestarDB.modules`; no `/reload` needed |
+| `/ls toggle <module>` | Enable or disable a module (`ZoneLabels`, `ThreatOverlay`, `Instances`, `Tooltip`). Takes effect immediately: the core calls the module's `OnDisable` or `OnEnable`, which removes or adds its data provider and map tick subscription. The choice is saved in `LodestarDB.modules`; no `/reload` needed |
 | `/ls zone <mapID\|here> <min> <max>` | Save a level-range override for a zone. `here` means the map currently shown on the world map frame (or the player's zone when the map is closed), so IDs do not have to be looked up |
 | `/ls zone <mapID\|here> reset` | Remove that zone's override, so the client or table value applies again |
 | `/ls overrides` | List every saved override with the client's and the table's value next to it, to spot overrides that are no longer needed |
