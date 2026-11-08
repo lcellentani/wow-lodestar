@@ -28,7 +28,7 @@ Claude writes `scripts/make_marker_art.py` and three white textures with the sha
 | `Media/threat-tab.tga` | filled rounded rectangle | the same, for the tab |
 | `Media/threat-skull.tga` | flat skull | the skull (threat color) |
 
-The outline is the colored shape drawn behind a dark copy 2 pixels smaller (1 pixel since the 2026-11-08 tuning), so three textures give the whole look. **New files need a full client restart**, not just `/reload`: the game only sees files that existed when it started (P46).
+The outline is the colored shape drawn behind a dark copy 2 pixels smaller (the edges grew instead in the 2026-11-08 tuning, so the plates keep their room), so three textures give the whole look. **New files need a full client restart**, not just `/reload`: the game only sees files that existed when it started (P46).
 
 ## Logic.lua (pure, unit tested)
 
@@ -52,13 +52,13 @@ Returns the zone whose neighbors get markers, or `nil` for "away".
 
 | parentKey | Layer | Size | Anchor |
 | --- | --- | --- | --- |
-| `DiscEdge` | `BACKGROUND` | 20 x 20 | `CENTER` |
-| `TabEdge` | `BACKGROUND` | 22 x 16 | `TOP` to `DiscEdge`'s `BOTTOM`, y offset 1 (overlap) |
-| `Disc`, `Tab` | `BORDER` | 1 pixel smaller each way: 18 x 18, 20 x 14 | `CENTER` on their edge |
+| `DiscEdge` | `BACKGROUND` | 22 x 22 | `CENTER` |
+| `TabEdge` | `BACKGROUND` | 24 x 18 | `TOP` to `DiscEdge`'s `BOTTOM`, y offset 1 (overlap) |
+| `Disc`, `Tab` | `BORDER` | 2 pixels smaller each way: 18 x 18, 20 x 14 | `CENTER` on their edge |
 | `Skull` | `ARTWORK` | 14 x 14 | `CENTER` on `Disc` |
 | `Level` (FontString, `GameFontHighlightSmallOutline`, 10 pt, P55) | `OVERLAY` | | `CENTER` on `Tab` |
 
-Textures: `file="Interface\AddOns\Lodestar\Media\threat-disc"` and so on. The sizes started from the placement tool's placeholder and were tuned on the live client on 2026-11-08: a 1-pixel outline instead of 2, a 10 pt number, and a tab grown so the number has about 3 pixels of margin (screenshots 200747, 201140, 201147).
+Textures: `file="Interface\AddOns\Lodestar\Media\threat-disc"` and so on. The sizes started from the placement tool's placeholder and were tuned on the live client on 2026-11-08: a 10 pt number, and a tab grown so the number has about 3 pixels of margin (screenshots 200747, 201140, 201147). A 1-pixel outline was tried and dropped: the final outline is 2 pixels, grown outward so the plates keep their size.
 
 ### `Modules/ThreatOverlay.lua`
 

@@ -22,10 +22,10 @@ import zlib
 SS = 4  # supersamples per axis for anti-aliased edges
 
 # Pin layout in screen pixels, as in the spec's Pins.xml table.
-DISC = 20
-EDGE = 1          # outline width: the dark plate is 1 pixel smaller each way
+DISC = 22
+EDGE = 2          # outline width: the dark plate is 2 pixels smaller each way
 SKULL = 14
-TAB_W, TAB_H = 22, 16
+TAB_W, TAB_H = 24, 18
 TAB_OVERLAP = 1
 
 PLATE = (0.1, 0.08, 0.05)

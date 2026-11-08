@@ -20,20 +20,20 @@
 
   <!-- Threat marker (notes/spec-5.4-threat-markers.md): the disc sits on the zone's
        point, the tab hangs under it. The colored edges are full size; the dark plates
-       on top are 1 pixel smaller each way, which leaves the outline. -->
+       on top are 2 pixels smaller each way, which leaves the outline. -->
   <Frame name="LodestarThreatPinTemplate" mixin="LodestarThreatPinMixin"
          enableMouse="false" virtual="true">
     <Size x="1" y="1"/>
     <Layers>
       <Layer level="BACKGROUND">
         <Texture parentKey="DiscEdge" file="Interface\AddOns\Lodestar\Media\threat-disc">
-          <Size x="20" y="20"/>
+          <Size x="22" y="22"/>
           <Anchors>
             <Anchor point="CENTER"/>
           </Anchors>
         </Texture>
         <Texture parentKey="TabEdge" file="Interface\AddOns\Lodestar\Media\threat-tab">
-          <Size x="22" y="16"/>
+          <Size x="24" y="18"/>
           <Anchors>
             <Anchor point="TOP" relativeKey="$parent.DiscEdge" relativePoint="BOTTOM" y="1"/>
           </Anchors>
