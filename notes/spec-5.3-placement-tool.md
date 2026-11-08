@@ -109,3 +109,5 @@ Screenshots of 2, 3 and 7, and any error popup. Claude records P53 and reads the
 ## After the step
 
 The placement pass itself: every zone on both continents, small map first, since that is where the threat markers live. Claude copies the points into `Data/Zones.lua` (`[T4]` data), then `/ls place clear`. Commits for this step: your code `[T2]`, Claude's notes `[T4]`, separately.
+
+Done 2026-11-08: 43 points placed (Shen'dralas included, though it has no range and so no label), copied into `Data/Zones.lua`, overrides cleared; labels on the maximized map sit on the points. Two name pairs touch (Duskwood and Deadwind Pass, Silverpine Forest and Alterac Mountains), left for the label style pass.

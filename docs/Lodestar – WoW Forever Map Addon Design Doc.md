@@ -519,7 +519,7 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 3. **M2, skeleton:** `.toc`, core, module registry, `Debug.lua` (`/ls probe`, `/ls dump`, the log and `/ls copy`) run in game with no errors, and Claude Code can read the log from the SavedVariables file.
 4. **M3, data:** `/ls dump` output is used to check the seeded tables, add the new zones and dungeons, and fix any differences; checked rows are re-marked as verified.
 5. **M4, overlays:** ZoneLabels works on the continent maps.
-6. **M5, MVP complete:** Instances, Tooltip and ThreatOverlay work (threat markers on the small map, decided 2026-11-07 after P45-P51), ZoneLabels moves to the maximized map with grid anchors, and all seven success criteria in the Overview pass.
+6. **M5, MVP complete:** Instances, Tooltip and ThreatOverlay work (threat markers on the small map, decided 2026-11-07 after P45-P51), ZoneLabels moves to the maximized map with hand-placed anchors (done 2026-11-08, step 5.3), and all seven success criteria in the Overview pass.
 7. **M6, v2:** waypoints, unexplored areas and map look and feel, in the order the API allows.
 
 **Risks**
