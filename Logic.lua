@@ -275,3 +275,28 @@ function Logic.ClearAllPlacements(overrides)
   end
   return count
 end
+
+-- The zone whose neighbors get threat markers, or nil (away).
+function Logic.PlayerZone(zones, mapID, isMicro, parentID)
+  if mapID == nil then
+    return nil
+  end
+
+  local row = zones[mapID]
+  if row then
+    if row.kind == "zone" then
+      return mapID
+    elseif row.kind == "city" then
+      return row.zone
+    end
+  end
+
+  if isMicro then
+    local parent = zones[parentID]
+    if parent ~= nil and parent.kind == "zone" then
+      return parentID
+    end
+  end
+
+  return nil
+end

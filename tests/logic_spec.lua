@@ -856,3 +856,45 @@ describe("ClearAllPlacements", function()
     assert(next(zones) == nil, "expected empty zones table")
   end)
 end)
+
+describe("PlayerZone", function()
+  local zones = {
+    [1] = { kind = "zone" },
+    [2] = { kind = "city", zone = 1 },
+  }
+
+  it("returns a zone's own ID", function()
+    local zoneID = Logic.PlayerZone(zones, 1, false, nil)
+    assert(zoneID == 1, "expected map equal 1, got " .. tostring(zoneID))
+  end)
+
+  it("returns a city's zone", function()
+    local zoneID = Logic.PlayerZone(zones, 2, false, nil)
+    assert(zoneID == 1, "expected map equal 1, got " .. tostring(zoneID))
+  end)
+
+  it("returns a micro map's zone parent", function()
+    local zoneID = Logic.PlayerZone(zones, 99, true, 1)
+    assert(zoneID == 1, "expected map equal 1, got " .. tostring(zoneID))
+  end)
+
+  it("returns nil for a micro map inside a city", function()
+    local zoneID = Logic.PlayerZone(zones, 99, true, 2)
+    assert(zoneID == nil, "expected nil map")
+  end)
+
+  it("returns nil for a micro map with an unknown parent", function()
+    local zoneID = Logic.PlayerZone(zones, 99, true, 50)
+    assert(zoneID == nil, "expected nil map")
+  end)
+
+  it("returns nil for a dungeon, even inside a zone", function()
+    local zoneID = Logic.PlayerZone(zones, 99, false, 1)
+    assert(zoneID == nil, "expected nil map")
+  end)
+
+  it("returns nil when there is no map", function()
+    local zoneID = Logic.PlayerZone(zones, nil, false, nil)
+    assert(zoneID == nil, "expected nil map")
+  end)
+end)
