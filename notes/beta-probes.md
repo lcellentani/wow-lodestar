@@ -65,6 +65,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P51 | traced masks on the map | [x] | 2026-11-07 | live; fit passes, yellow too weak |
 | P52 | combat API | [x] | 2026-11-07 | live |
 | P53 | placement tool | [x] | 2026-11-07 | live; all checks pass (8-9 on 2026-11-08) |
+| P54 | threat markers | [~] | 2026-11-08 | live; 1-4 and 7 pass; 5, 6, 8, 9 pending |
 
 ## Confirmed APIs
 
@@ -1718,3 +1719,14 @@ Checklist in `notes/spec-5.3-placement-tool.md`. Result (2026-11-07, live; scree
 - 40 zones placed in this session, both continents. Not placed: Deadwind Pass (1430), Swamp of Sorrows (1435), Shen'dralas (2652); Zephras Isle (2521) has no continent map, so it needs none.
 - 2026-11-08 (user report): starting a fight with the tool on turns it off, and after `/ls place` turns it off, clicks reach the map again. All P53 checks pass.
 - 2026-11-08: Deadwind Pass and Swamp of Sorrows placed (42 points), copied into `Data/Zones.lua` as `labelX, labelY` (3 decimals). Shen'dralas (2652) is a small area between Mulgore and Feralas (screenshot 162515); placed after a `/reload` (43 points in all).
+
+### P54: the threat markers (M5 step 5.4)
+
+Checklist in `notes/spec-5.4-threat-markers.md`. Result (2026-11-08, live, after a client restart; level 1 Paladin in Deathknell, Tirisfal Glades; screenshots 194816, 194838, 194902, 194907, 194950):
+
+- 1 passes: on the small Eastern Kingdoms map, markers on Silverpine Forest (8), Alterac Mountains (28) and Western Plaguelands (48), the three `neighbors` of Tirisfal Glades (1420); none on Tirisfal itself. Each sits on its zone's hand-placed point.
+- 2 passes: all three red, as `GetQuestDifficultyColor` gives at level 1 for 8, 28 and 48 (5 or more levels above the player). The skull, outline and tab edge share the color; the textures load.
+- 3 passes: maximized, no markers, range labels on every zone.
+- 4 passes: Kalimdor and the world map show no markers.
+- 7 passes: `/ls toggle ThreatOverlay` prints off/on/off, markers gone when off.
+- Pending: 5 (crossing a border with the map open), 6 (a city or cave), 8 (a fight with the map open), 9 (level-up recolor; at level 4 the Silverpine 8 should turn orange).
