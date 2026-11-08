@@ -1729,5 +1729,5 @@ Checklist in `notes/spec-5.4-threat-markers.md`. Result (2026-11-08, live, after
 - 3 passes: maximized, no markers, range labels on every zone.
 - 4 passes: Kalimdor and the world map show no markers.
 - 7 passes: `/ls toggle ThreatOverlay` prints off/on/off, markers gone when off.
-- 8 passes (user report): a fight with the small map open on Eastern Kingdoms, no error or blocked-action message, markers stay visible.
+- 8 passes (user report): a fight with the small map open on Eastern Kingdoms, no error or blocked-action message, markers stay visible. Switching to Kalimdor and back during the fight hides and redraws them as expected (pins acquired and released in combat without error).
 - Pending: 5 (crossing a border with the map open), 6 (a city or cave), 9 (level-up recolor; at level 4 the Silverpine 8 should turn orange).
