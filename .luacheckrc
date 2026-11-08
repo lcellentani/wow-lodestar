@@ -27,6 +27,7 @@ read_globals = {
   "time", "date", "GetTime", -- P16
   "CreateFromMixins", "Mixin", "MapCanvasDataProviderMixin", "GameTooltip", -- P17
   "GameFontHighlightOutline", "GameFontNormalOutline", -- P36
+  "GameFontHighlightSmallOutline", -- P55
   "EventRegistry",           -- P42
   "C_Texture",               -- P41
   "C_MapExplorationInfo",    -- P13
