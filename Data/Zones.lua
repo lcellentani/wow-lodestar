@@ -7,37 +7,37 @@ local addonName, ns = ...
 -- "Zones by level (Classic)" and third-party guides.
 -- Label points: placed by hand with /ls place on the live client (P53, 2026-11-08).
 -- Factions: Warcraft Wiki "Classic zones" (PvP status); Forever zones unknown ("").
--- Neighbors (Eastern Kingdoms): zones whose hover areas touch in the grid sampled with
--- C_Map.GetMapInfoAtPosition (step 5.1, 2026-11-06), cities folded into their zone.
+-- Neighbors: zones whose hover areas touch in grids sampled with C_Map.GetMapInfoAtPosition
+-- (Eastern Kingdoms in step 5.1, 2026-11-06; Kalimdor 2026-11-08), cities folded into their zone.
 -- A border counts whether or not it can be walked across.
 -- [uiMapID] = { [min, max,] faction, kind [, labelX, labelY] [, neighbors] [, zone] }
 -- neighbors: uiMapIDs of the zones sharing a border; zone: for a city, the zone around it
 -- faction: "Alliance" | "Horde" | "Contested" | "" (unknown, fill in game); kind: "zone" | "city"
 ns.Zones = {
   -- Kalimdor (1414)
-  [1411] = { min = 1,  max = 14, faction = "Horde",     kind = "zone", labelX = 0.585, labelY = 0.487 },  -- Durotar, forever, group finder P33
-  [1412] = { min = 1,  max = 14, faction = "Horde",     kind = "zone", labelX = 0.475, labelY = 0.601 },  -- Mulgore, forever, group finder P33
-  [1413] = { min = 8,  max = 30, faction = "Horde",     kind = "zone", labelX = 0.530, labelY = 0.571 },  -- The Barrens, forever, group finder P33
+  [1411] = { min = 1,  max = 14, faction = "Horde",     kind = "zone", labelX = 0.585, labelY = 0.487, neighbors = { 1413, 1440, 1447 } },  -- Durotar, forever, group finder P33
+  [1412] = { min = 1,  max = 14, faction = "Horde",     kind = "zone", labelX = 0.475, labelY = 0.601, neighbors = { 1413, 1442, 1443, 1444, 2652 } },  -- Mulgore, forever, group finder P33
+  [1413] = { min = 8,  max = 30, faction = "Horde",     kind = "zone", labelX = 0.530, labelY = 0.571, neighbors = { 1411, 1412, 1440, 1441, 1442, 1445 } },  -- The Barrens, forever, group finder P33
   [1438] = { min = 1,  max = 14, faction = "Alliance",  kind = "zone", labelX = 0.426, labelY = 0.113 },  -- Teldrassil, forever, group finder P33
-  [1439] = { min = 8,  max = 24, faction = "Alliance",  kind = "zone", labelX = 0.462, labelY = 0.251 },  -- Darkshore, forever, group finder P33
-  [1440] = { min = 18, max = 34, faction = "Contested", kind = "zone", labelX = 0.491, labelY = 0.408 },  -- Ashenvale, forever, group finder P33
-  [1441] = { min = 23, max = 40, faction = "Contested", kind = "zone", labelX = 0.541, labelY = 0.746 },  -- Thousand Needles, forever, group finder P33
-  [1442] = { min = 13, max = 32, faction = "Contested", kind = "zone", labelX = 0.438, labelY = 0.468 },  -- Stonetalon Mountains, forever, group finder P33
-  [1443] = { min = 28, max = 44, faction = "Contested", kind = "zone", labelX = 0.418, labelY = 0.566 },  -- Desolace, forever, group finder P33
-  [1444] = { min = 38, max = 54, faction = "Contested", kind = "zone", labelX = 0.430, labelY = 0.705 },  -- Feralas, forever, group finder P33
-  [1445] = { min = 33, max = 50, faction = "Contested", kind = "zone", labelX = 0.559, labelY = 0.674 },  -- Dustwallow Marsh, forever, group finder P33
-  [1446] = { min = 38, max = 54, faction = "Contested", kind = "zone", labelX = 0.563, labelY = 0.846 },  -- Tanaris, forever, group finder P33
-  [1447] = { min = 43, max = 60, faction = "Contested", kind = "zone", labelX = 0.600, labelY = 0.383 },  -- Azshara, forever, group finder P33
-  [1448] = { min = 46, max = 60, faction = "Contested", kind = "zone", labelX = 0.494, labelY = 0.274 },  -- Felwood, forever, group finder P33
-  [1449] = { min = 45, max = 60, faction = "Contested", kind = "zone", labelX = 0.497, labelY = 0.814 },  -- Un'Goro Crater, forever, group finder P33
-  [1450] = { min = 55, max = 60, faction = "Contested", kind = "zone", labelX = 0.537, labelY = 0.196 },  -- Moonglade, vanilla, unverified (not in the group finder; wiki "Classic zones": no range)
-  [1451] = { min = 53, max = 60, faction = "Contested", kind = "zone", labelX = 0.428, labelY = 0.840 },  -- Silithus, forever, group finder P33
-  [1452] = { min = 53, max = 63, faction = "Contested", kind = "zone", labelX = 0.580, labelY = 0.237 },  -- Winterspring, forever, group finder P33
+  [1439] = { min = 8,  max = 24, faction = "Alliance",  kind = "zone", labelX = 0.462, labelY = 0.251, neighbors = { 1440, 1448, 1450 } },  -- Darkshore, forever, group finder P33
+  [1440] = { min = 18, max = 34, faction = "Contested", kind = "zone", labelX = 0.491, labelY = 0.408, neighbors = { 1411, 1413, 1439, 1442, 1447, 1448 } },  -- Ashenvale, forever, group finder P33
+  [1441] = { min = 23, max = 40, faction = "Contested", kind = "zone", labelX = 0.541, labelY = 0.746, neighbors = { 1413, 1444, 1445, 1446, 1449 } },  -- Thousand Needles, forever, group finder P33
+  [1442] = { min = 13, max = 32, faction = "Contested", kind = "zone", labelX = 0.438, labelY = 0.468, neighbors = { 1412, 1413, 1440, 1443 } },  -- Stonetalon Mountains, forever, group finder P33
+  [1443] = { min = 28, max = 44, faction = "Contested", kind = "zone", labelX = 0.418, labelY = 0.566, neighbors = { 1412, 1442, 2652 } },  -- Desolace, forever, group finder P33
+  [1444] = { min = 38, max = 54, faction = "Contested", kind = "zone", labelX = 0.430, labelY = 0.705, neighbors = { 1412, 1441, 1451, 2652 } },  -- Feralas, forever, group finder P33
+  [1445] = { min = 33, max = 50, faction = "Contested", kind = "zone", labelX = 0.559, labelY = 0.674, neighbors = { 1413, 1441 } },  -- Dustwallow Marsh, forever, group finder P33
+  [1446] = { min = 38, max = 54, faction = "Contested", kind = "zone", labelX = 0.563, labelY = 0.846, neighbors = { 1441, 1449 } },  -- Tanaris, forever, group finder P33
+  [1447] = { min = 43, max = 60, faction = "Contested", kind = "zone", labelX = 0.600, labelY = 0.383, neighbors = { 1411, 1440, 1452 } },  -- Azshara, forever, group finder P33
+  [1448] = { min = 46, max = 60, faction = "Contested", kind = "zone", labelX = 0.494, labelY = 0.274, neighbors = { 1439, 1440, 1450, 1452, 2482 } },  -- Felwood, forever, group finder P33
+  [1449] = { min = 45, max = 60, faction = "Contested", kind = "zone", labelX = 0.497, labelY = 0.814, neighbors = { 1441, 1446, 1451 } },  -- Un'Goro Crater, forever, group finder P33
+  [1450] = { min = 55, max = 60, faction = "Contested", kind = "zone", labelX = 0.537, labelY = 0.196, neighbors = { 1439, 1448, 1452 } },  -- Moonglade, vanilla, unverified (not in the group finder; wiki "Classic zones": no range)
+  [1451] = { min = 53, max = 60, faction = "Contested", kind = "zone", labelX = 0.428, labelY = 0.840, neighbors = { 1444, 1449 } },  -- Silithus, forever, group finder P33
+  [1452] = { min = 53, max = 63, faction = "Contested", kind = "zone", labelX = 0.580, labelY = 0.237, neighbors = { 1447, 1448, 1450, 2482 } },  -- Winterspring, forever, group finder P33
   [1454] = { faction = "Horde",    kind = "city", zone = 1411 },  -- Orgrimmar, vanilla, unverified
   [1456] = { faction = "Horde",    kind = "city", zone = 1412 },  -- Thunder Bluff, vanilla, unverified
   [1457] = { faction = "Alliance", kind = "city", zone = 1438 },  -- Darnassus, vanilla, unverified
-  [2482] = { min = 55, max = 60, faction = "", kind = "zone", labelX = 0.534, labelY = 0.329 },  -- Mount Hyjal, forever, group finder P33
-  [2652] = { faction = "", kind = "zone", labelX = 0.444, labelY = 0.639 },  -- Shen'dralas, forever, unverified (not in the group finder; guides disagree on the range)
+  [2482] = { min = 55, max = 60, faction = "", kind = "zone", labelX = 0.534, labelY = 0.329, neighbors = { 1448, 1452 } },  -- Mount Hyjal, forever, group finder P33
+  [2652] = { faction = "", kind = "zone", labelX = 0.444, labelY = 0.639, neighbors = { 1412, 1443, 1444 } },  -- Shen'dralas, forever, unverified (not in the group finder; guides disagree on the range)
 
   -- Eastern Kingdoms (1415)
   [1416] = { min = 28, max = 44, faction = "Contested", kind = "zone", labelX = 0.469, labelY = 0.295, neighbors = { 1420, 1421, 1422, 1424, 1425 } },  -- Alterac Mountains, forever, group finder P33
