@@ -63,4 +63,48 @@ describe("Zones data", function()
       end
     end
   end)
+
+  it("links every city to a zone row, and only cities", function()
+    for id, row in pairs(Zones) do
+      if row.kind == "city" then
+        local zone = Zones[row.zone]
+        assert(zone ~= nil, id .. ": city zone " .. tostring(row.zone) .. " has no row")
+        assert(zone.kind == "zone", id .. ": city zone " .. row.zone .. " is not a zone")
+      else
+        assert(row.zone == nil, id .. ": only a city has a zone link")
+      end
+    end
+  end)
+
+  it("lists neighbors only on zones, as existing zones, never itself or twice", function()
+    for id, row in pairs(Zones) do
+      if row.neighbors ~= nil then
+        assert(row.kind == "zone", id .. ": a city has no neighbors; its zone does")
+        local seen = {}
+        for _, other in ipairs(row.neighbors) do
+          assert(other ~= id, id .. ": lists itself as a neighbor")
+          assert(not seen[other], id .. ": lists " .. other .. " twice")
+          seen[other] = true
+          assert(Zones[other] ~= nil, id .. ": neighbor " .. other .. " has no row")
+          assert(Zones[other].kind == "zone", id .. ": neighbor " .. other .. " is not a zone")
+        end
+      end
+    end
+  end)
+
+  it("has symmetric neighbor lists", function()
+    local function lists(a, b)
+      for _, other in ipairs(Zones[a].neighbors or {}) do
+        if other == b then
+          return true
+        end
+      end
+      return false
+    end
+    for id, row in pairs(Zones) do
+      for _, other in ipairs(row.neighbors or {}) do
+        assert(lists(other, id), id .. " lists " .. other .. ", but " .. other .. " does not list " .. id)
+      end
+    end
+  end)
 end)
