@@ -103,6 +103,14 @@ Fourth pass, 2026-11-09 (screenshot 154206: tucked heater, B3 bronze plate, thre
 - New layout K2 "Medal" in the mockup: a small split color tab (24 x 14, 7 px showing) peeks out above the level badge, a name tab hangs below it, and the badge sits on top of both; both tabs are narrower than the badge (the badge grows to stay 6 px wider each side than the name tab). Edge dark or warm; halo blur 5, 8 or 12 px, the silhouette grown before the blur.
 - In game, K2 means three rectangles of different widths: the tab texture needs slicing (or `SetTexCoord` on its ends) so the corners don't stretch. Not probed.
 
+Fifth pass, 2026-11-09:
+
+- K2 medal looked bad in practice (user). Dropped: the top color tab and the colored halo.
+- **Fit level rule** (decided for both maps, written into the design doc's "Difficulty colors"): one color per zone, from the player's level clamped into the zone's range. On the maximized map it colors the range plate's outline; the range digits stay neutral.
+- **Soft dark shadow** back as the shadow; 5 px looked fine, larger untested (the earlier mockup's size control only drove the halo, a bug).
+- Now in the mockup: two art elements, the range plate (fit-color outline, 2 or 3 px) always on top of the name plate (dark edge, tucked 5 px). Pairs P1 tag, P2 plaque and ribbon, P3 pill and strip, P4 bevelled plaque, P5 range plate only; fills bronze, vellum, dark; name plate same or one shade deeper; shadow 3-12 px.
+- Open for the small map: its tab still shows `min`; with the fit color, a yellow `8` on Westfall at level 24 may read oddly.
+
 ## Ideas to pick up
 
 - Note 2 as a concrete element: a small split disc (left half entry color, right half top color) next to or above the range, so the numbers can stay one calm neutral or light color. The threat-marker disc texture and a half-disc mask, or two half-disc textures, would do it; no gradient.
