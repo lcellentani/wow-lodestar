@@ -120,7 +120,7 @@ Sixth pass, 2026-11-09 (screenshot 162020):
 
 **Current choice, 2026-11-09** (screenshot 162534; "getting close to a good state"): P6 maximized variant on the maximized map (disc 30, skull 20), dark fill, 3 px fit-color edge, 11 px of room each side of the range and 5 above and below, range 16 pt, soft dark shadow 5 px, no zone names. The small map keeps today's pin (disc 22, skull 14, 2 px edge, 10 pt), colored by the fit level.
 
-Before code: probe a 16 pt font; decide how the tab stretches (sliced texture or `SetTexCoord` ends); extend `scripts/make_marker_art.py` for the second size and the shadow texture; settle the small map's tab number under the fit color (entry level, range or fit level).
+Before code: probe a 16 pt font; decide how the tab stretches (sliced texture or `SetTexCoord` ends); extend `scripts/make_marker_art.py` for the second size and the shadow texture; ~~settle the small map's tab number~~: **the range** (decided 2026-11-09, design doc ThreatOverlay), so both maps show the same pin content and differ only in size; check collisions on the small map.
 
 ## Ideas to pick up
 
