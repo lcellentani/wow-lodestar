@@ -118,6 +118,10 @@ Sixth pass, 2026-11-09 (screenshot 162020):
 - More room around the range on the maximized variant: 8 px each side and 4 above and below by default (5/3 and 11/5 to compare).
 - In game still needed: tab slicing (a range is wider than one level), a 16 pt font probe, the shadow texture.
 
+**Current choice, 2026-11-09** (screenshot 162534; "getting close to a good state"): P6 maximized variant on the maximized map (disc 30, skull 20), dark fill, 3 px fit-color edge, 11 px of room each side of the range and 5 above and below, range 16 pt, soft dark shadow 5 px, no zone names. The small map keeps today's pin (disc 22, skull 14, 2 px edge, 10 pt), colored by the fit level.
+
+Before code: probe a 16 pt font; decide how the tab stretches (sliced texture or `SetTexCoord` ends); extend `scripts/make_marker_art.py` for the second size and the shadow texture; settle the small map's tab number under the fit color (entry level, range or fit level).
+
 ## Ideas to pick up
 
 - Note 2 as a concrete element: a small split disc (left half entry color, right half top color) next to or above the range, so the numbers can stay one calm neutral or light color. The threat-marker disc texture and a half-disc mask, or two half-disc textures, would do it; no gradient.
