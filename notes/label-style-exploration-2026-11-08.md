@@ -1,6 +1,6 @@
 # Label style exploration (maximized map), 2026-11-08
 
-Status: paused by the user to think; resume in a new conversation. Nothing here is decided except where marked.
+Status: restarted 2026-11-09 from the small-map marker style (see "Restart"); the first pass below is history.
 Design doc reference: "Two map sizes, two questions" (Feature set), "ZoneLabels" (Module specs). The doc says only "label style iterates on the live client"; this was the first pass.
 
 ## Starting point
@@ -53,6 +53,35 @@ Still standing from the session: range first (L2) reads best; one-line labels ar
 - P55: `GameFontHighlightSmallOutline` is 10 pt with **no** outline on Forever; `GameFontHighlightOutline` and `NumberFontNormalSmall` are 12 pt `OUTLINE`; `GameFontHighlightSmall` and `SystemFont_Shadow_Small` are 10 pt.
 - Thin borders work as on the threat markers: a tinted shape behind a dark copy 2 pixels smaller (P54 tuning). Addon textures tint with `SetVertexColor` (P46); a changed texture reloads on `/reload`, a new file needs a client restart.
 - Fading a label is `SetAlpha` on the pin, no probe.
+
+## Restart, 2026-11-09: follow the small-map marker
+
+The user scrapped every style above (L0-L10, G, M): none of them work. The maximized map follows the threat-marker style instead (`Pins.xml` `LodestarThreatPinTemplate`, `notes/spec-5.4-threat-markers.md`).
+
+The marker style as rules:
+
+1. Information sits on dark plates (`0.1, 0.08, 0.05`, opaque), not on bare parchment.
+2. Threat color goes on outlines and symbols only, never on fills behind text, never on text.
+3. Outline: a solid 2-pixel ring, the colored shape 2 px larger each way behind the plate. One flat color, no gradient.
+4. Simple crisp shapes: a disc and a rounded rectangle (three textures).
+5. Neutral white text, 10 pt (`GameFontHighlightSmallOutline`, which has no outline on Forever, P55).
+6. About 3 px of margin around text.
+7. A symbol over a value: disc on top, tab below, 1 px overlap.
+8. Small: about 22 px wide, scaling `1.0-1.2`.
+
+Decided (user, 2026-11-09):
+
+- **Base shape:** the marker's disc over a tab, plus the zone name under it.
+- **Disc:** a split fill, the left half the entry color and the right half the top color; the 2 px edge is a fixed neutral (dark or warm, to judge); no skull. A deliberate exception to rule 2: the disc is the dedicated color element (note 2), so the numbers stay neutral.
+- **Tab:** dark plate with a threat-neutral edge, the range in white.
+- **Name:** 10 pt light text directly on the parchment (an exception to rule 1, to keep the map uncluttered); long names wrap to two lines.
+
+Open:
+
+- The edge color for the disc and tab (dark plate color or a fixed warm tone).
+- An outlined 10 pt font is not confirmed: P55 found `GameFontHighlightSmallOutline` has no outline. Probe another font object, or accept 12 pt `GameFontHighlightOutline` for the name.
+- Split-disc art: two half-disc textures, or one disc texture plus a half-disc. New files need a client restart (P46).
+- Fit focus (`SetAlpha` on zones that don't fit) stays available as an option.
 
 ## Ideas to pick up
 
