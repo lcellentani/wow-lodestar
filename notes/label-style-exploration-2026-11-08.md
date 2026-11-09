@@ -83,6 +83,13 @@ Open:
 - Split-disc art: two half-disc textures, or one disc texture plus a half-disc. New files need a client restart (P46).
 - Fit focus (`SetAlpha` on zones that don't fit) stays available as an option.
 
+Second pass, 2026-11-09 (user feedback on the first marker-style mockup):
+
+- **Edge: warm bronze** (decided): it reads less heavy than black.
+- The disc should become shield art; the range should be bigger than the name, above 12 pt; the black plate is heavy ("a punch in the face"), and the user feels the same about the small-map markers' dark disc and tab.
+- In the mockup now: shields S1 heater, S2 round-bottom, S3 kite (S0 disc for reference), split per pale (entry left, top right), drawn over the range plate's top edge; range backings B1 no plate (outlined digits), B2 see-through dark plate, B3 bronze plate, B4 vellum plate with dark digits (B0 dark for reference); range 12, 14 or 16 pt.
+- Needed in game whatever wins: a range font above 12 pt (probe; outlined for B1/B2, plain for B3/B4), shield textures from the art script (client restart), and for B2 a probe of texture alpha. Whatever backing wins may go back to the small-map markers.
+
 ## Ideas to pick up
 
 - Note 2 as a concrete element: a small split disc (left half entry color, right half top color) next to or above the range, so the numbers can stay one calm neutral or light color. The threat-marker disc texture and a half-disc mask, or two half-disc textures, would do it; no gradient.
