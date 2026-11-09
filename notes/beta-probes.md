@@ -68,7 +68,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P54 | threat markers | [~] | 2026-11-08 | live; 1-4, 7 and 8 pass; 5, 6, 9 pending |
 | P55 | small fonts | [x] | 2026-11-08 | live; SmallOutline is 10 pt with no outline |
 | P56 | large fonts (16 pt range) | [x] | 2026-11-09 | live; 16 pt plain and OUTLINE both work |
-| P57 | stretching the tab texture | [ ] | 2026-11-09 | live; pending |
+| P57 | stretching the tab texture | [x] | 2026-11-09 | live; `SetTextureSliceMargins` works |
 
 ## Confirmed APIs
 
@@ -1813,4 +1813,9 @@ Line 1 checks for the nine-slice texture methods. Lines 2-3 draw `threat-tab` 96
 /run local t=UIParent:CreateTexture(nil,"OVERLAY") t:SetTexture("Interface\\AddOns\\Lodestar\\Media\\threat-tab") t:SetSize(96,30) t:SetPoint("CENTER",0,-80) t:SetVertexColor(1,0.5,0.25)
 ```
 
-Result: pending.
+Result (2026-11-09, live, screenshot 175541):
+
+- Line 2 ran without an error and drew the tab, so `Texture:SetTextureSliceMargins` exists on Forever. The chat line from line 1 was not in the screenshot; `SetTextureSliceMode` stays unconfirmed (not needed: the default stretches the middle).
+- Sliced (upper, 96 x 30): the corners keep a tight round radius of about 9 pixels and the long edges stay straight and crisp.
+- Plain (lower): the corners stretch into wide, soft ovals, as expected.
+- So one sliced `threat-tab` texture per layer (edge and plate) covers any range width; no `SetTexCoord` three-piece fallback is needed. The margins are in texture pixels (9 of the 64 x 32 art).
