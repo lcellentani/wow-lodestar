@@ -96,6 +96,13 @@ Third pass, 2026-11-09 (screenshot 153328: S0 disc, B4 vellum plate):
 - **Range 16 pt, name 12 pt** (decided).
 - Now in the mockup: the disc tucked behind the range plate so only its top half shows (center on the plate's top edge), and a roomier plate (about 8 px each side, 4 above and below).
 
+Fourth pass, 2026-11-09 (screenshot 154206: tucked heater, B3 bronze plate, threat halo; medal reference 154151):
+
+- The threat halo is the interesting one; the user wants it bigger, and the dark edge back with it.
+- A flat rectangle reads better than a shield or disc for the colors.
+- New layout K2 "Medal" in the mockup: a small split color tab (24 x 14, 7 px showing) peeks out above the level badge, a name tab hangs below it, and the badge sits on top of both; both tabs are narrower than the badge (the badge grows to stay 6 px wider each side than the name tab). Edge dark or warm; halo blur 5, 8 or 12 px, the silhouette grown before the blur.
+- In game, K2 means three rectangles of different widths: the tab texture needs slicing (or `SetTexCoord` on its ends) so the corners don't stretch. Not probed.
+
 ## Ideas to pick up
 
 - Note 2 as a concrete element: a small split disc (left half entry color, right half top color) next to or above the range, so the numbers can stay one calm neutral or light color. The threat-marker disc texture and a half-disc mask, or two half-disc textures, would do it; no gradient.
