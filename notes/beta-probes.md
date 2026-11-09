@@ -1815,7 +1815,7 @@ Line 1 checks for the nine-slice texture methods. Lines 2-3 draw `threat-tab` 96
 
 Result (2026-11-09, live, screenshot 175541):
 
-- Line 2 ran without an error and drew the tab, so `Texture:SetTextureSliceMargins` exists on Forever. The chat line from line 1 was not in the screenshot; `SetTextureSliceMode` stays unconfirmed (not needed: the default stretches the middle).
+- Line 1 printed `true true true` (rerun, screenshot 175812): `SetTextureSliceMargins`, `SetTextureSliceMode` and `SetTexCoord` all exist on textures. Line 2 drew the sliced tab without an error. `SetTextureSliceMode` is not needed: the default stretches the middle.
 - Sliced (upper, 96 x 30): the corners keep a tight round radius of about 9 pixels and the long edges stay straight and crisp.
 - Plain (lower): the corners stretch into wide, soft ovals, as expected.
 - So one sliced `threat-tab` texture per layer (edge and plate) covers any range width; no `SetTexCoord` three-piece fallback is needed. The margins are in texture pixels (9 of the 64 x 32 art).
