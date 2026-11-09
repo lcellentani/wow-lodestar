@@ -90,6 +90,12 @@ Second pass, 2026-11-09 (user feedback on the first marker-style mockup):
 - In the mockup now: shields S1 heater, S2 round-bottom, S3 kite (S0 disc for reference), split per pale (entry left, top right), drawn over the range plate's top edge; range backings B1 no plate (outlined digits), B2 see-through dark plate, B3 bronze plate, B4 vellum plate with dark digits (B0 dark for reference); range 12, 14 or 16 pt.
 - Needed in game whatever wins: a range font above 12 pt (probe; outlined for B1/B2, plain for B3/B4), shield textures from the art script (client restart), and for B2 a probe of texture alpha. Whatever backing wins may go back to the small-map markers.
 
+Third pass, 2026-11-09 (screenshot 153328: S0 disc, B4 vellum plate):
+
+- **Soft shadow under the badge: yes**, on both maps (user: "does a good job"); variant H1-H3 not picked yet. In game: one pre-blurred silhouette texture behind the badge, tinted with `SetVertexColor`, no new API.
+- **Range 16 pt, name 12 pt** (decided).
+- Now in the mockup: the disc tucked behind the range plate so only its top half shows (center on the plate's top edge), and a roomier plate (about 8 px each side, 4 above and below).
+
 ## Ideas to pick up
 
 - Note 2 as a concrete element: a small split disc (left half entry color, right half top color) next to or above the range, so the numbers can stay one calm neutral or light color. The threat-marker disc texture and a half-disc mask, or two half-disc textures, would do it; no gradient.
