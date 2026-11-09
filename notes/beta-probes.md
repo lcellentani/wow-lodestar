@@ -67,6 +67,8 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P53 | placement tool | [x] | 2026-11-07 | live; all checks pass (8-9 on 2026-11-08) |
 | P54 | threat markers | [~] | 2026-11-08 | live; 1-4, 7 and 8 pass; 5, 6, 9 pending |
 | P55 | small fonts | [x] | 2026-11-08 | live; SmallOutline is 10 pt with no outline |
+| P56 | large fonts (16 pt range) | [ ] | 2026-11-09 | live; pending |
+| P57 | stretching the tab texture | [ ] | 2026-11-09 | live; pending |
 
 ## Confirmed APIs
 
@@ -1753,3 +1755,47 @@ SystemFont_Shadow_Small 10
 - All five exist. All use `Fonts\FRIZQT__.TTF` except `NumberFontNormalSmall` (`Fonts\ARIALN.TTF`).
 - `GameFontHighlightSmallOutline` is 10 pt and, despite its name, has **no** `OUTLINE` flag on Forever. On the marker's dark tab the number still reads (screenshot 200438: 8, 28, 48), so it is used there.
 - The same screenshot shows the 1-pixel outline (plates 18 x 18 and 18 x 11 inside 20 x 20 and 20 x 13).
+
+### P56: large fonts (new pins, the 16 pt range)
+
+The new pins show the range at 16 pt (`notes/label-style-exploration-2026-11-08.md`, "Current choice"). Lines 1-3 list the size and flags of candidate font objects; lines 4-5 set 16 pt on a FontString directly and draw two sample texts above the screen center, outlined and plain. `/reload` clears them.
+
+```
+/run for _,n in ipairs({"GameFontHighlightLarge","GameFontNormalLarge","GameFontHighlightHuge","GameFontNormalHuge"}) do local f=_G[n] if f then local _,s,fl=f:GetFont() print(n,s,fl) else print(n,"nil") end end
+```
+
+```
+/run for _,n in ipairs({"SystemFont_Large","SystemFont_Shadow_Large","SystemFont_Huge1","NumberFontNormalLarge"}) do local f=_G[n] if f then local _,s,fl=f:GetFont() print(n,s,fl) else print(n,"nil") end end
+```
+
+```
+/run for _,n in ipairs({"Game16Font","Game18Font","Fancy16Font","SystemFont_Shadow_Huge1"}) do local f=_G[n] if f then local _,s,fl=f:GetFont() print(n,s,fl) else print(n,"nil") end end
+```
+
+```
+/run local t=UIParent:CreateFontString(nil,"OVERLAY") print(t:SetFont("Fonts\FRIZQT__.TTF",16,"OUTLINE"),t:GetFont()) t:SetPoint("CENTER",0,80) t:SetText("18-34 outline")
+```
+
+```
+/run local t=UIParent:CreateFontString(nil,"OVERLAY") print(t:SetFont("Fonts\FRIZQT__.TTF",16,""),t:GetFont()) t:SetPoint("CENTER",0,50) t:SetText("18-34 plain")
+```
+
+Result: pending.
+
+### P57: stretching the tab texture (new pins, a range is wider than one level)
+
+Line 1 checks for the nine-slice texture methods. Lines 2-3 draw `threat-tab` 96 x 30 below the screen center in orange, sliced (corners keep their 9-pixel radius) and plain (corners stretch), to compare. If slicing is missing, the fallback is three textures with `SetTexCoord` (used in P48). `/reload` clears them.
+
+```
+/run local t=UIParent:CreateTexture() print(t.SetTextureSliceMargins~=nil,t.SetTextureSliceMode~=nil,t.SetTexCoord~=nil)
+```
+
+```
+/run local t=UIParent:CreateTexture(nil,"OVERLAY") t:SetTexture("Interface\AddOns\Lodestar\Media\threat-tab") t:SetTextureSliceMargins(9,9,9,9) t:SetSize(96,30) t:SetPoint("CENTER",0,-40) t:SetVertexColor(1,0.5,0.25)
+```
+
+```
+/run local t=UIParent:CreateTexture(nil,"OVERLAY") t:SetTexture("Interface\AddOns\Lodestar\Media\threat-tab") t:SetSize(96,30) t:SetPoint("CENTER",0,-80) t:SetVertexColor(1,0.5,0.25)
+```
+
+Result: pending.
