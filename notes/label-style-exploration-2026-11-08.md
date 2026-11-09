@@ -111,6 +111,13 @@ Fifth pass, 2026-11-09:
 - Now in the mockup: two art elements, the range plate (fit-color outline, 2 or 3 px) always on top of the name plate (dark edge, tucked 5 px). Pairs P1 tag, P2 plaque and ribbon, P3 pill and strip, P4 bevelled plaque, P5 range plate only; fills bronze, vellum, dark; name plate same or one shade deeper; shadow 3-12 px.
 - Open for the small map: its tab still shows `min`; with the fit color, a yellow `8` on Westfall at level 24 may read oddly.
 
+Sixth pass, 2026-11-09 (screenshot 162020):
+
+- **Lead candidate: P6, the threat pin on the maximized map too**, with the range in the tab and no zone names. The user's settings that look OK: dark fill, 3 px fit-color outline, 5 px soft shadow, range 16 pt.
+- **Two texture sets** (user): the small map keeps today's pin (disc 22, skull 14, 2 px edge, 10 pt); the maximized map gets its own larger set (disc 30, skull 20, 3 px edge, 16 pt), drawn by the art script at that size so edges stay crisp. The mockup shows both side by side at actual size.
+- More room around the range on the maximized variant: 8 px each side and 4 above and below by default (5/3 and 11/5 to compare).
+- In game still needed: tab slicing (a range is wider than one level), a 16 pt font probe, the shadow texture.
+
 ## Ideas to pick up
 
 - Note 2 as a concrete element: a small split disc (left half entry color, right half top color) next to or above the range, so the numbers can stay one calm neutral or light color. The threat-marker disc texture and a half-disc mask, or two half-disc textures, would do it; no gradient.
