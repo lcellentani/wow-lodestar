@@ -300,3 +300,12 @@ function Logic.PlayerZone(zones, mapID, isMicro, parentID)
 
   return nil
 end
+
+-- The player's level clamped into the zone's range, for the difficulty color; nil when the zone has no range.
+function Logic.FitLevel(playerLevel, min, max)
+  if min == nil then
+    return nil
+  end
+
+  return math.min(math.max(playerLevel, min), max or min)
+end
