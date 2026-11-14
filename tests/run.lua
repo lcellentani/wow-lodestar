@@ -1,19 +1,22 @@
 local passed, failed = 0, 0
-local group = ""
+-- Open describe blocks, outermost first; nested blocks join into one label.
+local groups = {}
 
 function describe(name, func)
-  group = name
+  groups[#groups + 1] = name
   func()
+  groups[#groups] = nil
 end
 
 function it(name, func)
+  local label = table.concat(groups, " > ") .. " > " .. name
   local ok, err = pcall(func)
   if ok then
     passed = passed + 1
-    print(group .. " > " .. name .. ": PASSED")
+    print(label .. ": PASSED")
   else
     failed = failed + 1
-    print(group .. " > " .. name .. ": FAILED (" .. tostring(err) .. ")")
+    print(label .. ": FAILED (" .. tostring(err) .. ")")
   end
 end
 
