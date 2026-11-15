@@ -70,6 +70,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P56 | large fonts (16 pt range) | [x] | 2026-11-09 | live; 16 pt plain and OUTLINE both work |
 | P57 | stretching the tab texture | [x] | 2026-11-09 | live; `SetTextureSliceMargins` works |
 | P58 | threat pins on both maps | [~] | 2026-11-15 | live; 1-8 pass, overlaps fixed; 9 pending |
+| P59 | instance marker APIs | [x] | 2026-11-15 | live; all present, motion-only mouse works in combat; no fog of war in Stormwind |
 
 ## Confirmed APIs
 
@@ -1835,3 +1836,14 @@ Checklist in `notes/spec-5.5-pin-rework.md`. Result (2026-11-15, live, after a c
 - Points moved with `/ls place` (2026-11-15, screenshots 195500, 195837): Alterac, Hillsbrad, Burning Steppes, Duskwood, Swamp of Sorrows, Blasted Lands, Teldrassil, Darkshore, Thousand Needles, Felwood; copied into `Data/Zones.lua` from the SavedVariables file. No pins touch on either continent; check 4 passes.
 - Pending: 9 (level-up recolor with the map open), shared with P54 check 9 (`notes/todo-p54-pending-checks.md`).
 - The XML anchors the disc parts and the text to the pin's center and writes the `OVERLAY` layer first, so `TabEdge` can anchor to `Range` (spec updated); the tab sizes to the text as intended.
+
+### P59: instance marker APIs (M5 step 5.6)
+
+Commands in `notes/spec-5.6-instances.md`. Result (2026-11-15, live, other addons off; screenshots 201611, 201615, 201959, 202249):
+
+- 1: `true true true true true true`: `GameTooltip` has `SetOwner`, `AddLine`, `AddDoubleLine` and `Hide`; frames have `SetMouseMotionEnabled` and `SetMouseClickEnabled`.
+- 2: both atlases draw at 20 x 20. `Dungeon` is a blue swirl with an orange rim, `Raid` a green swirl; told apart by color. Not yet seen on the parchment.
+- 3: run twice mid-fight: `combat true` both times, no blocked-action message; hovering the frame printed `enter` each time. A frame with mouse motion on and clicks off can be made and hovered in combat.
+- 4: Stormwind City (1453) is map type 3 (Zone), and its rectangle on Eastern Kingdoms (1415) is x 0.406-0.455, y 0.659-0.708: the Stockade, stored on the city map, projects onto the continent.
+- 5: `GetExploredAreaIDsAtPosition(1453, (0.534, 0.709))` gave an empty result with a character that had been in Stormwind: the city map has no fog of war, so the fog rule cannot reveal the Stockade.
+- 6: `GetExploredAreaIDsAtPosition(1426, (0.243, 0.398))` gave `{ 133 }` with the level 19 character: Gnomeregan's approximate entrance reads as explored.
