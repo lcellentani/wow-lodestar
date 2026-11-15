@@ -87,7 +87,7 @@ The MVP is four map overlays that read from one data table; v2 adds user-generat
 - "Explored" is the game's own fog of war, read through `C_MapExplorationInfo` (P44). "Entered a zone" means `GetExploredMapTextures(mapID)` returns at least one piece; an entrance's area is explored when `GetExploredAreaIDsAtPosition(mapID, vector)` returns area IDs at its position. One source drives both rows, and Lodestar keeps no record of its own.
 - Raids follow the same rule as dungeons. *(Claude's call.)*
 - If the exploration API cannot answer either question on live, the fallback is a per-character record in `LodestarDB` of zones entered, from `C_Map.GetBestMapForUnit("player")` on zone change; markers then appear once their zone is entered. *(Claude's call; needs a decision only if the probe fails.)*
-- A debug switch shows everything regardless of discovery, so markers and data can still be checked in game. *(Claude's call; command name decided in the step spec.)*
+- A debug switch, `/ls reveal`, shows everything regardless of discovery, so markers and data can still be checked in game. Session only, separate from `/ls debug` (verbose logging). *(Claude's call; name confirmed 2026-11-15 in `notes/spec-5.6-instances.md`.)*
 - **Neighbor** means two zones share a border on the map, whether or not it can be walked across; "walkable" was rejected because it gives away where the passes are.
 - Connection points between zones (passes, tunnels) and other orientation aids are parked until the user has played the live client for a while.
 **Difficulty colors** follow the game's own convention: grey for trivial, green for easy, yellow for even, orange for challenging, red for too high.
@@ -308,12 +308,12 @@ Edge cases: a zone with no data shows no label; a zone with a single level shows
 
 **Instances**
 
-- A data provider with one icon pin template; the pin's `OnMouseEnter` shows a tooltip with name, kind and level range.
+- A data provider with one icon pin template (the game's `Dungeon` or `Raid` atlas, P41); the pin's `OnMouseEnter` shows a tooltip with name, kind and level range. The pin reacts to the mouse moving over it but not to clicks, so clicks still reach the map (step 5.6, pending P59).
 - In `RefreshAllData`, if the current map is a continent or a zone, then for each discovered entry in `ns.Instances` (see "Discovery"; every entry while the debug switch is on):
   - If `entry.map` is the current map, place the pin at `entry.x, entry.y` as is.
   - Otherwise, if `ns.GetZoneRect(entry.map, currentMapID)` returns a rectangle, place the pin at `Logic.ProjectToParent(minX, maxX, minY, maxY, entry.x, entry.y)` using that rectangle.
   - Otherwise, skip the entry: its zone is not on this map.
-- Entrances sharing a position are offset slightly so both stay clickable.
+- Entrances sharing a position become one marker whose tooltip lists every instance behind it, one line each in data order (decided 2026-11-15, replacing a slight offset per marker: five icons on Blackrock Mountain were hard to hover). The raid icon shows only when every instance behind the door is a raid; Blackrock Mountain shows the dungeon icon.
 
 **Tooltip**
 
