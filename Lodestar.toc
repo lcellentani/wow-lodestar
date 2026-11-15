@@ -8,6 +8,7 @@
 Logic.lua
 Util.lua
 Core.lua
+Pins.lua
 Data\Zones.lua
 Data\Instances.lua
 Modules\ZoneLabels.lua

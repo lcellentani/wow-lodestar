@@ -6,26 +6,6 @@ local addonName, ns = ...
 -- zone is not on the continent shown.
 
 local TEMPLATE = "LodestarThreatPinTemplate"
-local PLATE_R, PLATE_G, PLATE_B = 0.1, 0.08, 0.05
-
-LodestarThreatPinMixin = CreateFromMixins(MapCanvasPinMixin)
-
-function LodestarThreatPinMixin:OnAcquired(min, x, y)
-  local color = GetQuestDifficultyColor(min)
-  self.DiscEdge:SetVertexColor(color.r, color.g, color.b)
-  self.TabEdge:SetVertexColor(color.r, color.g, color.b)
-  self.Skull:SetVertexColor(color.r, color.g, color.b)
-  self.Disc:SetVertexColor(PLATE_R, PLATE_G, PLATE_B)
-  self.Tab:SetVertexColor(PLATE_R, PLATE_G, PLATE_B)
-  self.Level:SetText(min)
-  self:SetPosition(x, y)
-  self:SetScalingLimits(1, 1.0, 1.2)
-end
-
--- AcquirePin calls this; the inherited one calls SetPassThroughButtons,
--- which is blocked in combat (P14). Our pins ignore the mouse, so skip it.
-function LodestarThreatPinMixin:CheckMouseButtonPassthrough() -- luacheck: ignore 212/self
-end
 
 -- The zone whose neighbors get markers, or nil when away (dungeon, loading screen).
 local function ResolvePlayerZone()
