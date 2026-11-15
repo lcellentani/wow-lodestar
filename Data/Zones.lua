@@ -9,9 +9,9 @@ local addonName, ns = ...
 -- Factions: Warcraft Wiki "Classic zones" (PvP status); Forever zones unknown ("").
 -- Neighbors: zones whose hover areas touch in grids sampled with C_Map.GetMapInfoAtPosition
 -- (Eastern Kingdoms in step 5.1, 2026-11-06; Kalimdor 2026-11-08), cities folded into their zone.
--- The hover areas leave gaps on some painted borders, so five pairs were added from the map by
--- eye (2026-11-08): Desolace-Feralas, Mount Hyjal-Ashenvale, Mount Hyjal-Azshara,
--- Deadwind Pass-Redridge Mountains, Elwynn Forest-Deadwind Pass.
+-- The hover areas leave gaps on some painted borders, so six pairs were added from the map by
+-- eye: Desolace-Feralas, Mount Hyjal-Ashenvale, Mount Hyjal-Azshara, Deadwind Pass-Redridge
+-- Mountains, Elwynn Forest-Deadwind Pass (2026-11-08); Dun Morogh-Badlands (2026-11-15).
 -- A border counts whether or not it can be walked across.
 -- [uiMapID] = { [min, max,] faction, kind [, labelX, labelY] [, neighbors] [, zone] }
 -- neighbors: uiMapIDs of the zones sharing a border; zone: for a city, the zone around it
@@ -45,7 +45,7 @@ ns.Zones = {
   -- Eastern Kingdoms (1415)
   [1416] = { min = 28, max = 44, faction = "Contested", kind = "zone", labelX = 0.472, labelY = 0.289, neighbors = { 1420, 1421, 1422, 1424, 1425 } },  -- Alterac Mountains, forever, group finder P33
   [1417] = { min = 28, max = 44, faction = "Contested", kind = "zone", labelX = 0.538, labelY = 0.376, neighbors = { 1424, 1425, 1437 } },  -- Arathi Highlands, forever, group finder P33
-  [1418] = { min = 33, max = 50, faction = "Contested", kind = "zone", labelX = 0.548, labelY = 0.600, neighbors = { 1427, 1428, 1432, 2548 } },  -- Badlands, forever, group finder P33
+  [1418] = { min = 33, max = 50, faction = "Contested", kind = "zone", labelX = 0.548, labelY = 0.600, neighbors = { 1426, 1427, 1428, 1432, 2548 } },  -- Badlands, forever, group finder P33
   [1419] = { min = 43, max = 60, faction = "Contested", kind = "zone", labelX = 0.540, labelY = 0.816, neighbors = { 1430, 1434, 1435 } },  -- Blasted Lands, forever, group finder P33
   [1420] = { min = 1,  max = 14, faction = "Horde",     kind = "zone", labelX = 0.444, labelY = 0.221, neighbors = { 1416, 1421, 1422 } },  -- Tirisfal Glades, forever, group finder P33
   [1421] = { min = 8,  max = 24, faction = "Horde",     kind = "zone", labelX = 0.416, labelY = 0.299, neighbors = { 1416, 1420, 1424 } },  -- Silverpine Forest, forever, group finder P33
@@ -53,7 +53,7 @@ ns.Zones = {
   [1423] = { min = 53, max = 63, faction = "Contested", kind = "zone", labelX = 0.580, labelY = 0.217, neighbors = { 1422, 1425 } },  -- Eastern Plaguelands, forever, group finder P33
   [1424] = { min = 18, max = 34, faction = "Contested", kind = "zone", labelX = 0.477, labelY = 0.346, neighbors = { 1416, 1417, 1421, 1425 } },  -- Hillsbrad Foothills, forever, group finder P33
   [1425] = { min = 38, max = 54, faction = "Contested", kind = "zone", labelX = 0.553, labelY = 0.310, neighbors = { 1416, 1417, 1422, 1423, 1424 } },  -- The Hinterlands, forever, group finder P33
-  [1426] = { min = 1,  max = 14, faction = "Alliance",  kind = "zone", labelX = 0.460, labelY = 0.554, neighbors = { 1427, 1432, 1437 } },  -- Dun Morogh, forever, group finder P33
+  [1426] = { min = 1,  max = 14, faction = "Alliance",  kind = "zone", labelX = 0.460, labelY = 0.554, neighbors = { 1418, 1427, 1432, 1437 } },  -- Dun Morogh, forever, group finder P33
   [1427] = { min = 43, max = 60, faction = "Contested", kind = "zone", labelX = 0.486, labelY = 0.606, neighbors = { 1418, 1426, 1428, 1432 } },  -- Searing Gorge, forever, group finder P33
   [1428] = { min = 48, max = 60, faction = "Contested", kind = "zone", labelX = 0.512, labelY = 0.656, neighbors = { 1418, 1427, 1429, 1433, 2548 } },  -- Burning Steppes, forever, group finder P33
   [1429] = { min = 1,  max = 14, faction = "Alliance",  kind = "zone", labelX = 0.463, labelY = 0.704, neighbors = { 1428, 1430, 1431, 1433, 1436 } },  -- Elwynn Forest, forever, group finder P33
