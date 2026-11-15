@@ -1,6 +1,6 @@
 # M5 step 5.5: the threat pin on both maps
 
-Status: spec written 2026-11-13. `Logic.FitLevel` and the pin mixin by the user; `Pins.xml`, module wiring, `.toc`, `.luacheckrc` and the design doc by Claude. Probe number reserved: P58 (the pins in game). No API probe needed: everything used is confirmed (P8, P46, P55, P56, P57, and the 5.4 list).
+Status: done 2026-11-15 (P58 checks 1-8 pass; check 9, the level-up, pending with P54's in `notes/todo-p54-pending-checks.md`). Spec written 2026-11-13. `Logic.FitLevel` and the pin mixin by the user; `Pins.xml`, module wiring, `.toc`, `.luacheckrc` and the design doc by Claude. Probe number reserved: P58 (the pins in game). No API probe needed: everything used is confirmed (P8, P46, P55, P56, P57, and the 5.4 list).
 Design doc reference: "Difficulty colors" (fit level), "ThreatOverlay", "ZoneLabels", "How map overlays draw". Look decided in `notes/label-style-exploration-2026-11-08.md`, "Current choice".
 
 ## What this step is for
