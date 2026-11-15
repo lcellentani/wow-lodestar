@@ -22,8 +22,8 @@ The label style pass ended with one pin for both maps (2026-11-09): the small-ma
 | Disc edge / plate | 22 / 18 | 30 / 24 |
 | Edge width | 2 | 3 |
 | Skull | 14 | 20 |
-| Tab height (outer) | 18 | 32 |
-| Room left and right of the text | 4 (start value, tune live) | 11 |
+| Tab height (outer) | 18 | 32, then 28 after P58 |
+| Room left and right of the text | 4 (start value, tune live) | 11, then 7 after P58 |
 | Font | `GameFontHighlightSmallOutline` (10 pt, P55) | `GameFontHighlightLarge` (16 pt, P56) |
 | Tab texture, slice margin | `threat-tab-small`, 4 | `threat-tab-large`, 5 |
 | Tab shadow, slice margins (L, T, R, B) | `threat-shadow-tab-small`, 17, 16, 17, 16 | `threat-shadow-tab-large`, 18, 16, 18, 16 |
@@ -127,5 +127,7 @@ How the numbers come out:
 Screenshots of 1, 3 and 4, and any error popup. Claude records P58 and tunes the room and offsets in follow-ups.
 
 ## After the step
+
+2026-11-15, after P58 (overlaps on the maximized map): the large tab is 28 high with 7 pixels of room (was 32 and 11), in `Pins.xml` only: `Range` at y -28, `TabEdge` at (-10, 14) and (10, -14). The tab shadow keeps its offsets: it reaches 16 pixels beyond the tab whatever the tab's height. Next: `/ls place` for the pairs that still touch.
 
 Look tuning (room around the text, shadow strength, text centering by a pixel) in small follow-ups. Claude deletes `Media/threat-tab.tga` and its entry in the art script once P58 passes. Commits: your code `[T2]`; Claude's XML, wiring and notes `[T4]`, separately.

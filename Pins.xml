@@ -77,8 +77,9 @@
     </Layers>
   </Frame>
 
-  <!-- Maximized map: disc 30, edge 3, skull 20, tab 32 high, room 11 beside the text.
-       Range center: disc bottom (-15) + 1 - 32 / 2 = -30. -->
+  <!-- Maximized map: disc 30, edge 3, skull 20, tab 28 high, room 7 beside the text
+       (compacted from 32 and 11 after P58 showed overlaps).
+       Range center: disc bottom (-15) + 1 - 28 / 2 = -28. -->
   <Frame name="LodestarThreatPinLargeTemplate" mixin="LodestarThreatPinMixin"
          enableMouse="false" virtual="true">
     <Size x="1" y="1"/>
@@ -86,7 +87,7 @@
       <Layer level="OVERLAY">
         <FontString parentKey="Range" inherits="GameFontHighlightLarge">
           <Anchors>
-            <Anchor point="CENTER" y="-30"/>
+            <Anchor point="CENTER" y="-28"/>
           </Anchors>
         </FontString>
         <Texture parentKey="Skull" file="Interface\AddOns\Lodestar\Media\threat-skull">
@@ -105,8 +106,8 @@
         </Texture>
         <Texture parentKey="TabEdge" file="Interface\AddOns\Lodestar\Media\threat-tab-large">
           <Anchors>
-            <Anchor point="TOPLEFT" relativeKey="$parent.Range" relativePoint="LEFT" x="-14" y="16"/>
-            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Range" relativePoint="RIGHT" x="14" y="-16"/>
+            <Anchor point="TOPLEFT" relativeKey="$parent.Range" relativePoint="LEFT" x="-10" y="14"/>
+            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Range" relativePoint="RIGHT" x="10" y="-14"/>
           </Anchors>
         </Texture>
       </Layer>
