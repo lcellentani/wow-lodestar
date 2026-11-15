@@ -8,8 +8,6 @@ Shared by both pin sizes (the shapes scale cleanly from 64 pixels down to 30 or 
 
   threat-disc.tga               64x64   filled disc: the edge (fit color) and the dark plate
   threat-skull.tga              64x64   flat skull: the fit-colored symbol
-  threat-tab.tga                64x32   today's tab, stretched to 24x18 (kept until the new
-                                        pins replace it)
 
 One set per pin size (small map, maximized map), drawn one texture pixel per screen pixel,
 because a sliced texture draws its margins at their own size (P57):
@@ -40,7 +38,9 @@ import zlib
 SS = 4  # supersamples per axis for anti-aliased edges
 
 # Pin layout in screen pixels. "small" is today's Pins.xml pin; "large" is the maximized
-# map's (disc 30, skull 20, 3-pixel edge, range 16 pt with 5 pixels above and below).
+# map's (disc 30, skull 20, 3-pixel edge, range 16 pt with 5 pixels above and below). Since P58
+# (2026-11-15) Pins.xml draws the large tab 28 high; the textures still fit, because the tab
+# and its shadow are sliced and the shadow reaches 16 pixels beyond the tab at any height.
 # tab_h is the tab's outer height: font + 2 * room + 2 * edge. sample_w is the outer tab
 # width for a range like "18-34", only for the preview (the game sizes it from the text).
 SIZES = {
@@ -85,10 +85,6 @@ def rounded_rect(x, y, w, h, r):
     cx = min(max(px, r), w - r)
     cy = min(max(py, r), h - r)
     return (px - cx) ** 2 + (py - cy) ** 2 <= r * r
-
-
-def tab(x, y):
-    return rounded_rect(x, y, 64, 32, 9)
 
 
 def skull(x, y):
@@ -288,7 +284,6 @@ def main():
         sys.exit(__doc__)
     outdir = args[0]
     write_tga(f"{outdir}/threat-disc.tga", coverage(disc, 64, 64))
-    write_tga(f"{outdir}/threat-tab.tga", coverage(tab, 64, 32))
     write_tga(f"{outdir}/threat-skull.tga", coverage(skull, 64, 64))
     arts = {}
     for size in SIZES:
@@ -297,7 +292,7 @@ def main():
             write_tga(f"{outdir}/threat-{name}-{size}.tga", alpha)
         print(f"{size}: tab slice {tab_slice(size)}, shadow-tab slice ({shadow_slice(size)}, 16, "
               f"{shadow_slice(size)}, 16), shadow pad {SHADOW_PAD}, drop {SHADOW_DROP}")
-    print("wrote threat-disc, threat-tab, threat-skull and the small/large sets to", outdir)
+    print("wrote threat-disc, threat-skull and the small/large sets to", outdir)
     if "preview" in opts:
         preview(opts["preview"], float(opts.get("scale", 6)), arts)
         print("preview", opts["preview"])
