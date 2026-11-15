@@ -69,7 +69,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P55 | small fonts | [x] | 2026-11-08 | live; SmallOutline is 10 pt with no outline |
 | P56 | large fonts (16 pt range) | [x] | 2026-11-09 | live; 16 pt plain and OUTLINE both work |
 | P57 | stretching the tab texture | [x] | 2026-11-09 | live; `SetTextureSliceMargins` works |
-| P58 | threat pins on both maps | [~] | 2026-11-15 | live; 1-8 pass, overlaps listed; 9 pending |
+| P58 | threat pins on both maps | [~] | 2026-11-15 | live; 1-8 pass, overlaps fixed; 9 pending |
 
 ## Confirmed APIs
 
@@ -1832,5 +1832,6 @@ Checklist in `notes/spec-5.5-pin-rework.md`. Result (2026-11-15, live, after a c
 - 5-8 pass (user report): the sets swap on maximize and minimize with no leftovers; each `/ls toggle` removes only its own pins; zoom grows them a little and they stay sharp; no error or blocked action in combat with either map size.
 - Fit colors at level 19 (not a checklist item, confirms `Logic.FitLevel` with `GetQuestDifficultyColor`): small map in Dun Morogh, Wetlands `18-34` and Loch Modan `8-24` yellow (inside), Searing Gorge `43-60` red. Kalimdor: the `1-14` zones green (fit 14, 5 below), Darkshore, Ashenvale, Stonetalon and the Barrens yellow (inside), Thousand Needles `23-40` orange (fit 23, 4 above), the rest red.
 - Compact large pin (2026-11-15, tab 28 high, room 7; screenshots 194923, 194932): text centered, corners round. Duskwood/Deadwind Pass and Dun Morogh/Searing Gorge now clear. Still touching, so their points move next (`/ls place`): Alterac/Hillsbrad, Redridge/Swamp of Sorrows, Swamp of Sorrows/Blasted Lands, Darkshore/Felwood (tab corners), Searing Gorge/Burning Steppes (just).
+- Points moved with `/ls place` (2026-11-15, screenshots 195500, 195837): Alterac, Hillsbrad, Burning Steppes, Duskwood, Swamp of Sorrows, Blasted Lands, Teldrassil, Darkshore, Thousand Needles, Felwood; copied into `Data/Zones.lua` from the SavedVariables file. No pins touch on either continent; check 4 passes.
 - Pending: 9 (level-up recolor with the map open), shared with P54 check 9 (`notes/todo-p54-pending-checks.md`).
 - The XML anchors the disc parts and the text to the pin's center and writes the `OVERLAY` layer first, so `TabEdge` can anchor to `Range` (spec updated); the tab sizes to the text as intended.
