@@ -27,7 +27,7 @@ Tests: a city counts as the zone around it. `Data/Zones.lua` links Undercity (`1
 
 Tests: `PLAYER_LEVEL_UP` triggers a redraw (`OnLevelUp`), and the colors change without reopening the map.
 
-**Do it after the pin rework** (fit level, range in the tab): the colors change then anyway, and one level-up then tests the final code. The expected result below is the same before and after the rework.
+This is also P58 check 9 (2026-11-15: P58 checks 1-8 passed; the pin rework is in). **Do it after the pin rework** (fit level, range in the tab): the colors change then anyway, and one level-up then tests the final code. The expected result below is the same before and after the rework.
 
 1. Keep the small map open while reaching level 4.
 2. Expected: Silverpine's marker turns from **red to orange** (8 is 4 above you, Forever's orange band). Alterac and Western Plaguelands stay red.

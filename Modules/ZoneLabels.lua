@@ -1,27 +1,10 @@
 local addonName, ns = ...
 
-local TEMPLATE = "LodestarZoneLabelPinTemplate"
--- Soft parchment tone for zone names, so the colored ranges stand out.
-local NAME_COLOR = ns.Logic.ColorCode(0.93, 0.86, 0.70)
+-- Zone pins on the maximized continent map (notes/spec-5.5-pin-rework.md): the large
+-- threat pin on every zone with a level range, in the color of its fit level. The pin
+-- mixin is shared with ThreatOverlay (Pins.lua). The small map has ThreatOverlay's pins.
 
-LodestarZoneLabelPinMixin = CreateFromMixins(MapCanvasPinMixin)
-
--- name is nil when the map is too small for names (not maximized).
-function LodestarZoneLabelPinMixin:OnAcquired(name, text, x, y)
-  if name ~= nil then
-    self.Name:SetText(NAME_COLOR .. name .. "|r")
-  else
-    self.Name:SetText("")
-  end
-  self.Label:SetText(text)
-  self:SetPosition(x, y)
-  self:SetScalingLimits(1, 1.0, 1.2)
-end
-
--- AcquirePin calls this; the inherited one calls SetPassThroughButtons,
--- which is blocked in combat. Our pins ignore the mouse, so skip it.
-function LodestarZoneLabelPinMixin:CheckMouseButtonPassthrough() -- luacheck: ignore 212/self
-end
+local TEMPLATE = "LodestarThreatPinLargeTemplate"
 
 local provider = CreateFromMixins(MapCanvasDataProviderMixin)
 
@@ -38,20 +21,19 @@ function provider:RefreshAllData()
     return
   end
 
-  -- Labels show on the maximized map only; the small map is for the threat
-  -- markers (decided 2026-11-07).
+  -- Maximized map only; the small map is for the threat markers (decided 2026-11-07).
   if not WorldMapFrame:IsMaximized() then
     return
   end
 
   for _, child in ipairs(C_Map.GetMapChildrenInfo(mapID, Enum.UIMapType.Zone) or {}) do
     local info = ns.GetZoneInfo(child.mapID)
-    local text = ns.Logic.FormatLevelRange(info.min, info.max, ns.LevelColorCode)
-    if text ~= nil then
+    -- No range (Shen'dralas, cities): no pin.
+    if info.min ~= nil then
       local minX, maxX, minY, maxY = ns.GetZoneRect(child.mapID, mapID)
       if minX ~= nil then
         local x, y = ns.Logic.LabelPosition(info, minX, maxX, minY, maxY)
-        WorldMapFrame:AcquirePin(TEMPLATE, child.name, text, x, y)
+        WorldMapFrame:AcquirePin(TEMPLATE, ns.ThreatPinStyle.large, info.min, info.max, x, y)
       end
     end
   end
@@ -61,35 +43,41 @@ local ZoneLabels = {}
 local enabled = false
 local sizeCallbacksAdded = false
 
--- The map does not refresh its data providers when it is maximized or
--- minimized, so names would keep the old window size's state until the
--- next map change. Listen to the map's size events rather than hooking
--- Maximize and Minimize: in combat those hooks broke the map (P14). The
--- callbacks are added once and check whether the module is enabled.
-local function OnMapSizeChanged()
+local function RefreshIfShown()
   if enabled and WorldMapFrame:IsShown() then
     provider:RefreshAllData()
   end
+end
+
+-- The fit level follows the player's level; the event's arguments are not probed
+-- (P40), so they are not used.
+local function OnLevelUp()
+  RefreshIfShown()
 end
 
 function ZoneLabels:OnEnable() -- luacheck: ignore 212/self
   WorldMapFrame:AddDataProvider(provider)
   enabled = true
 
+  -- The map does not refresh its data providers when it is maximized or minimized.
+  -- Listen to the map's size events rather than hooking Maximize and Minimize: in
+  -- combat those hooks broke the map (P14, P42). The callbacks are added once and
+  -- check whether the module is enabled.
   if not sizeCallbacksAdded then
-    EventRegistry:RegisterCallback("WorldMapMaximized", OnMapSizeChanged, ZoneLabels)
-    EventRegistry:RegisterCallback("WorldMapMinimized", OnMapSizeChanged, ZoneLabels)
+    EventRegistry:RegisterCallback("WorldMapMaximized", RefreshIfShown, ZoneLabels)
+    EventRegistry:RegisterCallback("WorldMapMinimized", RefreshIfShown, ZoneLabels)
     sizeCallbacksAdded = true
   end
 
+  ns.RegisterEvent("PLAYER_LEVEL_UP", OnLevelUp)
+
   -- Adding a provider does not draw on a map that is already open.
-  if WorldMapFrame:IsShown() then
-    provider:RefreshAllData()
-  end
+  RefreshIfShown()
 end
 
 function ZoneLabels:OnDisable() -- luacheck: ignore 212/self
   enabled = false
+  ns.UnregisterEvent("PLAYER_LEVEL_UP", OnLevelUp)
   provider:RemoveAllData()
   WorldMapFrame:RemoveDataProvider(provider)
 end

@@ -69,6 +69,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P55 | small fonts | [x] | 2026-11-08 | live; SmallOutline is 10 pt with no outline |
 | P56 | large fonts (16 pt range) | [x] | 2026-11-09 | live; 16 pt plain and OUTLINE both work |
 | P57 | stretching the tab texture | [x] | 2026-11-09 | live; `SetTextureSliceMargins` works |
+| P58 | threat pins on both maps | [~] | 2026-11-15 | live; 1-8 pass, overlaps listed; 9 pending |
 
 ## Confirmed APIs
 
@@ -1819,3 +1820,16 @@ Result (2026-11-09, live, screenshot 175541):
 - Sliced (upper, 96 x 30): the corners keep a tight round radius of about 9 pixels and the long edges stay straight and crisp.
 - Plain (lower): the corners stretch into wide, soft ovals, as expected.
 - So one sliced `threat-tab` texture per layer (edge and plate) covers any range width; no `SetTexCoord` three-piece fallback is needed. The margins are in texture pixels (9 of the 64 x 32 art).
+
+### P58: the threat pins on both maps (M5 step 5.5)
+
+Checklist in `notes/spec-5.5-pin-rework.md`. Result (2026-11-15, live, after a client restart; other addons off; level 1 Paladin in Tirisfal Glades, screenshots 193627, 193640, 193706; then a level 19 character in Dun Morogh, screenshots 194038, 194053):
+
+- 1 passes: on the small map, pins on Silverpine (`8-24`), Alterac (`28-44`) and Western Plaguelands (`48-60`); the tab fits each range with round corners, the shadow shows under disc and tab.
+- 2 passes: all three red at level 1.
+- 3 passes: maximized, a large pin on every zone with a range on both continents, at its hand-placed point; no names or old text labels; none on Shen'dralas. All three `1-14` zones on Eastern Kingdoms (Tirisfal, Dun Morogh, Elwynn) are yellow at level 1: inside their range.
+- 4, overlaps on the maximized map (the large pin is about 61 pixels high and the tab wide): Eastern Kingdoms, Hillsbrad's skull on Alterac's tab; Swamp of Sorrows' skull on Redridge's tab; Blasted Lands' skull on Swamp of Sorrows' tab; Duskwood's and Deadwind Pass's tabs side by side, touching. Near-touching: Dun Morogh's tab and Searing Gorge's skull, Searing Gorge's tab and Burning Steppes' skull. Kalimdor: Darkshore's tab touches the corner of Felwood's tab; everything else has room. Fix decided 2026-11-15: a more compact large pin first (`Pins.xml` numbers), then `/ls place` for what still collides.
+- 5-8 pass (user report): the sets swap on maximize and minimize with no leftovers; each `/ls toggle` removes only its own pins; zoom grows them a little and they stay sharp; no error or blocked action in combat with either map size.
+- Fit colors at level 19 (not a checklist item, confirms `Logic.FitLevel` with `GetQuestDifficultyColor`): small map in Dun Morogh, Wetlands `18-34` and Loch Modan `8-24` yellow (inside), Searing Gorge `43-60` red. Kalimdor: the `1-14` zones green (fit 14, 5 below), Darkshore, Ashenvale, Stonetalon and the Barrens yellow (inside), Thousand Needles `23-40` orange (fit 23, 4 above), the rest red.
+- Pending: 9 (level-up recolor with the map open), shared with P54 check 9 (`notes/todo-p54-pending-checks.md`).
+- The XML anchors the disc parts and the text to the pin's center and writes the `OVERLAY` layer first, so `TabEdge` can anchor to `Range` (spec updated); the tab sizes to the text as intended.

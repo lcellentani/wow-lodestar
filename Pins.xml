@@ -1,72 +1,142 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Frame name="LodestarZoneLabelPinTemplate" mixin="LodestarZoneLabelPinMixin"
-         enableMouse="false" virtual="true">
-    <Size x="1" y="1"/>
-    <Layers>
-      <Layer level="OVERLAY">
-        <FontString parentKey="Label" inherits="GameFontHighlightOutline">
-          <Anchors>
-            <Anchor point="CENTER"/>
-          </Anchors>
-        </FontString>
-        <FontString parentKey="Name" inherits="GameFontHighlightOutline">
-          <Anchors>
-            <Anchor point="BOTTOM" relativeKey="$parent.Label" relativePoint="TOP"/>
-          </Anchors>
-        </FontString>
-      </Layer>
-    </Layers>
-  </Frame>
+  <!-- Threat pin (notes/spec-5.5-pin-rework.md), one template per map size, both with
+       LodestarThreatPinMixin (Pins.lua). The disc sits on the zone's point; the range tab
+       hangs under it, overlapping it by 1 pixel, and grows with the text: the tab edge is
+       anchored to the Range FontString, and its sliced texture keeps the corners round.
+       Edges are fit colored; the dark plates inside them are one edge width smaller on
+       every side, which leaves the outline. Shadows are tinted black and carry their own
+       opacity.
 
-  <!-- Threat marker (notes/spec-5.4-threat-markers.md): the disc sits on the zone's
-       point, the tab hangs under it. The colored edges are full size; the dark plates
-       on top are 2 pixels smaller each way, which leaves the outline. -->
+       Layers are written in the order the anchors need (a region can only anchor to one
+       already created), not in drawing order; the level attribute sets the drawing order:
+       BACKGROUND shadows, BORDER edges, ARTWORK plates, OVERLAY skull and text.
+       The disc parts and the text anchor to the pin's center, so only the tab depends on
+       another region (Range). -->
+
+  <!-- Small map: disc 22, edge 2, skull 14, tab 18 high, room 4 beside the text.
+       Range center: disc bottom (-11) + 1 - 18 / 2 = -19. -->
   <Frame name="LodestarThreatPinTemplate" mixin="LodestarThreatPinMixin"
          enableMouse="false" virtual="true">
     <Size x="1" y="1"/>
     <Layers>
-      <Layer level="BACKGROUND">
+      <Layer level="OVERLAY">
+        <FontString parentKey="Range" inherits="GameFontHighlightSmallOutline">
+          <Anchors>
+            <Anchor point="CENTER" y="-19"/>
+          </Anchors>
+        </FontString>
+        <Texture parentKey="Skull" file="Interface\AddOns\Lodestar\Media\threat-skull">
+          <Size x="14" y="14"/>
+          <Anchors>
+            <Anchor point="CENTER"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="BORDER">
         <Texture parentKey="DiscEdge" file="Interface\AddOns\Lodestar\Media\threat-disc">
           <Size x="22" y="22"/>
           <Anchors>
             <Anchor point="CENTER"/>
           </Anchors>
         </Texture>
-        <Texture parentKey="TabEdge" file="Interface\AddOns\Lodestar\Media\threat-tab">
-          <Size x="24" y="18"/>
+        <Texture parentKey="TabEdge" file="Interface\AddOns\Lodestar\Media\threat-tab-small">
           <Anchors>
-            <Anchor point="TOP" relativeKey="$parent.DiscEdge" relativePoint="BOTTOM" y="1"/>
-          </Anchors>
-        </Texture>
-      </Layer>
-      <Layer level="BORDER">
-        <Texture parentKey="Disc" file="Interface\AddOns\Lodestar\Media\threat-disc">
-          <Size x="18" y="18"/>
-          <Anchors>
-            <Anchor point="CENTER" relativeKey="$parent.DiscEdge"/>
-          </Anchors>
-        </Texture>
-        <Texture parentKey="Tab" file="Interface\AddOns\Lodestar\Media\threat-tab">
-          <Size x="20" y="14"/>
-          <Anchors>
-            <Anchor point="CENTER" relativeKey="$parent.TabEdge"/>
+            <Anchor point="TOPLEFT" relativeKey="$parent.Range" relativePoint="LEFT" x="-6" y="9"/>
+            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Range" relativePoint="RIGHT" x="6" y="-9"/>
           </Anchors>
         </Texture>
       </Layer>
       <Layer level="ARTWORK">
-        <Texture parentKey="Skull" file="Interface\AddOns\Lodestar\Media\threat-skull">
-          <Size x="14" y="14"/>
+        <Texture parentKey="Disc" file="Interface\AddOns\Lodestar\Media\threat-disc">
+          <Size x="18" y="18"/>
           <Anchors>
-            <Anchor point="CENTER" relativeKey="$parent.Disc"/>
+            <Anchor point="CENTER"/>
+          </Anchors>
+        </Texture>
+        <Texture parentKey="Tab" file="Interface\AddOns\Lodestar\Media\threat-tab-small">
+          <Anchors>
+            <Anchor point="TOPLEFT" relativeKey="$parent.TabEdge" x="2" y="-2"/>
+            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.TabEdge" x="-2" y="2"/>
           </Anchors>
         </Texture>
       </Layer>
-      <Layer level="OVERLAY">
-        <FontString parentKey="Level" inherits="GameFontHighlightSmallOutline">
+      <Layer level="BACKGROUND">
+        <Texture parentKey="ShadowDisc" file="Interface\AddOns\Lodestar\Media\threat-shadow-disc-small">
+          <Size x="64" y="64"/>
           <Anchors>
-            <Anchor point="CENTER" relativeKey="$parent.Tab"/>
+            <Anchor point="CENTER" y="-1.5"/>
+          </Anchors>
+        </Texture>
+        <Texture parentKey="ShadowTab" file="Interface\AddOns\Lodestar\Media\threat-shadow-tab-small">
+          <Anchors>
+            <Anchor point="TOPLEFT" relativeKey="$parent.TabEdge" x="-13" y="21.5"/>
+            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.TabEdge" x="13" y="-24.5"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+    </Layers>
+  </Frame>
+
+  <!-- Maximized map: disc 30, edge 3, skull 20, tab 32 high, room 11 beside the text.
+       Range center: disc bottom (-15) + 1 - 32 / 2 = -30. -->
+  <Frame name="LodestarThreatPinLargeTemplate" mixin="LodestarThreatPinMixin"
+         enableMouse="false" virtual="true">
+    <Size x="1" y="1"/>
+    <Layers>
+      <Layer level="OVERLAY">
+        <FontString parentKey="Range" inherits="GameFontHighlightLarge">
+          <Anchors>
+            <Anchor point="CENTER" y="-30"/>
           </Anchors>
         </FontString>
+        <Texture parentKey="Skull" file="Interface\AddOns\Lodestar\Media\threat-skull">
+          <Size x="20" y="20"/>
+          <Anchors>
+            <Anchor point="CENTER"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="BORDER">
+        <Texture parentKey="DiscEdge" file="Interface\AddOns\Lodestar\Media\threat-disc">
+          <Size x="30" y="30"/>
+          <Anchors>
+            <Anchor point="CENTER"/>
+          </Anchors>
+        </Texture>
+        <Texture parentKey="TabEdge" file="Interface\AddOns\Lodestar\Media\threat-tab-large">
+          <Anchors>
+            <Anchor point="TOPLEFT" relativeKey="$parent.Range" relativePoint="LEFT" x="-14" y="16"/>
+            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Range" relativePoint="RIGHT" x="14" y="-16"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="ARTWORK">
+        <Texture parentKey="Disc" file="Interface\AddOns\Lodestar\Media\threat-disc">
+          <Size x="24" y="24"/>
+          <Anchors>
+            <Anchor point="CENTER"/>
+          </Anchors>
+        </Texture>
+        <Texture parentKey="Tab" file="Interface\AddOns\Lodestar\Media\threat-tab-large">
+          <Anchors>
+            <Anchor point="TOPLEFT" relativeKey="$parent.TabEdge" x="3" y="-3"/>
+            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.TabEdge" x="-3" y="3"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="BACKGROUND">
+        <Texture parentKey="ShadowDisc" file="Interface\AddOns\Lodestar\Media\threat-shadow-disc-large">
+          <Size x="64" y="64"/>
+          <Anchors>
+            <Anchor point="CENTER" y="-1.5"/>
+          </Anchors>
+        </Texture>
+        <Texture parentKey="ShadowTab" file="Interface\AddOns\Lodestar\Media\threat-shadow-tab-large">
+          <Anchors>
+            <Anchor point="TOPLEFT" relativeKey="$parent.TabEdge" x="-13" y="14.5"/>
+            <Anchor point="BOTTOMRIGHT" relativeKey="$parent.TabEdge" x="13" y="-17.5"/>
+          </Anchors>
+        </Texture>
       </Layer>
     </Layers>
   </Frame>

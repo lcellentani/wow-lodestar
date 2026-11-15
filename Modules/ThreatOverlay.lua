@@ -1,9 +1,9 @@
 local addonName, ns = ...
 
--- Threat markers (notes/spec-5.4-threat-markers.md): on the small continent map, a
--- marker on each zone bordering the player's zone, in the threat color of its minimum
--- level. Nothing on the maximized map (it has the range labels) or when the player's
--- zone is not on the continent shown.
+-- Threat markers (notes/spec-5.4-threat-markers.md, spec-5.5-pin-rework.md): on the
+-- small continent map, a pin on each zone bordering the player's zone, in the color of
+-- its fit level. Nothing on the maximized map (ZoneLabels draws the large pins there) or
+-- when the player's zone is not on the continent shown.
 
 local TEMPLATE = "LodestarThreatPinTemplate"
 
@@ -36,7 +36,7 @@ function provider:RefreshAllData()
     return
   end
 
-  -- Small map only; the maximized map has the range labels (decided 2026-11-07).
+  -- Small map only; the maximized map has ZoneLabels' large pins (decided 2026-11-07).
   if WorldMapFrame:IsMaximized() then
     return
   end
@@ -56,7 +56,8 @@ function provider:RefreshAllData()
     local info = ns.GetZoneInfo(id)
     -- No range (Shen'dralas) or no point: no marker.
     if info.min ~= nil and info.labelX ~= nil and info.labelY ~= nil then
-      WorldMapFrame:AcquirePin(TEMPLATE, info.min, info.labelX, info.labelY)
+      WorldMapFrame:AcquirePin(TEMPLATE, ns.ThreatPinStyle.small, info.min, info.max,
+        info.labelX, info.labelY)
     end
   end
 end

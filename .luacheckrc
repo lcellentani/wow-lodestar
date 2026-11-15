@@ -9,7 +9,6 @@ globals = {
   "LodestarDB", "SLASH_LODESTAR1", "SLASH_LODESTAR2", "SlashCmdList",
   "LodestarTooltip", "LodestarCopyFrame",
   -- one line per pin mixin
-  "LodestarZoneLabelPinMixin",
   "LodestarThreatPinMixin",
 }
 

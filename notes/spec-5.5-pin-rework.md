@@ -78,14 +78,14 @@ Hint: the tab sizes itself from the text through XML anchors (below), so the mix
 
 | parentKey | Layer | Texture | Placement |
 | --- | --- | --- | --- |
-| `ShadowDisc` | `BACKGROUND` | `threat-shadow-disc-small` | 64 x 64, `CENTER` on `DiscEdge`, y -1.5 |
+| `ShadowDisc` | `BACKGROUND` | `threat-shadow-disc-small` | 64 x 64, `CENTER` of the pin, y -1.5 |
 | `ShadowTab` | `BACKGROUND` | `threat-shadow-tab-small` | `TOPLEFT` on `TabEdge`'s `TOPLEFT` (-13, 21.5 [14.5]); `BOTTOMRIGHT` on its `BOTTOMRIGHT` (13, -24.5 [-17.5]) |
 | `DiscEdge` | `BORDER` | `threat-disc` | 22 x 22 [30], `CENTER` of the pin: the disc sits on the zone's point |
 | `TabEdge` | `BORDER` | `threat-tab-small` | `TOPLEFT` on `Range`'s `LEFT` (-6 [-14], 9 [16]); `BOTTOMRIGHT` on `Range`'s `RIGHT` (6 [14], -9 [-16]) |
-| `Disc` | `ARTWORK` | `threat-disc` | 18 x 18 [24], `CENTER` on `DiscEdge` |
+| `Disc` | `ARTWORK` | `threat-disc` | 18 x 18 [24], `CENTER` of the pin |
 | `Tab` | `ARTWORK` | `threat-tab-small` | `TOPLEFT` on `TabEdge` (2 [3], -2 [-3]); `BOTTOMRIGHT` on `TabEdge` (-2 [-3], 2 [3]) |
-| `Skull` | `OVERLAY` | `threat-skull` | 14 x 14 [20], `CENTER` on `Disc` |
-| `Range` (FontString) | `OVERLAY` | font from the table above | `CENTER` on `DiscEdge`'s `BOTTOM`, y -8 [-15] |
+| `Skull` | `OVERLAY` | `threat-skull` | 14 x 14 [20], `CENTER` of the pin |
+| `Range` (FontString) | `OVERLAY` | font from the table above | `CENTER` of the pin, y -19 [-30] (`DiscEdge`'s `BOTTOM`, y -8 [-15]) |
 
 How the numbers come out:
 
@@ -93,6 +93,7 @@ How the numbers come out:
 - The tab edge hangs off the text: half the tab height up and down, and room plus edge width (4 + 2 [11 + 3]) left and right. A wider range widens the tab with no Lua.
 - The plate is the edge inset by the edge width on all sides, so the outline is the same as today.
 - The tab shadow is 13 pixels (the blur reach) wider than the tab on each side and 64 pixels high, centered on the tab and dropped 1.5 pixels, as the art script's preview composes it.
+- The disc parts and the text anchor to the pin's center (same geometry as chaining them off `DiscEdge`), so the only anchor chain is `Range` -> `TabEdge` -> `Tab`, `ShadowTab`. A region can only anchor to one already created, so the XML writes its layers in that order (`OVERLAY` first); the `level` attribute still sets the drawing order (changed 2026-11-15 while writing the XML).
 - The layers move up one step from 5.4 so the shadows can sit underneath: shadows, then edges, then plates, then skull and text.
 
 ### Modules
