@@ -25,7 +25,7 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 - No minimap changes.
 - No coordinate display: Forever's map already shows cursor and player coordinates at its bottom left (seen during P3, Oct 12, 2026).
 - Forever only: no support for Classic Era, Cataclysm Classic or Retail. The `.toc` lists only Forever's interface number.
-- No integration or compatibility work with other map addons (Questie, HandyNotes and similar); Lodestar runs as the only addon.
+- No integration or compatibility work with other map addons (Questie, HandyNotes and similar); Lodestar runs as the only addon. *(Exception decided 2026-11-18: QuestieDB, a data-only addon, as an optional quest source; see "Quest tracking".)*
 - No localization: the client is English, so instance names, faction names and all addon text are English only.
 
 **Success criteria**
@@ -74,7 +74,7 @@ The MVP is four map overlays that read from one data table; v2 adds user-generat
 | Waypoints and notes | v2 | Right-click to drop a pin; `/way x y` command; saved per account | SavedVariables |
 | Unexplored areas | v2 | Tint sub-areas the character has not discovered yet | Exploration API (probe first) |
 | Map look and feel | v2 | Opacity, scale and movable window | Frame hooks |
-| Quest tracking | v2 | Quest givers on zone maps in four states (available, in the log, locked, completed), regardless of the player's level; per-zone counts on continent maps; the quest chains behind each dungeon. Proposed 2026-11-18, see "Quest tracking" | Quest table, completed-quest and quest-log APIs (probe first) |
+| Quest tracking | v2 | Quest givers on zone maps in four states (available, in the log, locked, completed), regardless of the player's level; per-zone counts on continent maps; the quest chains behind each dungeon. Proposed 2026-11-18, see "Quest tracking" | A quest source (QuestieDB first), completed-quest and quest-log APIs (probe first) |
 | Zones off the continents | v2 | Show the level range on the zone's own map for zones no continent shows (Zephras Isle on the beta), if the live client still leaves them off the world map | Zone table |
 
 **Discovery** (decided 2026-10-24). What Lodestar shows depends on what the character has done:
@@ -389,7 +389,15 @@ A quest made unavailable by a mutually exclusive one (breadcrumbs, class or fact
 - **Chain starts** count in the continent badges, so a low-level zone that still holds the start of a high-level chain stands out.
 - **The pin tooltip** shows the quest's place in its chain ("Step 2 of 5, leads to *The Defias Brotherhood*").
 
-**Data** (`Data/Quests.lua`, Claude's proposal). The client reports what the character has done, but not which quests exist, who gives them, where, or what they require; that is static data, as for zones and instances.
+**Data** (decided 2026-11-18). The client reports what the character has done, but not which quests exist, who gives them, where, or what they require; that is static data, as for zones and instances.
+
+- **A seam between data and logic.** `Logic.QuestState`, `Logic.ChainRoots` and the QuestMap module work only on the neutral quest record below. A source adapter, `ns.QuestSource`, fills it (functions such as `Get(questID)` and `ForZone(uiMapID)`; exact names in the step spec). Like a platform layer in an engine: changing the source means writing one adapter, not touching the logic or the module.
+- **First source: QuestieDB** ([github.com/Questie/QuestieDB](https://github.com/Questie/QuestieDB)), a data-only addon split out of Questie in September 2026, with a public API for other addons (`LibQuestieDB` and the `QuestDB`, `NpcDB` globals) and a contract version. It is installed next to Lodestar and declared with `## OptionalDeps: QuestieDB`. Lodestar ships none of its data, so QuestieDB's unclear license (see below) is never copied into this repo. Without QuestieDB, QuestMap stays off and says why; the rest of Lodestar is unaffected.
+- **QuestieDB's coverage** (read from its repo on 2026-11-18; it changes fast): about 4,200 vanilla quests, with coordinates converted to Forever's maps on the assumption that nothing moved; about 750 Forever records (new or changed quests) from a data snapshot, with gaps its own docs list: about 626 quests without race restrictions (Forever's new races), a few broken quest-giver links, partial map coverage, and moved content not detected.
+- **Handling the gaps:** a quest with no race restriction counts as "unknown" and is shown, since hiding a quest the player can take is worse than showing one they cannot. The completed-quest API stays the truth for completion, and the validator command (Steps) checks QuestieDB against the game while playing.
+- **Later source, if needed: our own table** (`Data/Quests.lua`, the same record), built by an offline script from CMaNGOS classic-db (GPLv3, which means moving Lodestar to GPLv3), with spawn points converted to map positions using each zone's world bounds read in game (`C_Map.GetWorldPosFromMapPos`, to probe), and the Forever delta from the validator. Built only if QuestieDB hurts (breaking changes, memory, gaps) or to own the data.
+
+The neutral quest record:
 
 ```lua
 ns.Quests = {
@@ -401,9 +409,9 @@ ns.Quests = {
 - Keyed by quest ID, the client's own identifier, as zones are keyed by uiMapID.
 - `start.map` is the zone's uiMapID and `x, y` are normalized on that zone's map, the same convention as `Instances.lua`; continent positions are projected at runtime with `Logic.ProjectToParent`.
 - English names, as for instances (no localization).
-- Rows carry the same source comments as the other tables (`-- vanilla, unverified`, `-- verified YYYY-MM-DD`, `-- forever, YYYY-MM-DD`).
-- **Where the data comes from:** facts only (IDs, levels, prerequisites, coordinates), as for the other tables. Questie is not a clean source: its `LICENSE.md` (checked 2026-11-18) says the project never had a proper license, asks others to treat it as "all rights reserved" when in doubt, and lets forks copy under GPLv3 while warning that not every historic contributor has agreed. Copying from it would need Lodestar to move from MIT to GPLv3, and even then would not be fully clean (see Open questions). Forever's own quests can only come from the game: a debug command can log the quest ID and the player's position when a quest dialog opens, which is how the table grows while playing.
-- **Size.** Classic has about 4,000 quests. Without objectives and spawn points, the rows are small, so the table starts inside the addon. It moves to a separate load-on-demand addon only if a probe measures a real cost in load time or memory; that split would need a namespace exception, so it is not done up front.
+- In our own table, rows carry the same source comments as the other tables (`-- vanilla, unverified`, `-- verified YYYY-MM-DD`, `-- forever, YYYY-MM-DD`).
+- **Licensing:** Questie and QuestieDB are not clean sources to copy from: their `LICENSE.md` files (checked 2026-11-18) say the projects never had a proper license, ask others to treat them as "all rights reserved" when in doubt, and let forks copy under GPLv3 while warning that not every historic contributor has agreed. Reading QuestieDB at runtime avoids copying; Lodestar stays MIT unless our own CMaNGOS table is built.
+- **Size.** QuestieDB carries NPCs, items, objects and locales as well as quests, so its memory cost is probed before relying on it. Our own table, if built, would hold quests only and start inside the addon; it would move to a load-on-demand addon only if a probe measured a real cost.
 
 **Module.** `QuestMap`, a data provider like the other overlays, with a quest pin template in `Pins.xml` and a badge pin for continent maps. Badges sit by the zone's `labelX, labelY`, next to the zone's threat pin when it has one; the exact offset is for the step spec. It refreshes on `QUEST_TURNED_IN`, `QUEST_ACCEPTED`, `QUEST_REMOVED` and `PLAYER_LEVEL_UP` (names to confirm) when the map is shown, and otherwise waits for the next map open, like ZoneLabels.
 
@@ -415,24 +423,26 @@ ns.Quests = {
 4. **Quest dialog:** `GetQuestID()` while a quest dialog is open, for the in-game collection command.
 5. **Character:** `UnitFactionGroup`, `UnitRace`, `UnitClass`, for the faction, race and class filters.
 6. **Native markers:** whether Forever's map already shows quest givers or quest areas (as P9 did for zone levels), to avoid duplicating a native feature.
-7. **Cost:** `UpdateAddOnMemoryUsage` and `GetAddOnMemoryUsage` before and after the quest table loads.
+7. **Cost:** `UpdateAddOnMemoryUsage` and `GetAddOnMemoryUsage` with and without QuestieDB loaded.
+8. **QuestieDB:** it loads on Forever with its Forever data, its contract version, and a lookup of one known quest through `QuestDB`. Its API is addon code we can read, but how it behaves on Forever is still checked in game.
+9. **Quest IDs:** after turning in an early quest, its vanilla ID appears in the completed-quest list (Forever kept vanilla IDs).
 
 **Steps** (milestone M7)
 
 1. The probes above.
-2. A one-zone data slice with a chain into a dungeon (Westfall and the Deadmines is a good fit: the Defias chain ends inside the instance), with `tests/quests_spec.lua` checking the rows as the other table tests do.
+2. The `ns.QuestSource` seam and the QuestieDB adapter, checked on one chain into a dungeon (Westfall and the Deadmines is a good fit: the Defias chain ends inside the instance). The adapter's mapping from QuestieDB's fields to the neutral record is a pure function in `Logic.lua`, unit tested with a few recorded rows.
 3. `Logic.QuestState` and `Logic.ChainRoots` with unit tests.
 4. Quest pins on zone maps.
 5. Continent badges, compact and full.
 6. Quest lists in the instance and zone tooltips.
-7. The collection command, then the rest of the data, zone by zone.
+7. The validator command: when a quest dialog opens, log the quest ID and the player's position and compare them with the source; mismatches are worth reporting upstream to QuestieDB.
 
 **Open questions**
 
 - [ ] **Discovery.** "Facts are earned by discovery" holds back a zone's instances until the zone is entered. Do quest pins follow the same rule? A possible middle ground: badges (counts only) show for every zone, pins only for zones the character has entered.
 - [ ] **No GPS.** A quest-giver pin is a place, like an entrance marker: the fact a fellow player would share ("the chain starts in Southshore"). Claude reads it as allowed as long as there are no routes, arrows or objective areas; confirm.
 - [x] **Completed quests:** **shown as dimmed pins** (decided 2026-11-18), with a toggle to hide them.
-- [ ] **Data source** for the vanilla rows: Warcraft Wiki facts collected by a script, by hand, only from the game while playing, or Questie's data with a move to GPLv3 (trade-offs discussed 2026-11-18).
+- [x] **Data source:** **QuestieDB at runtime first, behind the `ns.QuestSource` seam; our own CMaNGOS table later if needed** (decided 2026-11-18). Lodestar stays MIT for now.
 
 ## Settings and slash commands
 
@@ -626,4 +636,4 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 - [x] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (answered, P44); whether Blizzard's zone highlight art can be fetched for any zone and tinted (fetched yes, tinted no, P45); whether a texture loads from the addon folder (yes, with alpha, P46). Grid sampling is fast enough to run in one go (P47).
 - [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the colored range labels on the maximized map answer "where on this continent fits me?", and the row was removed from the feature set.
 - [ ] Parked until a few weeks of live play: connection points between zones, and which orientation information the map actually fails to give.
-- [ ] Quest tracking: the open questions in "Quest tracking", "Open questions" (Discovery, No GPS, data source; completed quests decided 2026-11-18).
+- [ ] Quest tracking: the open questions in "Quest tracking", "Open questions" (Discovery, No GPS; completed quests and data source decided 2026-11-18).
