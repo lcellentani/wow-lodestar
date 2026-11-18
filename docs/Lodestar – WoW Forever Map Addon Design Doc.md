@@ -20,7 +20,7 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 
 **Non-goals (MVP)**
 
-- No quest-giver, vendor or resource-node database.
+- No quest-giver, vendor or resource-node database. *(Revised 2026-11-18: quests move out of the non-goals as a post-MVP feature, see "Quest tracking"; vendors and resource nodes stay out.)*
 - No replacement of Blizzard's map frame; the addon only draws on top of it.
 - No minimap changes.
 - No coordinate display: Forever's map already shows cursor and player coordinates at its bottom left (seen during P3, Oct 12, 2026).
@@ -74,6 +74,7 @@ The MVP is four map overlays that read from one data table; v2 adds user-generat
 | Waypoints and notes | v2 | Right-click to drop a pin; `/way x y` command; saved per account | SavedVariables |
 | Unexplored areas | v2 | Tint sub-areas the character has not discovered yet | Exploration API (probe first) |
 | Map look and feel | v2 | Opacity, scale and movable window | Frame hooks |
+| Quest tracking | v2 | Quest givers on zone maps in four states (available, in the log, locked, completed), regardless of the player's level; per-zone counts on continent maps; the quest chains behind each dungeon. Proposed 2026-11-18, see "Quest tracking" | Quest table, completed-quest and quest-log APIs (probe first) |
 | Zones off the continents | v2 | Show the level range on the zone's own map for zones no continent shows (Zephras Isle on the beta), if the live client still leaves them off the world map | Zone table |
 
 **Discovery** (decided 2026-10-24). What Lodestar shows depends on what the character has done:
@@ -351,6 +352,86 @@ Classic Era maps do not show a tooltip when hovering a zone, only a one-line nam
 
 **Combat and taint.** The addon touches only the map frame and its own frames, never secure action buttons, and follows the "No taint" rule in Architecture, so combat lockdown should not affect it. Verify in game with P14 and P15.
 
+## Quest tracking (v2, proposed 2026-11-18)
+
+**Why.** At higher levels, many quests, dungeon quests above all, sit at the end of long chains that start at much lower levels, often in another zone. The zone labels answer "where should I be?"; quest tracking answers "what have I done, what is open, and what am I missing?". Questie covers part of this, but Lodestar runs alone (see Non-goals) and the behavior here is tailored: the map's scope sets the detail, and chains are first-class.
+
+**What the user decided (2026-11-18)**
+
+- **Every quest, regardless of the player's level.** Quests above the player are shown as locked with the reason, not hidden, so a chain can be planned before it opens. Only quests the character can never take (other faction, race or class) are left out.
+- **Detail follows what the map shows, not which window shows it**, the same rule as the zone labels. The small map is the windowed world map, which can show a zone or a continent, just like the maximized one:
+
+| Map shows | Small (windowed) | Maximized |
+| --- | --- | --- |
+| World (both continents) | nothing | nothing |
+| Continent | per-zone badge, compact: an icon and the number of available quests; the full counts in the tooltip | per-zone badge, full: for example "8 available · 2 chain starts" |
+| Zone | a pin per quest giver in that zone | a pin per quest giver in that zone |
+
+- **Same content on both sizes; only density changes.** The small map has about half the pixels, so badges are compact there and pins scale with the canvas (`SetScalingLimits`), as Blizzard's own pins do.
+- **No minimap.** The "No minimap changes" non-goal still holds.
+
+**Quest states** (Claude's proposal). Each quest the character can take is in one of four states, worked out by a pure function `Logic.QuestState(quest, ctx)` with unit tests, where `ctx` holds the player's level, the completed-quest set and the quest log:
+
+| State | When | Look |
+| --- | --- | --- |
+| Available | Not done, not in the log, every prerequisite done, player level at or above the quest's minimum | Pin in the quest's difficulty color (see "Difficulty colors") |
+| In the log | In the quest log | Distinct pin (for example a "?" shape), so it is not confused with a new quest |
+| Locked | A prerequisite is missing, or the player is below the minimum level | Grey, dimmed pin; the tooltip names the reason ("Requires level 28" or "Requires: *quest name*") |
+| Completed | Turned in | Hidden by default (see Open questions) |
+
+A quest made unavailable by a mutually exclusive one (breadcrumbs, class or faction choices) counts as completed for the chain logic and is never shown.
+
+**Chains** (Claude's proposal). The quest table is a dependency graph, like targets in a build system. `Logic.ChainRoots(questID, ctx)`, pure and unit tested, walks the prerequisites backwards from a target quest and returns the first quests not yet done: the ones the player can act on now, or the earliest locked ones. Uses:
+
+- **Instance markers and the zone tooltip** list the quests tied to each instance, with their state, so "what do I need before Scarlet Monastery?" is answered on the map that already shows the entrance.
+- **Chain starts** count in the continent badges, so a low-level zone that still holds the start of a high-level chain stands out.
+- **The pin tooltip** shows the quest's place in its chain ("Step 2 of 5, leads to *The Defias Brotherhood*").
+
+**Data** (`Data/Quests.lua`, Claude's proposal). The client reports what the character has done, but not which quests exist, who gives them, where, or what they require; that is static data, as for zones and instances.
+
+```lua
+ns.Quests = {
+  -- [questID] = { name, level, min, faction, start = { map, x, y }, pre = { questIDs, all needed },
+  --               preAny = { questIDs, one is enough }, excl = { questIDs }, instance = "name" }
+}
+```
+
+- Keyed by quest ID, the client's own identifier, as zones are keyed by uiMapID.
+- `start.map` is the zone's uiMapID and `x, y` are normalized on that zone's map, the same convention as `Instances.lua`; continent positions are projected at runtime with `Logic.ProjectToParent`.
+- English names, as for instances (no localization).
+- Rows carry the same source comments as the other tables (`-- vanilla, unverified`, `-- verified YYYY-MM-DD`, `-- forever, YYYY-MM-DD`).
+- **Where the data comes from:** facts only (IDs, levels, prerequisites, coordinates), as for the other tables. Questie's database is GPL-licensed and Lodestar is MIT, so it is not a source to copy from. Forever's own quests can only come from the game: a debug command can log the quest ID and the player's position when a quest dialog opens, which is how the table grows while playing.
+- **Size.** Classic has about 4,000 quests. Without objectives and spawn points, the rows are small, so the table starts inside the addon. It moves to a separate load-on-demand addon only if a probe measures a real cost in load time or memory; that split would need a namespace exception, so it is not done up front.
+
+**Module.** `QuestMap`, a data provider like the other overlays, with a quest pin template in `Pins.xml` and a badge pin for continent maps. Badges sit by the zone's `labelX, labelY`, next to the zone's threat pin when it has one; the exact offset is for the step spec. It refreshes on `QUEST_TURNED_IN`, `QUEST_ACCEPTED`, `QUEST_REMOVED` and `PLAYER_LEVEL_UP` (names to confirm) when the map is shown, and otherwise waits for the next map open, like ZoneLabels.
+
+**Probes** (to be numbered in the step spec; evidence rule). Forever's UI is Mainline (P36), so check both the Classic and the Mainline name of each quest API.
+
+1. **Completed quests:** `GetQuestsCompleted`, `C_QuestLog.IsQuestFlaggedCompleted(questID)`, `C_QuestLog.GetAllCompletedQuestIDs`; which exist, and whether they answer right after login.
+2. **Quest log:** `GetNumQuestLogEntries` and `GetQuestLogTitle` (Classic; does it return the quest ID?) or `C_QuestLog.GetNumQuestLogEntries` and `C_QuestLog.GetInfo` (Mainline).
+3. **Events:** `QUEST_ACCEPTED`, `QUEST_TURNED_IN`, `QUEST_REMOVED`, `QUEST_LOG_UPDATE`, `QUEST_DETAIL`; which fire and with which arguments.
+4. **Quest dialog:** `GetQuestID()` while a quest dialog is open, for the in-game collection command.
+5. **Character:** `UnitFactionGroup`, `UnitRace`, `UnitClass`, for the faction, race and class filters.
+6. **Native markers:** whether Forever's map already shows quest givers or quest areas (as P9 did for zone levels), to avoid duplicating a native feature.
+7. **Cost:** `UpdateAddOnMemoryUsage` and `GetAddOnMemoryUsage` before and after the quest table loads.
+
+**Steps** (milestone M7)
+
+1. The probes above.
+2. A one-zone data slice with a chain into a dungeon (Westfall and the Deadmines is a good fit: the Defias chain ends inside the instance), with `tests/quests_spec.lua` checking the rows as the other table tests do.
+3. `Logic.QuestState` and `Logic.ChainRoots` with unit tests.
+4. Quest pins on zone maps.
+5. Continent badges, compact and full.
+6. Quest lists in the instance and zone tooltips.
+7. The collection command, then the rest of the data, zone by zone.
+
+**Open questions**
+
+- [ ] **Discovery.** "Facts are earned by discovery" holds back a zone's instances until the zone is entered. Do quest pins follow the same rule? A possible middle ground: badges (counts only) show for every zone, pins only for zones the character has entered.
+- [ ] **No GPS.** A quest-giver pin is a place, like an entrance marker: the fact a fellow player would share ("the chain starts in Southshore"). Claude reads it as allowed as long as there are no routes, arrows or objective areas; confirm.
+- [ ] **Completed quests:** hidden by default, or shown dimmed? Either way, a toggle shows the other.
+- [ ] **Data source** for the vanilla rows: Warcraft Wiki facts collected by a script, by hand, or only from the game while playing.
+
 ## Settings and slash commands
 
 The MVP has no settings window; everything is a slash command, which is fast to build and easy to test. The command is `/ls`, with `/lodestar` as a longer alias.
@@ -523,6 +604,7 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 5. **M4, overlays:** ZoneLabels works on the continent maps.
 6. **M5, MVP complete:** Instances, Tooltip and ThreatOverlay work (threat markers on the small map, decided 2026-11-07 after P45-P51), ZoneLabels moves to the maximized map with hand-placed anchors (done 2026-11-08, step 5.3), and all seven success criteria in the Overview pass.
 7. **M6, v2:** waypoints, unexplored areas and map look and feel, in the order the API allows.
+8. **M7, quest tracking:** the steps in "Quest tracking", starting with the quest probes and a one-zone data slice. Starts after the MVP (M5); its order against M6 is open.
 
 **Risks**
 
@@ -542,3 +624,4 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 - [x] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (answered, P44); whether Blizzard's zone highlight art can be fetched for any zone and tinted (fetched yes, tinted no, P45); whether a texture loads from the addon folder (yes, with alpha, P46). Grid sampling is fast enough to run in one go (P47).
 - [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the colored range labels on the maximized map answer "where on this continent fits me?", and the row was removed from the feature set.
 - [ ] Parked until a few weeks of live play: connection points between zones, and which orientation information the map actually fails to give.
+- [ ] Quest tracking: the four questions in "Quest tracking", "Open questions" (Discovery, No GPS, completed quests, data source).
