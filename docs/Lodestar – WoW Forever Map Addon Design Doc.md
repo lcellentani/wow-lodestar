@@ -376,8 +376,10 @@ Classic Era maps do not show a tooltip when hovering a zone, only a one-line nam
 | --- | --- | --- |
 | Available | Not done, not in the log, every prerequisite done, player level at or above the quest's minimum | Pin in the quest's difficulty color (see "Difficulty colors") |
 | In the log | In the quest log | Distinct pin (for example a "?" shape), so it is not confused with a new quest |
-| Locked | A prerequisite is missing, or the player is below the minimum level | Grey, dimmed pin; the tooltip names the reason ("Requires level 28" or "Requires: *quest name*") |
-| Completed | Turned in | Hidden by default (see Open questions) |
+| Locked | A prerequisite is missing, or the player is below the minimum level | Grey pin with a padlock; the tooltip names the reason ("Requires level 28" or "Requires: *quest name*") |
+| Completed | Turned in | Dimmed pin with a check mark (decided 2026-11-18); a toggle hides completed quests |
+
+Completed and locked pins are both muted, so they differ by shape (check mark or padlock), not only by color; the exact look is chosen from mockups in the step spec. *(Claude's call.)*
 
 A quest made unavailable by a mutually exclusive one (breadcrumbs, class or faction choices) counts as completed for the chain logic and is never shown.
 
@@ -400,7 +402,7 @@ ns.Quests = {
 - `start.map` is the zone's uiMapID and `x, y` are normalized on that zone's map, the same convention as `Instances.lua`; continent positions are projected at runtime with `Logic.ProjectToParent`.
 - English names, as for instances (no localization).
 - Rows carry the same source comments as the other tables (`-- vanilla, unverified`, `-- verified YYYY-MM-DD`, `-- forever, YYYY-MM-DD`).
-- **Where the data comes from:** facts only (IDs, levels, prerequisites, coordinates), as for the other tables. Questie's database is GPL-licensed and Lodestar is MIT, so it is not a source to copy from. Forever's own quests can only come from the game: a debug command can log the quest ID and the player's position when a quest dialog opens, which is how the table grows while playing.
+- **Where the data comes from:** facts only (IDs, levels, prerequisites, coordinates), as for the other tables. Questie is not a clean source: its `LICENSE.md` (checked 2026-11-18) says the project never had a proper license, asks others to treat it as "all rights reserved" when in doubt, and lets forks copy under GPLv3 while warning that not every historic contributor has agreed. Copying from it would need Lodestar to move from MIT to GPLv3, and even then would not be fully clean (see Open questions). Forever's own quests can only come from the game: a debug command can log the quest ID and the player's position when a quest dialog opens, which is how the table grows while playing.
 - **Size.** Classic has about 4,000 quests. Without objectives and spawn points, the rows are small, so the table starts inside the addon. It moves to a separate load-on-demand addon only if a probe measures a real cost in load time or memory; that split would need a namespace exception, so it is not done up front.
 
 **Module.** `QuestMap`, a data provider like the other overlays, with a quest pin template in `Pins.xml` and a badge pin for continent maps. Badges sit by the zone's `labelX, labelY`, next to the zone's threat pin when it has one; the exact offset is for the step spec. It refreshes on `QUEST_TURNED_IN`, `QUEST_ACCEPTED`, `QUEST_REMOVED` and `PLAYER_LEVEL_UP` (names to confirm) when the map is shown, and otherwise waits for the next map open, like ZoneLabels.
@@ -429,8 +431,8 @@ ns.Quests = {
 
 - [ ] **Discovery.** "Facts are earned by discovery" holds back a zone's instances until the zone is entered. Do quest pins follow the same rule? A possible middle ground: badges (counts only) show for every zone, pins only for zones the character has entered.
 - [ ] **No GPS.** A quest-giver pin is a place, like an entrance marker: the fact a fellow player would share ("the chain starts in Southshore"). Claude reads it as allowed as long as there are no routes, arrows or objective areas; confirm.
-- [ ] **Completed quests:** hidden by default, or shown dimmed? Either way, a toggle shows the other.
-- [ ] **Data source** for the vanilla rows: Warcraft Wiki facts collected by a script, by hand, or only from the game while playing.
+- [x] **Completed quests:** **shown as dimmed pins** (decided 2026-11-18), with a toggle to hide them.
+- [ ] **Data source** for the vanilla rows: Warcraft Wiki facts collected by a script, by hand, only from the game while playing, or Questie's data with a move to GPLv3 (trade-offs discussed 2026-11-18).
 
 ## Settings and slash commands
 
@@ -624,4 +626,4 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 - [x] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (answered, P44); whether Blizzard's zone highlight art can be fetched for any zone and tinted (fetched yes, tinted no, P45); whether a texture loads from the addon folder (yes, with alpha, P46). Grid sampling is fast enough to run in one go (P47).
 - [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the colored range labels on the maximized map answer "where on this continent fits me?", and the row was removed from the feature set.
 - [ ] Parked until a few weeks of live play: connection points between zones, and which orientation information the map actually fails to give.
-- [ ] Quest tracking: the four questions in "Quest tracking", "Open questions" (Discovery, No GPS, completed quests, data source).
+- [ ] Quest tracking: the open questions in "Quest tracking", "Open questions" (Discovery, No GPS, data source; completed quests decided 2026-11-18).
