@@ -42,8 +42,8 @@ ns.Instances = {
   { name = "Dire Maul (West)", map = 1444, x = 0.590, y = 0.445, min = 56, max = 60, kind = "dungeon" },  -- Feralas; levels P33, entrance approximate
   { name = "Dire Maul (North)", map = 1444, x = 0.590, y = 0.445, min = 56, max = 60, kind = "dungeon" },  -- Feralas; levels P33, entrance approximate
   { name = "Onyxia's Lair", map = 1445, x = 0.526, y = 0.768, min = 60, max = 60, kind = "raid" },  -- Dustwallow Marsh; levels vanilla, entrance approximate
-  { name = "Ruins of Ahn'Qiraj", map = 1451, x = 0.286, y = 0.924, min = 60, max = 60, kind = "raid" },  -- Silithus; levels vanilla, entrance approximate
-  { name = "Temple of Ahn'Qiraj", map = 1451, x = 0.244, y = 0.875, min = 60, max = 60, kind = "raid" },  -- Silithus; levels vanilla, entrance approximate
+  { name = "Ruins of Ahn'Qiraj", map = 1451, x = 0.286, y = 0.924, min = 60, max = 60, kind = "raid" },  -- Silithus; levels vanilla, entrance approximate (the Gates of Ahn'Qiraj)
+  { name = "Temple of Ahn'Qiraj", map = 1451, x = 0.286, y = 0.924, min = 60, max = 60, kind = "raid" },  -- Silithus; levels vanilla; shares the Ruins' point since 2026-11-22: both doors lie behind the Gates of Ahn'Qiraj, a short walk apart, and two markers overlapped (P60); the recalled 0.244, 0.875 was approximate too
 
   -- Forever: entrances to find in game (P12)
   { name = "Hall of Thanes", map = 1455, x = 0.281, y = 0.471, min = 13, max = 20, kind = "dungeon" },  -- Ironforge; levels P33, its meeting stone 2026-10-19 (P12)

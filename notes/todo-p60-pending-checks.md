@@ -9,7 +9,7 @@ The vanilla entrances in `Data/Instances.lua` are approximate (Claude's recall o
 Still to check:
 
 - Eastern Kingdoms: Shadowfang Keep, Gnomeregan, Scarlet Monastery, Uldaman, Sunken Temple, Blackrock Mountain, Scholomance, Stratholme (both gates), Naxxramas, Zul'Gurub.
-- Kalimdor: Wailing Caverns, Razorfen Kraul, Razorfen Downs, Blackfathom Deeps, Zul'Farrak, Maraudon, Dire Maul, Onyxia's Lair, Ruins and Temple of Ahn'Qiraj.
+- Kalimdor: Wailing Caverns, Razorfen Kraul, Razorfen Downs, Blackfathom Deeps, Zul'Farrak, Maraudon, Dire Maul, Onyxia's Lair, Ruins and Temple of Ahn'Qiraj (one marker since 2026-11-22, at the Gates of Ahn'Qiraj; if the two doors turn out far apart, they get their own points again).
 
 Measured already (meeting stones, P12): The Deadmines, The Stockade, Ragefire Chasm and the Forever dungeons with a position.
 
