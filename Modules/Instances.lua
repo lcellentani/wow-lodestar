@@ -7,10 +7,10 @@ local addonName, ns = ...
 
 local TEMPLATE = "LodestarInstancePinTemplate"
 
--- Marker side in pixels: 20 on the small map, 28 on the maximized one, close to the large
--- threat disc (30); decided 2026-11-22 in P60 check 6.
+-- Marker side in pixels: 20 on the small map, 32 on the maximized one, a little above the
+-- large threat disc (30); 28 from P60 check 6, raised to 32 on trial 2026-11-22.
 local SIZE_SMALL = 20
-local SIZE_LARGE = 28
+local SIZE_LARGE = 32
 
 -- An exploration result counts only when it has something in it: P44 and P59 showed an
 -- empty result without telling whether it was nil or an empty table.
