@@ -10,6 +10,7 @@ globals = {
   "LodestarTooltip", "LodestarCopyFrame",
   -- one line per pin mixin
   "LodestarThreatPinMixin",
+  "LodestarInstancePinMixin",
 }
 
 -- WoW API the addon reads. Only APIs confirmed in notes/beta-probes.md (evidence rule);

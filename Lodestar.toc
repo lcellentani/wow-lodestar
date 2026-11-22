@@ -13,6 +13,7 @@ Data\Zones.lua
 Data\Instances.lua
 Modules\ZoneLabels.lua
 Modules\ThreatOverlay.lua
+Modules\Instances.lua
 Pins.xml
 Debug.lua
 Place.lua

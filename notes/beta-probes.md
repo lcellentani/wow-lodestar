@@ -71,6 +71,7 @@ Before the addon exists, run the `/dump` lines below (copy them from here and pa
 | P57 | stretching the tab texture | [x] | 2026-11-09 | live; `SetTextureSliceMargins` works |
 | P58 | threat pins on both maps | [~] | 2026-11-15 | live; 1-8 pass, overlaps fixed; 9 pending |
 | P59 | instance marker APIs | [x] | 2026-11-15 | live; all present, motion-only mouse works in combat; no fog of war in Stormwind |
+| P60 | instance markers | [~] | 2026-11-22 | live; 1-8 pass after two fixes; 9 and the city rule's negative case pending |
 
 ## Confirmed APIs
 
@@ -1847,3 +1848,17 @@ Commands in `notes/spec-5.6-instances.md`. Result (2026-11-15, live, other addon
 - 4: Stormwind City (1453) is map type 3 (Zone), and its rectangle on Eastern Kingdoms (1415) is x 0.406-0.455, y 0.659-0.708: the Stockade, stored on the city map, projects onto the continent.
 - 5: `GetExploredAreaIDsAtPosition(1453, (0.534, 0.709))` gave an empty result with a character that had been in Stormwind: the city map has no fog of war, so the fog rule cannot reveal the Stockade.
 - 6: `GetExploredAreaIDsAtPosition(1426, (0.243, 0.398))` gave `{ 133 }` with the level 19 character: Gnomeregan's approximate entrance reads as explored.
+
+### P60: the instance markers (M5 step 5.6)
+
+Checklist in `notes/spec-5.6-instances.md`. Result (2026-11-22, live, other addons off; a Stormwind character; screenshots 014355, 014819, 015031, 015307, 015331, 015538, 015548, 015602, 015611, 020138, 020152):
+
+- 1 failed at first: opening the map in Stormwind raised `Blizzard_MapCanvas.lua:309: assertion failed!` from `AcquirePin`. For a pin with mouse motion on, `AcquirePin` asserts the pin has no `OnEnter`/`OnLeave` script and sets its own, which call the mixin's `OnMouseEnter`/`OnMouseLeave`. The template had both scripts; removed, it keeps `OnLoad` only. After `/reload`: passes, markers only on explored entrances.
+- 2 passes: `/ls reveal` prints `reveal on`/`reveal off`; every entrance with a position shows on both continents; Blackrock Mountain and Scarlet Monastery are one marker each; turning reveal off hides the unexplored ones on the open map.
+- 3 passes after a change: lines in data order, names white, ranges colored per end, kind after each; Zul'Gurub `60 Raid`; the tooltip hides on leave. `GameTooltip` draws its first line in a larger title font, so the first instance stood out; the tooltip now starts with the entrance map's name (`C_Map.GetMapInfo(group.map).name`) as its title (decided with the user).
+- 4 passes: left click on a continent marker opens the zone under it, right click on a zone map goes back up.
+- 5 passes: Blackrock Mountain on the Burning Steppes map at the mountain's foot; the Stockade on the Stormwind City map (at its measured meeting stone) and on Eastern Kingdoms; with reveal off the Stockade shows for a character who has been in Elwynn Forest. Not tested: a character who never entered a city's zone (expected: no marker).
+- 6, look: the `Dungeon` icon is a small teal ring on the parchment, readable on the small map, too small on the maximized one next to the 30 px threat discs, so markers are 28 x 28 there (20 on the small map; the module passes the size to the pin and redraws on `WorldMapMaximized`/`WorldMapMinimized`). Markers draw under the threat pins; covered or half covered on the maximized map: Shadowfang Keep, the Deadmines, Excavation Site: Wetlands (all under a tab), Uldaman, the Sunken Temple, the two Ahn'Qiraj raids, Onyxia's Lair. Ruins and Temple of Ahn'Qiraj also overlap each other. Draw order left open: the threat pins lose their tab (decided 2026-11-22, design doc ThreatOverlay), which clears most of these.
+- 7 passes: `/ls toggle Instances` removes only the markers and brings them back on the open map.
+- 8 passes: in combat, small and maximized map, hovering markers and resizing: no error, no blocked action.
+- 9 pending: vanilla entrance positions are checked in play, as characters reach them (`notes/todo-p60-pending-checks.md`).

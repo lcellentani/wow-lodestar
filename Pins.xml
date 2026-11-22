@@ -141,4 +141,22 @@
       </Layer>
     </Layers>
   </Frame>
+
+  <!-- Instance entrance marker (notes/spec-5.6-instances.md), one per door, on zone and
+       continent maps at both sizes, with LodestarInstancePinMixin (Pins.lua). OnAcquired
+       sets the Icon's atlas (Dungeon or Raid, P41). No enableMouse attribute: OnLoad turns
+       mouse motion on and clicks off, so clicks reach the map (P59). No OnEnter/OnLeave
+       scripts: for a pin with mouse motion on, AcquirePin asserts it has none and sets its
+       own, which call the mixin's OnMouseEnter/OnMouseLeave (P60, 2026-11-22). -->
+  <Frame name="LodestarInstancePinTemplate" mixin="LodestarInstancePinMixin" virtual="true">
+    <Size x="20" y="20"/>
+    <Layers>
+      <Layer level="ARTWORK">
+        <Texture parentKey="Icon" setAllPoints="true"/>
+      </Layer>
+    </Layers>
+    <Scripts>
+      <OnLoad>self:OnLoad()</OnLoad>
+    </Scripts>
+  </Frame>
 </Ui>
