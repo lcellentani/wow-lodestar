@@ -309,3 +309,49 @@ function Logic.FitLevel(playerLevel, min, max)
 
   return math.min(math.max(playerLevel, min), max or min)
 end
+
+function Logic.GroupByPosition(entries)
+  local groupsByKey = {}
+  local groups = {}
+
+  for _, row in ipairs(entries) do
+    if row.x and row.y then
+      local key = row.map .. ":" .. row.x .. ":" .. row.y
+      local group = groupsByKey[key]
+      if group == nil then
+        group = { map = row.map, x = row.x, y = row.y, entries = {} }
+        group.entries[#group.entries + 1] = row
+        groups[#groups + 1] = group
+        groupsByKey[key] = group
+      else
+        group.entries[#group.entries + 1] = row
+      end
+    end
+  end
+
+  return groups
+end
+
+function Logic.GroupKind(entries)
+  if #entries == 0 then
+    return "dungeon"
+  end
+  for _, row in ipairs(entries) do
+    if row.kind ~= "raid" then
+      return "dungeon"
+    end
+  end
+  return "raid"
+end
+
+local KIND_LABELS = { dungeon = "Dungeon", raid = "Raid" }
+
+function Logic.FormatInstanceDetail(min, max, kind, codeFor)
+  local list = {}
+
+  -- nil (no levels) adds nothing, so the kind stands alone
+  list[#list + 1] = Logic.FormatLevelRange(min, max, codeFor)
+  list[#list + 1] = KIND_LABELS[kind]
+
+  return table.concat(list, " ")
+end

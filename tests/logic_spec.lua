@@ -947,3 +947,148 @@ describe("FitLevel", function()
     assert(fit == nil, "expected nil, got " .. tostring(fit))
   end)
 end)
+
+describe("GroupByPosition", function()
+  local function describeGroups(groups)
+    local list = {}
+    for _, g in ipairs(groups) do
+      local names = {}
+      for _, r in ipairs(g.entries) do
+        names[#names + 1] = r.name
+      end
+      list[#list + 1] = table.concat(names, "|")
+    end
+    return table.concat(list, ",")
+  end
+
+  it("returns an empty list for an empty list", function()
+    local entries = {}
+    local shape = describeGroups(Logic.GroupByPosition(entries))
+    assert(shape == "", "expected an empty list, got " .. shape)
+  end)
+
+  it("puts two rows at one position in one group, in order", function()
+    local entries = {
+      { name = "A", map = 1, x = 0.5, y = 0.1 },
+      { name = "B", map = 1, x = 0.5, y = 0.1 },
+    }
+    local groups = Logic.GroupByPosition(entries)
+    local shape = describeGroups(groups)
+    assert(shape == "A|B", "expected A|B, got " .. shape)
+    assert(groups[1].map == 1, "expected map 1, got " .. tostring(groups[1].map))
+    assert(groups[1].x == 0.5, "expected x 0.5, got " .. tostring(groups[1].x))
+    assert(groups[1].y == 0.1, "expected y 0.1, got " .. tostring(groups[1].y))
+  end)
+
+  it("returns two positions as two groups in first-seen order", function()
+    local entries = {
+      { name = "A", map = 1, x = 0.5, y = 0.1 },
+      { name = "B", map = 1, x = 0.5, y = 0.4 },
+      { name = "C", map = 1, x = 0.5, y = 0.1 },
+    }
+    local shape = describeGroups(Logic.GroupByPosition(entries))
+    assert(shape == "A|C,B", "expected A|C,B, got " .. shape)
+  end)
+
+  it("keeps the same x, y on two maps apart", function()
+    local entries = {
+      { name = "A", map = 1, x = 0.5, y = 0.1 },
+      { name = "B", map = 2, x = 0.5, y = 0.1 },
+    }
+    local shape = describeGroups(Logic.GroupByPosition(entries))
+    assert(shape == "A,B", "expected A,B, got " .. shape)
+  end)
+
+  it("skips a row without x", function()
+    local entries = {
+      { name = "A", map = 1, y = 0.1 },
+      { name = "B", map = 2, x = 0.5, y = 0.1 },
+    }
+    local shape = describeGroups(Logic.GroupByPosition(entries))
+    assert(shape == "B", "expected B, got " .. shape)
+  end)
+
+  it("does not change the input list", function()
+    local entries = {
+      { name = "A", map = 1, x = 0.5, y = 0.1 },
+      { name = "B", map = 1, x = 0.5, y = 0.4 },
+      { name = "C", map = 1, x = 0.5, y = 0.1 },
+      { name = "D", map = 1, y = 0.2 },
+    }
+    local before = {}
+    for i, row in ipairs(entries) do
+      before[i] = row
+    end
+    Logic.GroupByPosition(entries)
+    assert(#entries == #before, "expected " .. #before .. " rows, got " .. #entries)
+    for i in ipairs(before) do
+      assert(entries[i] == before[i], "row " .. i .. " changed")
+    end
+  end)
+end)
+
+describe("GroupKind", function()
+  it("returns raid when every row is a raid", function()
+    local entries = {
+      { kind = "raid" },
+      { kind = "raid" },
+      { kind = "raid" },
+    }
+    local kind = Logic.GroupKind(entries)
+    assert(kind == "raid", "expected raid, got " .. tostring(kind))
+  end)
+
+  it("returns dungeon when every row is a dungeon", function()
+    local entries = {
+      { kind = "dungeon" },
+      { kind = "dungeon" },
+    }
+    local kind = Logic.GroupKind(entries)
+    assert(kind == "dungeon", "expected dungeon, got " .. tostring(kind))
+  end)
+
+  it("returns dungeon for a mix of raids and dungeons", function()
+    local entries = {
+      { kind = "raid" },
+      { kind = "dungeon" },
+      { kind = "raid" },
+    }
+    local kind = Logic.GroupKind(entries)
+    assert(kind == "dungeon", "expected dungeon, got " .. tostring(kind))
+  end)
+
+  it("returns raid for a single raid", function()
+    local entries = {
+      { kind = "raid" },
+    }
+    local kind = Logic.GroupKind(entries)
+    assert(kind == "raid", "expected raid, got " .. tostring(kind))
+  end)
+
+  it("returns dungeon for an empty list", function()
+    local entries = {}
+    local kind = Logic.GroupKind(entries)
+    assert(kind == "dungeon", "expected dungeon, got " .. tostring(kind))
+  end)
+end)
+
+describe("FormatInstanceDetail", function()
+  local function fakeCode(level)
+    return "<" .. level .. ">"
+  end
+
+  it("formats a range and a dungeon", function()
+    local result = Logic.FormatInstanceDetail(15, 25, "dungeon", fakeCode)
+    assert(result == "<15>15|r-<25>25|r Dungeon", "got " .. tostring(result))
+  end)
+
+  it("formats a single level and a raid", function()
+    local result = Logic.FormatInstanceDetail(60, 60, "raid", fakeCode)
+    assert(result == "<60>60|r Raid", "got " .. tostring(result))
+  end)
+
+  it("returns the kind alone without levels", function()
+    local result = Logic.FormatInstanceDetail(nil, nil, "dungeon", fakeCode)
+    assert(result == "Dungeon", "got " .. tostring(result))
+  end)
+end)
