@@ -40,7 +40,7 @@ end
 function LodestarThreatPinMixin:CheckMouseButtonPassthrough() -- luacheck: ignore 212/self
 end
 
-local KIND_ATLAS = { dungeon = "Dungeon", raid = "Raid" }  -- P41
+local KIND_ATLAS = { dungeon = "Dungeon", raid = "Raid" } -- P41
 
 LodestarInstancePinMixin = CreateFromMixins(MapCanvasPinMixin)
 
@@ -50,9 +50,11 @@ function LodestarInstancePinMixin:OnLoad()
   self:SetMouseClickEnabled(false)
 end
 
--- group comes from Logic.GroupByPosition; x, y are already projected by the module.
-function LodestarInstancePinMixin:OnAcquired(group, x, y)
+-- group comes from Logic.GroupByPosition; x, y are already projected by the module;
+-- size is the marker's side for the map size shown (20 small, 28 maximized).
+function LodestarInstancePinMixin:OnAcquired(group, x, y, size)
   self.group = group
+  self:SetSize(size, size)
   self.Icon:SetAtlas(KIND_ATLAS[ns.Logic.GroupKind(group.entries)])
   self:SetPosition(x, y)
   self:SetScalingLimits(1, 1.0, 1.2)
@@ -61,6 +63,10 @@ end
 -- One line per instance behind the door; colors are read now, so a level-up needs no refresh.
 function LodestarInstancePinMixin:OnMouseEnter()
   GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+  local info = C_Map.GetMapInfo(self.group.map)
+  if info then
+    GameTooltip:AddLine(info.name)
+  end
   for _, row in ipairs(self.group.entries) do
     local detail = ns.Logic.FormatInstanceDetail(row.min, row.max, row.kind, ns.LevelColorCode)
     GameTooltip:AddDoubleLine(row.name, detail, 1, 1, 1, 1, 1, 1)
