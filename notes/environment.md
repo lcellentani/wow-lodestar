@@ -30,7 +30,25 @@ Kept for reference.
 
 ## Junction safety
 
-Remove the junction with `Remove-Item` on the `Lodestar` link itself: that deletes only the link. Never delete the files *inside* it: they are the repo's files.
+`AddOns\Lodestar` *is* the repo: anything written into it (an extracted zip, a copied file) lands in `D:\DEV\wow-lodestar`, and anything deleted inside it is deleted from the repo. Never extract a release zip over it, and never delete the files inside it.
+
+Remove the junction with `cmd /c rmdir`, which deletes only the link and never touches the target:
+
+```powershell
+cmd /c rmdir "D:\GAMES\World of Warcraft\_forever_\Interface\AddOns\Lodestar"
+```
+
+Do not use `Remove-Item -Recurse` (or confirm a recurse prompt) on the junction: Windows PowerShell 5.1 can follow it and delete the repo's files. *(Corrected 2026-11-26: this section used to recommend `Remove-Item`.)*
+
+## Testing a release zip
+
+To load a release zip (for example from GitHub Releases) instead of the repo:
+
+1. Close the game. Commit or stash work in progress.
+2. Remove the junction with `cmd /c rmdir` (above), then check that `D:\DEV\wow-lodestar` is intact.
+3. Extract the zip into `D:\GAMES\World of Warcraft\_forever_\Interface\AddOns\`, so `AddOns\Lodestar\Lodestar.toc` exists. Start the game and test.
+4. Close the game and delete the extracted `AddOns\Lodestar` folder; it is a real folder now, so this is safe.
+5. Recreate the junction (command under "Live client"). Settings in `WTF` are not touched by any of this.
 
 ## Dev tools
 
