@@ -154,6 +154,8 @@ Lodestar/             # repo root, linked into Interface/AddOns as Lodestar
   Pins.xml             # virtual pin templates (plain frames with a mixin) used by the map overlays
   Debug.lua            # /ls probe, /ls dump, the SavedVariables log and the copy window
   Options.lua          # slash commands, later a settings panel
+  Media/               # textures the game loads, and nothing else (shipped as is)
+  art/                 # working art: sources, traced masks; git-ignored, never shipped
   tests/               # run.lua harness and *_spec.lua unit tests for Logic.lua (and Util.lua against fakes), run outside the game; not listed in the .toc
   scripts/check.ps1    # runs luacheck, then the tests; the one check command
   tools/               # downloaded lua5.1.exe and luacheck.exe; git-ignored
@@ -165,6 +167,8 @@ Lodestar/             # repo root, linked into Interface/AddOns as Lodestar
 ```
 
 **Load order** in the `.toc`: `Logic.lua`, `Util.lua`, `Core.lua`, `Data\Zones.lua`, `Data\Instances.lua`, the `Modules\*.lua` files, `Pins.xml`, `Debug.lua`, `Options.lua`. `Logic.lua` comes first because everything else uses it; `Pins.xml` comes after the modules because its templates name the pin mixins the modules define. The game loads only the files listed in the `.toc`, so `tests/`, `scripts/`, `tools/`, `notes/` and `docs/` living in the addon folder is harmless.
+
+**`Media/` holds only files the game loads** *(decided 2026-11-26, `notes/spec-release-pipeline.md`)*. Release zips are checked by `scripts/check-package.ps1` against the `.toc` and the `Media` paths the code references, so any other file in `Media/` fails the release check. Working art, and anything derived from Blizzard's art (the traced masks, now `art/traced/`), goes in the git-ignored `art/`.
 
 `Pins.xml` exists because Blizzard's map creates pins from named XML templates; it holds templates only, with all behavior in the Lua modules. An XML template can only find its mixin by global name, so each pin mixin is a global named `Lodestar...PinMixin`.
 

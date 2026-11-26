@@ -4,7 +4,7 @@ Each screenshot shows one zone's art inside a magenta frame. The script finds th
 art's brightness inside it, turns that into a white .tga with the shape in the alpha channel, and
 prints the zone's rectangle on the map from LodestarDB.art in the SavedVariables file.
 
-The output derives from Blizzard's art, so it goes to the git-ignored Media/traced/ only.
+The output derives from Blizzard's art, so it goes to the git-ignored art/traced/ only (was Media/traced/ until 2026-11-26).
 
 Usage: python scripts/trace_masks.py [--edge=0.5] [--suffix=] <Lodestar.lua> <outdir> <mapID>=<screenshot.png> ...
 --edge sets the contour as a fraction of the brightest pixel; --suffix is added to each file name.

@@ -7,7 +7,7 @@ Design doc reference: "ThreatOverlay", "Zone shapes" tier 3, which this replaces
 
 Blizzard's highlight art has the true zone shape, but it cannot be tinted in game (P45, P48). A screenshot of it can be turned into a mask outside the game. The art is drawn on a magenta frame, so the script finds its exact edges, and the rectangle comes from the API, so placement needs no measuring.
 
-Masks made this way derive from Blizzard's art, so they stay **local**: `Media/traced/` is git-ignored and nothing traced goes in the public repo. A fresh clone has no traced masks.
+Masks made this way derive from Blizzard's art, so they stay **local**: `Media/traced/` is git-ignored and nothing traced goes in the public repo. *(Moved to `art/traced/` on 2026-11-26: `Media/` holds only files the game loads, see `notes/spec-release-pipeline.md`.)* A fresh clone has no traced masks.
 
 Same three zones as P50, for a direct comparison: Elwynn Forest (1429), Wetlands (1437), Silverpine Forest (1421). The points below sit well inside each zone's hover area (from the P50 grid).
 
