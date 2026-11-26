@@ -2,9 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Draft |
+| **Status** | Ready |
 | **Date** | 2026-11-26 |
-| **Plan** | Not yet planned |
+| **Plan** | `notes/plan-release-pipeline.md` |
 | **Supersedes** | N/A |
 
 Design doc reference: "Target client and API assumptions" (release scope, revised 2026-11-26), "Commands", "Getting output out of the game", "Project layout" (load order). Probe number reserved: **P63** (the step in game). P61 and P62 stay with step 5.7.
