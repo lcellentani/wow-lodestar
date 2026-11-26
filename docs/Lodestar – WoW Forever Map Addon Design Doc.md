@@ -42,7 +42,7 @@ Lodestar is a World of Warcraft: Forever addon that puts level, faction and inst
 
 Forever is a permanent Classic variant with a level cap of 60, launching on November 4, 2026; the beta runs from September 17 to October 21 ([Zockify](https://www.zockify.com/forever/), [Warcraft Wiki](https://warcraft.wiki.gg/wiki/Forever)). Its addon API is not documented yet, so everything below is an assumption to verify in game before writing code.
 
-Lodestar is for personal use: the source is public on GitHub under the MIT license, but no release on addon sites is planned. The beta is the first place to probe and test, but the live client is just as valid after the beta closes, so there is no hard deadline; the beta days are simply used to learn as much as possible early.
+Lodestar is a hobby project, released for fun: the source is public on GitHub under the MIT license, test builds go to friends through GitHub Releases, and a CurseForge release is planned once the MVP is done. There is no deadline and no support commitment; it targets the English Forever client and runs best as the only map addon. Feedback and bugs go to GitHub Issues. *(Revised 2026-11-26: was personal use with no release on addon sites.)* The beta is the first place to probe and test, but the live client is just as valid after the beta closes, so there is no hard deadline; the beta days are simply used to learn as much as possible early.
 
 | # | Assumption | Why it matters | Probe in game |
 | --- | --- | --- | --- |
@@ -235,7 +235,7 @@ Decided when the table was seeded (2026-10-19):
 - `x` and `y` are normalized 0-1 positions on that zone's map: exactly what `C_Map.GetPlayerMapPosition` reports while standing at the entrance.
 - If the game reports a smaller map at the entrance (a cave, or a sub-map such as Blackrock Mountain), record the position on the parent zone instead: open the zone's map and read the cursor position over the entrance, or walk to the cave mouth while the zone map still applies.
 - Positions on other maps (continents) are never stored; they are projected at runtime (see "Map positions" below).
-- There is no in-game override for instances: since the addon is for personal use, a wrong entrance is fixed by editing `Instances.lua` directly.
+- There is no in-game override for instances: a wrong entrance is fixed by editing `Instances.lua` directly and shipping it in the next release.
 
 **Map positions.** The core keeps one cache of zone rectangles, `ns.GetZoneRect(zoneID, mapID)`, which wraps `C_Map.GetMapRectOnMap` and returns `nil` when the zone does not appear on that map. The game does not return `nil` in that case but a rectangle of four zeros (P5, Zephras Isle on the world map), so any rectangle with `maxX <= minX` or `maxY <= minY` counts as "not on this map"; that check is a pure function in `Logic.lua` with a unit test. Both ZoneLabels and Instances use it. A point `(x, y)` on a zone's map is projected onto a parent map with:
 
@@ -634,7 +634,7 @@ There is no hard deadline. The aim is to use the beta (until Oct 21, 2026) for a
 **Open questions**
 
 - [x] Which client language do you play in? **English**, so no locale table is needed (see Non-goals).
-- [x] Is this for personal use, or will you publish it on a site such as CurseForge? **Personal use; no release on addon sites.** The source is public on GitHub under the **MIT license** (`LICENSE` in the repo root). Seed data taken from Warcraft Wiki is limited to facts (IDs, level ranges, coordinates); no wiki text and no Blizzard UI source is copied into the repo.
+- [x] Is this for personal use, or will you publish it on a site such as CurseForge? ~~Personal use; no release on addon sites.~~ **Revised 2026-11-26: released for fun.** Test builds go to friends through GitHub Releases, then CurseForge once the MVP is done; feedback and bugs through GitHub Issues. Dev commands (`/ls probe`, `dump`, `place`, `reveal` and similar) are hidden behind a debug flag in player builds. All art in `Media/` is original; nothing is taken from the game's files, which CurseForge requires. The source is public on GitHub under the **MIT license** (`LICENSE` in the repo root). Seed data taken from Warcraft Wiki is limited to facts (IDs, level ranges, coordinates); no wiki text and no Blizzard UI source is copied into the repo.
 - [ ] Should v2 start with waypoints or unexplored-area highlighting?
 - [x] Live probes for 2026-10-24's decisions, specified as P43-P47 in `notes/spec-5.0-live-probes.md`: what `C_MapExplorationInfo` returns (answered, P44); whether Blizzard's zone highlight art can be fetched for any zone and tinted (fetched yes, tinted no, P45); whether a texture loads from the addon folder (yes, with alpha, P46). Grid sampling is fast enough to run in one go (P47).
 - [x] Is "Best zone for your level" still wanted? **No** (2026-10-24): the colored range labels on the maximized map answer "where on this continent fits me?", and the row was removed from the feature set.

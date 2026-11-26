@@ -1,6 +1,6 @@
 # Lodestar
 
-World of Warcraft: Forever addon that shows zone level ranges, instance entrances, coordinates and a zone tooltip on the world map. Personal use, MIT licensed, English client only.
+World of Warcraft: Forever addon that shows zone level ranges, instance entrances, coordinates and a zone tooltip on the world map. Hobby project released for fun (GitHub Releases for friends now, CurseForge after the MVP), MIT licensed, English client only, original art only.
 
 The design doc is the source of truth: `docs/Lodestar – WoW Forever Map Addon Design Doc.md`. Read the relevant section before changing code, and update the doc when a decision changes.
 
