@@ -466,7 +466,7 @@ The MVP has no settings window; everything is a slash command, which is fast to 
 | `/ls log clear` | Empty `LodestarDB.log` |
 | `/way x y [note]` | Add a waypoint on the current map (v2) |
 
-**Player and dev commands** *(decided 2026-11-26, `notes/spec-release-pipeline.md`)*. Release builds list and run only `toggle`, `copy` and `log clear`; the rest are dev commands. Dev mode is always on in the unpackaged copy (a packager `--@debug@` block) and can be turned on in a release with `/ls dev`, which is not listed and lasts until `/reload`, so a tester can help chase a bug. `/ls debug` stays a separate switch for verbose logging, and is a dev command.
+**Player and dev commands** *(decided 2026-11-26, `notes/spec-release-pipeline.md`)*. Release builds list and run only `toggle`, `copy` and `log clear`; the rest are dev commands. Dev mode is always on in the unpackaged copy (a packager `--@debug@` block) and can be turned on in a release with `/ls dev`, which is not listed, toggles, and lasts until `/reload`, so a tester can help chase a bug; while it is on, `/ls` lists every command. `/ls debug` stays a separate switch for verbose logging, and is a dev command.
 
 `/ls dump` is the most important command early on: it is how the seeded zone table gets checked against the game, and how new zones get added. A real options panel is a v2 task.
 
