@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phase 1 done 2026-11-27) |
+| **Status** | In Progress (Phases 1-2 done 2026-11-27) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -83,7 +83,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 2: Visibility rule in Logic — Not Started
+### Phase 2: Visibility rule in Logic — Done (2026-11-27)
 
 **Objective:** A tested, game-independent rule for which commands run and which are listed.
 
