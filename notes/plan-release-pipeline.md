@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-2 and Tasks 3.1-3.3 done 2026-11-27) |
+| **Status** | In Progress (Phases 1-3 done 2026-11-27) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -106,7 +106,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 3: Wiring in game code — In Progress (Tasks 3.1-3.3 done 2026-11-27)
+### Phase 3: Wiring in game code — Done (2026-11-27)
 
 **Objective:** The registry, the dispatcher, `/ls dev` and the login line use the Phase 2 rule; the junction copy behaves as today.
 
@@ -153,7 +153,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 - A second `/ls dev` restores the full list.
 - `scripts/check.ps1` passes.
 
-#### Task 3.4: Login line
+#### Task 3.4: Login line — Done (2026-11-27: `Lodestar: 0.1.0 loaded (interface 16001), db v1` on the junction)
 
 **File:** `Core.lua` (`OnLogin`)
 **Tag:** T4 — the format is fixed by the spec; it uses the API confirmed in Phase 1.
