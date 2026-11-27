@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-2 and Tasks 3.1-3.2 done 2026-11-27) |
+| **Status** | In Progress (Phases 1-2 and Tasks 3.1-3.3 done 2026-11-27) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -106,7 +106,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 3: Wiring in game code — In Progress (Tasks 3.1-3.2 done 2026-11-27)
+### Phase 3: Wiring in game code — In Progress (Tasks 3.1-3.3 done 2026-11-27)
 
 **Objective:** The registry, the dispatcher, `/ls dev` and the login line use the Phase 2 rule; the junction copy behaves as today.
 
@@ -139,7 +139,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 - A search for `ns.RegisterCommand(` finds 9 call sites (8 existing plus `dev`). Each one is reviewed in the diff, which shows its access argument: 3 `"player"`, 5 `"dev"`, 1 `"hidden"`.
 - `scripts/check.ps1` passes.
 
-#### Task 3.3: `/ls dev`
+#### Task 3.3: `/ls dev` — Done (2026-11-27: on/off sequence checked, `screenshots/Screenshot 2026-11-27 184151.png`)
 
 **File:** `Options.lua`
 **Tag:** T4 — a small command following the pattern of `/ls debug`; its behavior is fixed by the spec.
