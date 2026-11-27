@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-3 done 2026-11-27) |
+| **Status** | In Progress (Phases 1-3 and Task 4.1 done 2026-11-27) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -170,11 +170,11 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 4: Packaging, package check and local dry run — Not Started
+### Phase 4: Packaging, package check and local dry run — In Progress (Task 4.1 done 2026-11-27)
 
 **Objective:** Everything needed to release is in the repo, and a local packager run builds a package that passes the content check, without publishing anything.
 
-#### Task 4.1: `.toc` version token, `.pkgmeta`, workflow
+#### Task 4.1: `.toc` version token, `.pkgmeta`, workflow — Done (2026-11-27: `gh workflow list` shows `Release` active; no run on the `main` push; `.pkgmeta` parsing is checked by the Task 4.4 dry run)
 
 **File:** `Lodestar.toc`, **New File:** `.pkgmeta`, **New File:** `.github/workflows/release.yml`
 **Tag:** T4 — tooling and config, which `CLAUDE.md` assigns to me.
