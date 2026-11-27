@@ -1,0 +1,25 @@
+# Builds Lodestar-<tag>.zip with the BigWigs packager and publishes a GitHub
+# Release when a v* tag is pushed. Tags with "beta" or "alpha" become pre-releases.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Package and release
+        uses: BigWigsMods/packager@v2
+        env:
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}

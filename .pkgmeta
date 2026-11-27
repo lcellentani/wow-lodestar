@@ -1,0 +1,24 @@
+# BigWigs packager config: https://github.com/BigWigsMods/packager
+# Release steps: notes/spec-release-pipeline.md and the design doc, "Releasing".
+package-as: Lodestar
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+# Dev files stay out of the zip; scripts/check-package.ps1 checks the result.
+ignore:
+  - tests
+  - tools
+  - notes
+  - docs
+  - scripts
+  - screenshots
+  - art
+  - CLAUDE.md
+  - .zed
+  - .github
+  - .luacheckrc
+  - .luarc.json
+  - .editorconfig
+  - .gitignore
