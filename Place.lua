@@ -264,5 +264,6 @@ ns.RegisterCommand(
       ns.Print("/ls " .. PLACE_USAGE)
     end
   end,
-  PLACE_USAGE
+  PLACE_USAGE,
+  "dev"
 )

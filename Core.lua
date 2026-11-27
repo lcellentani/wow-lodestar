@@ -1,5 +1,12 @@
 local addonName, ns = ...
 
+-- Dev mode: off in release packages, where the packager comments out the
+-- debug block below. The block must come after this line.
+ns.devMode = false
+--@debug@
+ns.devMode = true
+--@end-debug@
+
 local eventFrame = CreateFrame("Frame")
 local rectCache = {}
 
@@ -98,20 +105,28 @@ end
 
 local commands = {}
 
-function ns.RegisterCommand(name, handler, usage)
+-- access: "player", "dev" or "hidden"; nil counts as "dev" (see Logic).
+function ns.RegisterCommand(name, handler, usage, access)
   local lowerName = string.lower(name)
   commands[lowerName] = {
     handler = handler,
     usage = usage,
+    access = access,
   }
+
+  if access == nil and ns.devMode then
+    ns.Print("|cffff4040Warning:|r command \"" .. lowerName .. "\" has no access level")
+  end
 end
 
 function ns.RunCommand(msg)
   local command, args = ns.Logic.ParseCommand(msg)
   if command == "" then
     local names = {}
-    for name in pairs(commands) do
-      names[#names + 1] = name
+    for name, entry in pairs(commands) do
+      if ns.Logic.IsCommandListed(entry.access, ns.devMode) then
+        names[#names + 1] = name
+      end
     end
     table.sort(names)
     for _, name in ipairs(names) do
@@ -121,7 +136,7 @@ function ns.RunCommand(msg)
   end
 
   local entry = commands[command]
-  if entry == nil then
+  if entry == nil or not ns.Logic.IsCommandRunnable(entry.access, ns.devMode) then
     ns.Print("|cffff4040Error:|r unknown command \"" .. command .. "\", type /ls for help")
     return
   end

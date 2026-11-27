@@ -157,7 +157,8 @@ ns.RegisterCommand(
       ns.Print("/ls " .. LOG_CLEAR_USAGE)
     end
   end,
-  LOG_CLEAR_USAGE
+  LOG_CLEAR_USAGE,
+  "player"
 )
 
 ns.RegisterCommand(
@@ -178,7 +179,8 @@ ns.RegisterCommand(
     copyFrame.editBox:HighlightText()
     copyFrame.editBox:SetFocus()
   end,
-  COPY_USAGE
+  COPY_USAGE,
+  "player"
 )
 
 ns.RegisterCommand(
@@ -264,7 +266,8 @@ ns.RegisterCommand(
     lines[#lines + 1] = "probes: " .. #PROBES .. ", failed: " .. failed
     ns.Emit("probe", lines)
   end,
-  PROBE_USAGE
+  PROBE_USAGE,
+  "dev"
 )
 
 ns.RegisterCommand(
@@ -345,5 +348,6 @@ ns.RegisterCommand(
 
     ns.Emit("dump", lines)
   end,
-  DUMP_USAGE
+  DUMP_USAGE,
+  "dev"
 )

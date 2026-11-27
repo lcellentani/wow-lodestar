@@ -23,7 +23,8 @@ ns.RegisterCommand(
     local stateText = ns.IsModuleRunning(canonicalName) and "on" or "off"
     ns.Print(canonicalName .. ": " .. stateText)
   end,
-  TOGGLE_USAGE
+  TOGGLE_USAGE,
+  "player"
 )
 
 ns.RegisterCommand(
@@ -44,5 +45,6 @@ ns.RegisterCommand(
       ns.Print("map tick running: " .. tostring(ns.IsMapTickRunning()))
     end
   end,
-  DEBUG_USAGE
+  DEBUG_USAGE,
+  "dev"
 )

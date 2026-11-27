@@ -132,5 +132,6 @@ ns.RegisterCommand(
     ns.Print("reveal " .. (ns.reveal and "on" or "off"))
     RefreshIfShown()
   end,
-  REVEAL_USAGE
+  REVEAL_USAGE,
+  "dev"
 )
