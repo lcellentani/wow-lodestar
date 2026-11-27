@@ -1862,3 +1862,10 @@ Checklist in `notes/spec-5.6-instances.md`. Result (2026-11-22, live, other addo
 - 7 passes: `/ls toggle Instances` removes only the markers and brings them back on the open map.
 - 8 passes: in combat, small and maximized map, hovering markers and resizing: no error, no blocked action.
 - 9 pending: vanilla entrance positions are checked in play, as characters reach them (`notes/todo-p60-pending-checks.md`).
+
+### P63: the release pipeline (release step)
+
+Steps in `notes/spec-release-pipeline.md` ("P63: the step in game"); tasks in `notes/plan-release-pipeline.md`.
+
+- 1 passes (2026-11-27, junction copy, other addons off): `C_AddOns` exists and `C_AddOns.GetAddOnMetadata("Lodestar", "Version")` returns `0.1.0` (the `.toc` value). The older global `GetAddOnMetadata` is `nil`. The login line reads the version through `C_AddOns.GetAddOnMetadata`.
+- 2-6: pending (dry run in Task 4.4, then the first beta in Phase 5).

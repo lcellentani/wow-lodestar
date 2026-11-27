@@ -34,6 +34,7 @@ read_globals = {
   "CreateVector2D",          -- P44
   "debugprofilestop",        -- P47
   "InCombatLockdown",        -- P52
+  "C_AddOns",                -- P63 (GetAddOnMetadata; the global GetAddOnMetadata is nil)
 }
 
 files["tests/**"] = { globals = { "describe", "it", "DEFAULT_CHAT_FRAME", "date" } }  -- harness helpers; fakes for util_spec

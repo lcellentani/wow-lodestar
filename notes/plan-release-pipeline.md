@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | Not Started |
+| **Status** | In Progress (Phase 1 done 2026-11-27) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -57,7 +57,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ## 2. Phased Task Breakdown
 
-### Phase 1: Metadata API probe — Not Started
+### Phase 1: Metadata API probe — Done (2026-11-27: `C_AddOns.GetAddOnMetadata`)
 
 **Objective:** Confirm which API reads the `.toc` version, before any code uses it (evidence rule).
 
