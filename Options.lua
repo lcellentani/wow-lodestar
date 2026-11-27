@@ -6,6 +6,7 @@ SlashCmdList.LODESTAR = ns.RunCommand
 
 local TOGGLE_USAGE = "toggle <module> - turn a module on or off."
 local DEBUG_USAGE = "debug - toggle verbose logging."
+local DEV_USAGE = "dev - toggle dev commands until /reload."
 
 ns.RegisterCommand(
   "toggle",
@@ -47,4 +48,19 @@ ns.RegisterCommand(
   end,
   DEBUG_USAGE,
   "dev"
+)
+
+-- Hidden: runs in every build, listed only in dev mode. Not saved.
+ns.RegisterCommand(
+  "dev",
+  function()
+    ns.devMode = not ns.devMode
+    if ns.devMode then
+      ns.Print("dev mode on until /reload; type /ls for all commands")
+    else
+      ns.Print("dev mode off")
+    end
+  end,
+  DEV_USAGE,
+  "hidden"
 )
