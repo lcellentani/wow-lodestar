@@ -355,3 +355,12 @@ function Logic.FormatInstanceDetail(min, max, kind, codeFor)
 
   return table.concat(list, " ")
 end
+
+function Logic.IsCommandRunnable(access, devMode)
+  local playerOrHidden = access == "player" or access == "hidden"
+  return playerOrHidden or devMode == true
+end
+
+function Logic.IsCommandListed(access, devMode)
+  return access == "player" or devMode == true
+end
