@@ -197,11 +197,17 @@ function ns.UnregisterEvent(event, handler)
 end
 
 local function OnLogin()
-  local interface = select(4, GetBuildInfo())
-
   LodestarDB = ns.Logic.MergeDefaults(LodestarDB or {}, DEFAULTS)
   ns.db = LodestarDB
-  ns.Print("loaded (interface " .. interface .. "), db v" .. ns.db.version)
+
+  -- P63: C_AddOns.GetAddOnMetadata reads the .toc Version.
+  local version = C_AddOns.GetAddOnMetadata(addonName, "Version")
+  local loginLine = tostring(version) .. " loaded"
+  if ns.devMode then
+    local interface = select(4, GetBuildInfo())
+    loginLine = loginLine .. " (interface " .. interface .. "), db v" .. ns.db.version
+  end
+  ns.Print(loginLine)
 
   if not WorldMapFrame then
     ns.Print("|cffff4040Error:|r WorldMapFrame is missing; map tick unavailable")
