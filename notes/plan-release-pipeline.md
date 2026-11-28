@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-3 and Task 4.1 done 2026-11-27; Task 4.2 drafted, Task 4.3 done 2026-11-28) |
+| **Status** | In Progress (Phases 1-3 and Task 4.1 done 2026-11-27; Task 4.2 drafted, Tasks 4.3-4.4 done 2026-11-28) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -170,7 +170,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 4: Packaging, package check and local dry run — In Progress (Task 4.1 done 2026-11-27)
+### Phase 4: Packaging, package check and local dry run — In Progress (Tasks 4.1, 4.3, 4.4 done; 4.2 drafted, changelog wording waits for you)
 
 **Objective:** Everything needed to release is in the repo, and a local packager run builds a package that passes the content check, without publishing anything.
 
@@ -230,7 +230,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 - Run on the `v0.1.0-test` zip (downloaded with `gh release download`), it passes except for `CHANGELOG.md` being missing (that release has none). This shows it works on a real, known-good package.
 - Run on a copy of that zip with an extra `Media/stray.tga` and with `Pins.xml` removed, it reports both and exits non-zero.
 
-#### Task 4.4: Local packager dry run (P63 step 2, Open question 5)
+#### Task 4.4: Local packager dry run (P63 step 2, Open question 5) — Done (2026-11-28: 16001 handled as `forever`; `zip`/`jq` missing, so the folder was checked and passes; default zip name had `-forever`, fixed with `-n` in the workflow; details in P63)
 
 **File:** `notes/beta-probes.md`; the packager is cloned into the git-ignored `tools/`
 **Tag:** T4 — I run it from Git Bash and record the result.
@@ -345,7 +345,7 @@ Already changed before Phase 1 (2026-11-26): `.gitignore` (`art/` replaces `Medi
 
 ### Integration
 - [ ] `scripts/check-package.ps1` passes on the dry run and on the released zip (P63 step 2).
-- [ ] Interface 16001 doesn't break the packager (Task 4.4).
+- [x] Interface 16001 doesn't break the packager (Task 4.4).
 
 ### Regression
 - [ ] Through the junction, every command works with no `/ls dev`, and no "no access level" warning appears (P63 step 6).

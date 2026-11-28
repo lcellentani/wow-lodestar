@@ -1868,4 +1868,9 @@ Checklist in `notes/spec-5.6-instances.md`. Result (2026-11-22, live, other addo
 Steps in `notes/spec-release-pipeline.md` ("P63: the step in game"); tasks in `notes/plan-release-pipeline.md`.
 
 - 1 passes (2026-11-27, junction copy, other addons off): `C_AddOns` exists and `C_AddOns.GetAddOnMetadata("Lodestar", "Version")` returns `0.1.0` (the `.toc` value). The older global `GetAddOnMetadata` is `nil`. The login line reads the version through `C_AddOns.GetAddOnMetadata`.
-- 2-6: pending (dry run in Task 4.4, then the first beta in Phase 5).
+- 2, local dry run (2026-11-28, packager `v2` at `01e8631`, Git Bash, `release.sh -d -z`): passes.
+  - Prerequisites: `git`, `curl`, `unzip` present; `zip` and `jq` missing (`jq` is only for uploads and `release.json`), so the zip step was skipped and the built `Lodestar/` folder checked. `svn`/`hg` not needed (no externals).
+  - Interface 16001 is known to the packager: `Build type: non-retail version-forever alpha non-debug`, `Game version: 1.60.1`, no errors or warnings. `release.json` is only written on upload; the code gives it `"flavor": "forever", "interface": 16001`.
+  - `scripts/check-package.ps1` on the folder passes (26 files, 9 Media files referenced). The `.toc` reads `## Version: v0.1.0-test-22-g8cb368e`; in `Core.lua` the `@debug@` block is commented out (`--[==[@debug@ ... --@end-debug@]==]`).
+  - Zip name: the default template appends the game type for non-retail builds, giving `Lodestar-<tag>-forever.zip` (seen with a stand-in `zip` that printed its arguments). The workflow now passes `-n "{package-name}-{project-version}:{project-version}"`, which gives `Lodestar-<tag>.zip` with the plain version as label.
+- 2 (released zip) and 3-6: pending (first beta, Phase 5).
