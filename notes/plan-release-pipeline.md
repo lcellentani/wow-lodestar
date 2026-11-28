@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-3 done 2026-11-27, Phase 4 and Task 5.1 done 2026-11-28) |
+| **Status** | In Progress (Phases 1-3 done 2026-11-27, Phase 4 and Tasks 5.1-5.2 done 2026-11-28) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -252,7 +252,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 5: First beta release and in-game check — In Progress (Task 5.1 done 2026-11-28)
+### Phase 5: First beta release and in-game check — In Progress (Tasks 5.1-5.2 done 2026-11-28)
 
 **Objective:** A real `-beta` pre-release built by the workflow passes P63 in game, and the docs reflect the new pipeline.
 
@@ -270,7 +270,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 - `scripts/check-package.ps1` passes on the downloaded release zip. If it fails, the release is deleted (`gh release delete v0.2.0-beta1 --cleanup-tag`) and the problem fixed before a new tag.
 - If it isn't marked as a pre-release, it's fixed with `gh release edit --prerelease` and the workflow gets the packager's release-type option.
 
-#### Task 5.2: P63 steps 2-6 in game
+#### Task 5.2: P63 steps 2-6 in game — Done (2026-11-28: all six steps pass, no fix tasks; results and screenshots in P63)
 
 **File:** `notes/beta-probes.md`
 **Tag:** T4 — you play the checks, and I write the checklist and record the results.
@@ -339,16 +339,16 @@ Already changed before Phase 1 (2026-11-26): `.gitignore` (`art/` replaces `Medi
 
 ### Functional
 - [x] A `-beta` tag push produces a pre-release with the right zip and notes (Task 5.1).
-- [ ] Release build: `/ls` lists `toggle`, `copy`, `log` only, and `/ls probe` gives "unknown command" (P63 step 4).
-- [ ] `/ls dev` on, then off, behaves as the spec says (P63 step 5).
-- [ ] The login line shows `Lodestar: <tag> loaded` in a release, and the token plus dev details on the junction (P63 steps 3 and 6).
+- [x] Release build: `/ls` lists `toggle`, `copy`, `log` only, and `/ls probe` gives "unknown command" (P63 step 4).
+- [x] `/ls dev` on, then off, behaves as the spec says (P63 step 5).
+- [x] The login line shows `Lodestar: <tag> loaded` in a release, and the token plus dev details on the junction (P63 steps 3 and 6).
 
 ### Integration
-- [ ] `scripts/check-package.ps1` passes on the dry run and on the released zip (P63 step 2).
+- [x] `scripts/check-package.ps1` passes on the dry run and on the released zip (P63 step 2).
 - [x] Interface 16001 doesn't break the packager (Task 4.4).
 
 ### Regression
-- [ ] Through the junction, every command works with no `/ls dev`, and no "no access level" warning appears (P63 step 6).
+- [x] Through the junction, every command works with no `/ls dev`, and no "no access level" warning appears (P63 step 6).
 - [ ] `scripts/check.ps1` passes after every phase.
 - [ ] Caught errors are still logged to `LodestarDB.log` in a release build: `ns.SafeCall`, `ns.Record` and `ns.Emit` in `Util.lua` are untouched (checked in review), and `/ls copy` stays a player command.
 
