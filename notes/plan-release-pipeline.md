@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-3 and Task 4.1 done 2026-11-27; Task 4.2 drafted 2026-11-28) |
+| **Status** | In Progress (Phases 1-3 and Task 4.1 done 2026-11-27; Task 4.2 drafted, Task 4.3 done 2026-11-28) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -211,7 +211,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 - `CHANGELOG.md` has exactly one release heading.
 - The README no longer says dev commands are visible.
 
-#### Task 4.3: `scripts/check-package.ps1`
+#### Task 4.3: `scripts/check-package.ps1` — Done (2026-11-28: `v0.1.0-test` zip fails only on `CHANGELOG.md`; the tampered copy reports `Pins.xml` missing and `Media/stray.tga` extra, plus the `Pins.xml` textures as extras since nothing references them any more; folder input and a file outside `Lodestar/` also checked)
 
 **File:** **New File:** `scripts/check-package.ps1`
 **Tag:** T4 — tooling, which `CLAUDE.md` assigns to me.
