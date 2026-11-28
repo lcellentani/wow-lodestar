@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-3 done 2026-11-27, Phase 4 and Tasks 5.1-5.2 done 2026-11-28) |
+| **Status** | Done (Phases 1-3 done 2026-11-27, Phases 4-5 done 2026-11-28) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -252,7 +252,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 5: First beta release and in-game check — In Progress (Tasks 5.1-5.2 done 2026-11-28)
+### Phase 5: First beta release and in-game check — Done (2026-11-28)
 
 **Objective:** A real `-beta` pre-release built by the workflow passes P63 in game, and the docs reflect the new pipeline.
 
@@ -288,7 +288,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 - All six P63 steps are recorded with pass or fail and the screenshots' names.
 - Any failure gets a fix task appended to this plan before the phase is marked Done.
 
-#### Task 5.3: Docs and status
+#### Task 5.3: Docs and status — Done (2026-11-28)
 
 **File:** `docs/Lodestar – WoW Forever Map Addon Design Doc.md`, `CLAUDE.md`, `notes/spec-release-pipeline.md`
 **Tag:** T4 — my own notes.

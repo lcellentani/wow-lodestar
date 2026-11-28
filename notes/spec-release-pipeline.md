@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Ready |
+| **Status** | Implemented (2026-11-28, first release `v0.2.0-beta1`) |
 | **Date** | 2026-11-26 |
 | **Plan** | `notes/plan-release-pipeline.md` |
 | **Supersedes** | N/A |

@@ -42,6 +42,7 @@ Confirmed in game; details and probe results in `notes/beta-probes.md`.
 - M0-M2 done. Step specs live in `notes/spec-<step>-<topic>.md`. `Data/Zones.lua` and `Data/Instances.lua` (43 instances) are checked by `tests/zones_spec.lua` and `tests/instances_spec.lua`; where each range comes from is in the doc's Zones and Instances "Level source". Every `Logic.lua` function has unit tests; local paths are in `notes/environment.md`.
 - M3 (data): ongoing alongside M5.
 - M4-M5 (overlays): steps 4.1-5.6 done: zone labels and threat pins (one pin for both map sizes, hand-set `labelX, labelY` for all 43 continent zones, `/ls place`) and instance markers (one per door, revealed through the fog of war, `/ls reveal`; Ruins and Temple of Ahn'Qiraj share one). Shen'dralas stays unlabeled until an in-game source gives its range.
+- Release pipeline: done 2026-11-28 (`notes/spec-release-pipeline.md`). A `v*` tag publishes a GitHub Release through the BigWigs packager; release builds show only player commands (`/ls dev` for the rest); steps under "Releasing" in the design doc. Latest: `v0.2.0-beta1` (pre-release).
 - Next: step 5.7, skull-only threat pins with the zone Tooltip; draft in `notes/spec-5.7-skull-pins-tooltip.md`, open questions before the plan.
 - Pending in game: `notes/todo-p54-pending-checks.md`, `notes/todo-p60-pending-checks.md`.
 - M7 (quest tracking): proposed, starts after M5; see the doc's "Quest tracking" (QuestieDB at runtime behind `ns.QuestSource`, completed quests as dimmed pins, two open questions).

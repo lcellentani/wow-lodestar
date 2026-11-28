@@ -158,6 +158,10 @@ Lodestar/             # repo root, linked into Interface/AddOns as Lodestar
   art/                 # working art: sources, traced masks; git-ignored, never shipped
   tests/               # run.lua harness and *_spec.lua unit tests for Logic.lua (and Util.lua against fakes), run outside the game; not listed in the .toc
   scripts/check.ps1    # runs luacheck, then the tests; the one check command
+  scripts/check-package.ps1  # checks a release zip (or built folder) against the .toc and the Media paths the code references
+  .pkgmeta             # BigWigs packager config: package name, CHANGELOG.md as release notes, files left out of the zip
+  .github/workflows/release.yml  # on a v* tag push, runs the packager and publishes the GitHub Release
+  CHANGELOG.md         # the current release's notes only, for players; shipped in the zip
   tools/               # downloaded lua5.1.exe and luacheck.exe; git-ignored
   .luacheckrc          # luacheck config: Lua 5.1, WoW globals, allowed Lodestar globals
   .gitignore           # ignores tools/
@@ -468,6 +472,7 @@ The MVP has no settings window; everything is a slash command, which is fast to 
 | `/ls probe hover` | P7: report the zone under the cursor. Meant to be bound to a key through a macro, so the cursor can stay on the map |
 | `/ls copy` | Open the copy window with the output of the last `/ls` command |
 | `/ls log clear` | Empty `LodestarDB.log` |
+| `/ls dev` | Toggle dev mode until `/reload`: dev commands run and `/ls` lists every command. Not listed in a release build (see below) |
 | `/way x y [note]` | Add a waypoint on the current map (v2) |
 
 **Player and dev commands** *(decided 2026-11-26, `notes/spec-release-pipeline.md`)*. Release builds list and run only `toggle`, `copy` and `log clear`; the rest are dev commands. Dev mode is always on in the unpackaged copy (a packager `--@debug@` block) and can be turned on in a release with `/ls dev`, which is not listed, toggles, and lasts until `/reload`, so a tester can help chase a bug; while it is on, `/ls` lists every command. `/ls debug` stays a separate switch for verbose logging, and is a dev command.
@@ -577,6 +582,8 @@ M1 is done when `scripts/check.ps1` passes on a starter `Logic.lua` with one sam
 2. You run `/reload` in game.
 3. Run `/reload` once more after any `/ls` command whose output matters, so the SavedVariables log is written to disk; then tell Claude Code to read it from `WTF/Account/<ACCOUNT>/SavedVariables/Lodestar.lua`. For a quick check, use `/ls copy` and paste instead. For a Lua error outside the safe-call wrapper, a screenshot of the error popup works.
 4. Commit when a milestone works.
+
+**Releasing** *(2026-11-28, `notes/spec-release-pipeline.md`)*. Rewrite `CHANGELOG.md` with the new release's entry only (Claude drafts from the commits, you edit), run `scripts/check.ps1`, commit and push. Then tag and push the tag (`git tag v0.2.0`, `git push origin v0.2.0`): the `Release` workflow runs the BigWigs packager, which sets the `.toc` version from the tag, comments out the `--@debug@` block (so dev mode is off), builds `Lodestar-<tag>.zip` and publishes the GitHub Release with `CHANGELOG.md` as its notes. A tag containing `beta` or `alpha` becomes a pre-release. Finally, download the zip (`gh release download <tag>`) and run `scripts/check-package.ps1` on it; if it fails, delete the release (`gh release delete <tag> --cleanup-tag`), fix, and tag again. To test a build in game without touching the repo, follow "Testing a release zip" in `notes/environment.md`. A local dry run with no upload: clone the packager into `tools/packager` and run `release.sh -d -z` from Git Bash (no `zip` there, so check the built folder).
 
 **Keep the game out of the critical path**
 
