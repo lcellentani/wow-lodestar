@@ -349,8 +349,8 @@ Already changed before Phase 1 (2026-11-26): `.gitignore` (`art/` replaces `Medi
 
 ### Regression
 - [x] Through the junction, every command works with no `/ls dev`, and no "no access level" warning appears (P63 step 6).
-- [ ] `scripts/check.ps1` passes after every phase.
-- [ ] Caught errors are still logged to `LodestarDB.log` in a release build: `ns.SafeCall`, `ns.Record` and `ns.Emit` in `Util.lua` are untouched (checked in review), and `/ls copy` stays a player command.
+- [x] `scripts/check.ps1` passes after every phase.
+- [x] Caught errors are still logged to `LodestarDB.log` in a release build: `ns.SafeCall`, `ns.Record` and `ns.Emit` in `Util.lua` are untouched (checked in review), and `/ls copy` stays a player command. (2026-11-28: `Util.lua` unchanged since `v0.1.0-test`; `copy` listed in the release build, P63 step 4.)
 
 ---
 
