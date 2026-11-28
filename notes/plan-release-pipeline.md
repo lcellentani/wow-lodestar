@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-3 done 2026-11-27, Phase 4 done 2026-11-28) |
+| **Status** | In Progress (Phases 1-3 done 2026-11-27, Phase 4 and Task 5.1 done 2026-11-28) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -252,11 +252,11 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 5: First beta release and in-game check — Not Started
+### Phase 5: First beta release and in-game check — In Progress (Task 5.1 done 2026-11-28)
 
 **Objective:** A real `-beta` pre-release built by the workflow passes P63 in game, and the docs reflect the new pipeline.
 
-#### Task 5.1: Push the first beta tag
+#### Task 5.1: Push the first beta tag — Done (2026-11-28: run 46165432737 succeeded; pre-release with `Lodestar-v0.2.0-beta1.zip`, changelog notes and `release.json` flavor `forever`; package check passes on the downloaded zip)
 
 **File:** none (git tag `v0.2.0-beta1`)
 **Tag:** T1 — publishing a release is your decision and your action: you run the two commands I give you (`git tag v0.2.0-beta1`, `git push origin v0.2.0-beta1`), and I watch the run with `gh run watch`.
@@ -338,7 +338,7 @@ Already changed before Phase 1 (2026-11-26): `.gitignore` (`art/` replaces `Medi
 ## 4. Validation Checklist
 
 ### Functional
-- [ ] A `-beta` tag push produces a pre-release with the right zip and notes (Task 5.1).
+- [x] A `-beta` tag push produces a pre-release with the right zip and notes (Task 5.1).
 - [ ] Release build: `/ls` lists `toggle`, `copy`, `log` only, and `/ls probe` gives "unknown command" (P63 step 4).
 - [ ] `/ls dev` on, then off, behaves as the spec says (P63 step 5).
 - [ ] The login line shows `Lodestar: <tag> loaded` in a release, and the token plus dev details on the junction (P63 steps 3 and 6).
