@@ -4,7 +4,7 @@
 |-------|-------|
 | **Spec** | `notes/spec-release-pipeline.md` |
 | **Date** | 2026-11-26 (review fixes applied the same day) |
-| **Status** | In Progress (Phases 1-3 and Task 4.1 done 2026-11-27; Task 4.2 drafted, Tasks 4.3-4.4 done 2026-11-28) |
+| **Status** | In Progress (Phases 1-3 done 2026-11-27, Phase 4 done 2026-11-28) |
 | **Effort** | 2 sessions (one for the probe and your Logic code, one for wiring, packaging and the first beta) |
 
 ---
@@ -170,7 +170,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 
 ---
 
-### Phase 4: Packaging, package check and local dry run — In Progress (Tasks 4.1, 4.3, 4.4 done; 4.2 drafted, changelog wording waits for you)
+### Phase 4: Packaging, package check and local dry run — Done (2026-11-28)
 
 **Objective:** Everything needed to release is in the repo, and a local packager run builds a package that passes the content check, without publishing anything.
 
@@ -195,7 +195,7 @@ Also deferred: an `## IconTexture` for the AddOns list (cosmetic, not in the spe
 - The workflow parses: after it's pushed, the repo's Actions tab shows it with no "Invalid workflow file" error (`gh workflow list` shows it). It only triggers on `v*` tag pushes, so pushes to `main` don't run it.
 - `scripts/check.ps1` passes.
 
-#### Task 4.2: `CHANGELOG.md` and README — Drafted (2026-11-28: changelog wording waits for your edit before Task 5.1)
+#### Task 4.2: `CHANGELOG.md` and README — Done (2026-11-28: changelog wording approved as drafted)
 
 **File:** **New File:** `CHANGELOG.md`, `README.md`
 **Tag:** T4 — I draft both and you edit the changelog wording for players before tagging.
