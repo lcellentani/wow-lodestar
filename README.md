@@ -11,7 +11,7 @@ It is a hobby project, made for fun. It targets the English Forever client and w
 
 ## Install
 
-1. Download the latest `Lodestar-<version>.zip` from the [Releases](https://github.com/lcellentani/wow-lodestar/releases) page.
+1. Download the latest `Lodestar-<tag>.zip` (for example `Lodestar-v0.2.0.zip`) from the [Releases](https://github.com/lcellentani/wow-lodestar/releases) page. Releases marked **Pre-release** (tags ending in `-beta1`, `-beta2`, ...) are test builds.
 2. Extract it into your Forever addon folder, so that you get
    `<WoW folder>\_forever_\Interface\AddOns\Lodestar\Lodestar.toc`.
 3. Start the game (or restart it if it was running) and check that **Lodestar** is ticked in the character screen's **AddOns** list.
@@ -25,12 +25,14 @@ To update, delete the old `Lodestar` folder and extract the new zip. Settings ar
 Type `/ls` (or `/lodestar`) in chat for the list of commands. The ones for players:
 
 - `/ls toggle <module>` turns a module on or off: `ZoneLabels`, `ThreatOverlay`, `Instances`.
-
-The other commands are development tools and will be hidden in a later version.
+- `/ls copy` shows Lodestar's last chat output (or the last error it caught) in a box, selected so you can copy it with Ctrl+C.
+- `/ls log clear` empties the output log Lodestar saves between sessions.
 
 ## Feedback and bugs
 
 Open an issue on [GitHub Issues](https://github.com/lcellentani/wow-lodestar/issues). For a bug, say what you did, what you expected and what happened; a screenshot helps. Lua errors show up with `/console scriptErrors 1`.
+
+When Lodestar reports an error in chat, type `/ls copy` right after it and paste the text into the issue. If I ask for more details, `/ls dev` turns on the development commands until your next `/reload`; type it again to turn them off.
 
 ## License
 
