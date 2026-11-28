@@ -21,5 +21,9 @@ jobs:
 
       - name: Package and release
         uses: BigWigsMods/packager@v2
+        with:
+          # Zip named Lodestar-<tag>.zip: the default name adds "-forever" for interface 16xxx
+          # (Task 4.4 dry run, notes/beta-probes.md P63). The label after ":" stays the version.
+          args: -n "{package-name}-{project-version}:{project-version}"
         env:
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
